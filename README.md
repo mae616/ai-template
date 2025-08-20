@@ -235,10 +235,9 @@ ai-template/
 
 ### 問題の報告
 
-- **GitHub Issues**: [Issues](https://github.com/your-username/ai-template/issues)
-- **ディスカッション**: [Discussions](https://github.com/your-username/ai-template/discussions)
+- **GitHub Issues**:
+- **ディスカッション**
 
 ---
 
 ⭐ このプロジェクトが役に立ったら、スターを付けてください！
-# ai-template
