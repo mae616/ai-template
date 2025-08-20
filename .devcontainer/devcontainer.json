@@ -1,0 +1,30 @@
+{
+    "name": "${localWorkspaceFolderBasename} DevContainer",
+    "dockerComposeFile": "docker-compose.yml",
+    "service": "app",
+    "workspaceFolder": "/workspace",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "dbaeumer.vscode-eslint",
+                "esbenp.prettier-vscode",
+                "biomejs.biome",
+                "anthropic.claude-code",
+                "anthropic.claude-code-extension"
+            ]
+        }
+    },
+    "remoteUser": "root",
+    "postCreateCommand": "bash .devcontainer/setup.sh",
+    "forwardPorts": [8000, 3000, 5173, 8888, 8001],
+    "overrideCommand": false,
+    "mounts": [
+        "source=${localEnv:HOME}${localEnv:USERPROFILE}/.vscode/extensions,target=/root/.vscode-server/extensions,type=bind,consistency=cached",
+        "source=${localEnv:HOME}${localEnv:USERPROFILE}/.vscode/extensions,target=/root/.vscode/extensions,type=bind,consistency=cached",
+        "source=${localEnv:HOME}${localEnv:USERPROFILE}/.claude,target=/root/.claude,type=bind,consistency=cached",
+        "source=${localEnv:HOME}${localEnv:USERPROFILE}/.cursor,target=/root/.cursor,type=bind,consistency=cached",
+        "source=${localEnv:HOME}${localEnv:USERPROFILE}/.anthropic,target=/root/.anthropic,type=bind,consistency=cached",
+        "source=${localEnv:HOME}${localEnv:USERPROFILE}/.cursorrules,target=/root/.cursorrules,type=bind,consistency=cached"
+    ],
+    "initializeCommand": "mkdir -p ${localEnv:HOME}${localEnv:USERPROFILE}/.vscode/extensions ${localEnv:HOME}${localEnv:USERPROFILE}/.claude ${localEnv:HOME}${localEnv:USERPROFILE}/.cursor ${localEnv:HOME}${localEnv:USERPROFILE}/.anthropic"
+}

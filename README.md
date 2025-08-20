@@ -1,0 +1,244 @@
+# AI Project Prompt Template
+
+AIアプリケーション開発用の汎用テンプレートプロジェクトです。
+Claude Code, Cursor などのコード支援AIによる開発のプロンプトテンプレートを提供します。
+
+## 🚀 AIタスクシステムの特徴
+このプロジェクトでは、[Cole Medin氏によるcontext-engineering-intro](https://github.com/coleam00/context-engineering-intro)の内容を日本語版にし、コンテキスト・エンジニアリングを活かしつつも、スクラム的なサイクルでTASK-LISTとTASKによりスプリントごとに確認可能な開発のプロンプトを提供します。
+
+## 🚀 使用AI支援開発環境
+* Claude Code<br>https://github.com/anthropics/claude-code
+* Serena AI Coding Agent<br>https://github.com/oraios/serena
+* Cursor<br>https://cursor.com/
+
+## 🛠️ 開発環境
+
+### 基本環境
+- **DevContainer**: Podman, Ubuntu 22.04 LTS
+- **Node.js**: LTS + pnpm
+- **AI支援**: Claude Code + Serena AI + Cursor
+- **ツール管理**: mise
+
+### 環境セットアップ
+
+このリポジトリをローカル環境に `git clone` してください。
+※ `~/` に `clone` した例でこの先のコマンドを記述します。
+
+#### shellコマンドの設定
+`~/.zshrc`または`~/.bashrc`に以下の関数を追加してください。
+```
+# ai-template
+apply_template() {
+    rsync -av \
+      --exclude '.git' \
+      --exclude '.venv' \
+      --exclude 'LICENSE' \
+      --exclude 'CODE_OF_CONDUCT.md' \
+      --exclude 'CONTRIBUTING.md' \
+      --exclude 'SECURITY.md' \
+      --exclude 'MAINTAINERS.md' \
+      --exclude 'README.md' \
+      ~/ai-template/ ./ 
+}
+```
+`source ~/.zshrc`または`source ~/.bashrc` を実行してください。
+
+#### 開発プロジェクトの作成
+ボイラーテンプレートなどでReactなどの開発プロジェクトを作成してください。
+そのプロジェクト内で `apply_template` を実行してください。
+
+#### DevContainerの起動
+開発プロジェクトをCursor IDEで開き、左下にメッセージが表示されたら、DevContainerの起動ボタンを押してください。
+
+#### 基本的なセットアップ
+```bash
+# 環境の確認
+node --version
+pnpm --version
+
+# 依存関係のインストール
+pnpm install
+```
+
+### ポート設定
+
+- **3000**: 開発サーバー用
+- **5173**: Vite開発サーバー用
+- **8000**: Serena MCPサーバー用
+- **8888**: 8000ポートへのマッピング（追加開発サーバー用）
+
+## 🌟 対応技術スタック
+
+### 現在サポート済み
+- **Node.js**: LTS + pnpm (パッケージ管理)
+
+### 今後の拡張予定（コントリビューション歓迎）
+他の言語やフレームワークのサポートを追加したい場合は、コントリビューションをお願いします！
+
+## 📚 AIタスクシステムの使用方法 (Claude Code)
+
+このプロジェクトでは、AIと人間が協力して高品質なコードを効率的に開発するためのプロンプトテンプレートを提供しています。コンテキスト・エンジニアリングを活かしつつ、スクラム的なサイクルでTASK-LISTとTASKによりスプリントごとに確認可能な開発をサポートします。
+
+### プロンプトテンプレートの特徴
+
+- **コンテキスト・エンジニアリング**: 適切なコンテキストを提供してAIの理解を促進
+- **スクラム的サイクル**: スプリントごとの計画・実行・確認・改善
+- **TASK-LIST**: 全体のタスク一覧と優先順位の管理
+- **TASK**: 個別タスクの詳細な実装と検証
+
+### タスクコマンドの使用手順
+
+#### **Step 1: RDDやコンテキストの作成**
+アプリの新規作成の場合 `doc/` フォルダの配下にrdd.mdで要件定義を記述してください。
+改修の場合は `ai-task/` フォルダ配下の `INITIAL.md` をコピーして、要件を記述してください。
+
+#### **Step 2: TASK-LIST生成（generate-task-list）**
+Claude Code で `/generate-task-list` を実行します。
+要件定義書の相対パスか `ai-task/` フォルダ配下に記述した要件ファイルを引数に渡してください。
+
+包括的なTASK-LISTが生成されます。
+
+**使用例:**
+```bash
+# 要件ファイル: ai-task/project-overview.md
+# 実行: /generate-task-list ai-task/project-overview.md
+```
+
+**生成されるもの:**
+- `ai-task/機能名/task-list*.md` - 全体のタスク一覧
+- 優先順位と依存関係
+- スプリント計画
+- 成功基準
+
+#### **Step 3: TASK生成（generate-task）**
+生成されたタスクリストから、スプリント分のタスクの内容のプロンプトを生成します。
+
+**使用例:**
+```bash
+# タスク概要: ai-task/機能名/task-list-*.md
+# 実行: /generate-task ai-task/機能名/task-list-*.md
+```
+
+**生成されるもの:**
+- `ai-task/機能名/TASK_{sprint_number}_{feature_name}.md` - 詳細な実装TASK
+- 必要なコンテキストと調査結果
+- 検証手順
+
+#### **Step 3: TASK実行（execute-task）**
+```bash
+# TASKファイルが生成されたら
+1. execute-taskコマンドでTASKを実行
+2. AIが段階的に実装を進める
+3. 各段階で検証を実行
+4. 完了まで自動的に進む
+```
+
+**使用例:**
+```bash
+# TASKファイル: ai-task/機能名/TASK_{sprint_number}_{feature_name}.md
+# 実行: /execute-task ai-task/機能名/TASK_{sprint_number}_{feature_name}.md
+```
+
+### スクラム的開発サイクル
+```
+1. スプリント計画 → 2. TASK-LIST生成 → 3. TASK生成 → 4. TASK1実行 → ユーザーがアプリを確認 → 5. TASK2実行 → ユーザーがアプリを確認 → ...
+```
+
+## 📁 プロジェクト構成
+
+```
+ai-template/
+├── .ai-instructions/          # AI指示ファイル
+├── .claude/                   # Claude Code設定
+│   ├── commands/              # AIタスクシステムのコマンド
+│   └── settings.local.json    # AIのコマンド権限
+├── .devcontainer/             # DevContainer設定
+├── ai-task/                   # AIタスク管理
+│   ├── templates/             # タスクテンプレート
+│   └── trouble-shooting/      # 問題解決履歴
+├── doc/                       # ドキュメント
+│   ├── design_document/       # 設計ドキュメント
+│   ├── manual/                # マニュアル
+│   ├── pdf/                   # PDFファイル
+│   ├── test_case/             # テストケース
+│   └── uml/                   # UML図
+├── .mise.toml                 # ツール管理設定
+├── CLAUDE.md                  # Claude Code設定
+├── .cursorrules               # Cursor設定
+├── CONTRIBUTING.md            # コントリビューションガイド
+├── CODE_OF_CONDUCT.md         # 行動規範
+├── LICENSE                    # MITライセンス
+└── README.md                  # このファイル
+```
+
+## 🤝 コントリビューション
+
+このプロジェクトへの貢献を歓迎します！
+
+[CONTRIBUTING.md](CONTRIBUTING.md) を参照してください。
+
+## 📋 運営体制
+
+**本リポジトリは個人メンテナンス（ボランティア）です。**
+
+### 対応スケジュール
+- **返信・レビュー**: 週1回を目安にまとめて行います
+- **緊急対応**: お急ぎの方はPRで具体例を添えてください🙏
+
+### メンテナンス方針
+- 個人の時間の範囲内で対応
+- コミュニティの貢献を重視
+- 段階的な機能拡張
+- 品質を重視した開発
+
+### サポートレベル
+- **高**: 基本的な機能とドキュメント
+- **中**: バグ修正とセキュリティ対応
+- **低**: 新機能追加（コントリビューション歓迎）
+
+## 📚 参考資料
+
+- [Serena GitHub](https://github.com/oraios/serena)
+- [Serena Documentation](https://github.com/oraios/serena#readme)
+- [MCP Protocol](https://modelcontextprotocol.io/)
+- [Cursor IDE](https://cursor.sh/)
+- [mise](https://mise.jdx.dev/)
+- [Podman](https://podman.io/)
+- [DevContainer](https://containers.dev/)
+
+## 📄 ライセンス
+
+このプロジェクトは [MIT License](LICENSE) の下で公開されています。
+
+### ライセンスの概要
+
+- **商用利用**: 可能
+- **改変**: 可能
+- **配布**: 可能
+- **個人利用**: 可能
+- **責任**: 作者は一切の責任を負いません
+
+### ライセンステキスト
+
+
+## 🙏 謝辞
+
+このプロジェクトは以下のプロジェクトの恩恵を受けています：
+
+- [Serena AI](https://github.com/oraios/serena) - AI支援開発エージェント
+- [Cursor IDE](https://cursor.sh/) - AI統合開発環境
+- [DevContainer](https://containers.dev/) - コンテナ化された開発環境
+- [Podman](https://podman.io/) - コンテナエンジン
+- [mise](https://mise.jdx.dev/) - ツール管理
+
+## 📞 サポート
+
+### 問題の報告
+
+- **GitHub Issues**: [Issues](https://github.com/your-username/ai-template/issues)
+- **ディスカッション**: [Discussions](https://github.com/your-username/ai-template/discussions)
+
+---
+
+⭐ このプロジェクトが役に立ったら、スターを付けてください！
+# ai-template
