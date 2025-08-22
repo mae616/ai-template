@@ -78,6 +78,67 @@ pnpm install
 ### 今後の拡張予定（コントリビューション歓迎）
 他の言語やフレームワークのサポートを追加したい場合は、コントリビューションをお願いします！
 
+### デザイン連携フロー（Figma MCP → 実装/ドキュメント） (Claude Code)
+
+このリポジトリでは **Figma MCP** から設計情報を抽出し、AIと人間が協調して安全に実装へ落とし込むためのコマンドを用意しています。  
+目的は **ブラックボックス化を避けつつ、再現性のあるUI開発** を進めることです。
+
+---
+
+### フロー概要
+
+1. **design-extract**  
+   - Figma MCPから **Design Tokens / Components / Constraints** をJSON化  
+   - 出力:  
+     - `design/design-tokens.json`  
+     - `design/components.json`  
+     - `doc/design/design_context.json`  
+   - 実装禁止。まずは**SSOT（Single Source of Truth）**を確立するステージ。
+
+2. **design-skeleton**  
+   - JSONを参照して **静的UI骨格** を生成  
+   - ロジックや状態は持たず、**tokens/variantsに基づく見た目のみ**  
+   - RDDの技術スタックを既定に採用（React/Vue/SwiftUIなど）。  
+   - ゲート: Storybookやプレビューでデザイン一致を確認。
+
+3. **design-export-html**  
+   - JSONから **静的HTML** を生成し、`doc/design/html/` に保存  
+   - ドキュメント用の配布形式。外部依存なく閲覧可能。  
+   - 主要ブレークポイントでレイアウトが崩れないことを確認。
+
+4. **design-bind**  
+   - `components.json` の variants を **props/属性** に落とし込み、  
+     RDD準拠の技術スタックに結合するアダプタ層を生成。  
+   - 出力は各スタックの再利用可能コンポーネント（React/Vue/Svelte/SwiftUI/Flutterなど）。  
+   - ゲート: Story/テスト/Lintすべて緑。  
+   - 異なるスタックを指定する場合は **ADR-lite承認必須**。
+
+---
+
+### この流れのメリット
+
+- **段階停止**でのゲート管理により「暴走・崩壊」を防ぐ  
+- **設計情報(JSON)** を常にSSOTにすることで透明性を確保  
+- **ドキュメント/実装**を同じ元データから生成し、齟齬を防止  
+- **スタック依存部**は design-bind に隔離 → 他スタックでも再利用可能  
+
+---
+
+### 実行例
+
+#### 1. Figma設計の抽出
+`/design-extract HomePage`
+
+#### 2. 骨格生成（既定スタック=React）
+`/design-skeleton`
+
+#### 3. ドキュメント用HTMLを生成
+`/design-export-html HomePage`
+
+#### 4. スタック結合（例: Vueにバインド）
+`/design-bind vue`
+
+
 ## 📚 AIタスクシステムの使用方法 (Claude Code)
 
 このプロジェクトでは、AIと人間が協力して高品質なコードを効率的に開発するためのプロンプトテンプレートを提供しています。コンテキスト・エンジニアリングを活かしつつ、スクラム的なサイクルでTASK-LISTとTASKによりスプリントごとに確認可能な開発をサポートします。
