@@ -5,6 +5,9 @@ services:
         build:
             context: .
             dockerfile: Dockerfile
+        # メモリ制限を4GBに増設（Next.js 15ビルドのため）
+        mem_limit: 4g
+        memswap_limit: 4g
         volumes:
             - ..:/workspace:cached
             - serena-cache:/root/.cache:Z
@@ -25,7 +28,7 @@ services:
           - PATH=/root/.local/share/mise/shims:/root/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
           - MISE_DATA_DIR=/root/.local/share/mise
           - MISE_CONFIG_DIR=/root/.config/mise
-          - NODE_OPTIONS=--max-old-space-size=512
+          - NODE_OPTIONS=--max-old-space-size=2048
           # ファイル監視の代替対策（macOS用）
           - CHOKIDAR_USEPOLLING=true
           - CHOKIDAR_INTERVAL=1000
