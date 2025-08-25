@@ -1,9 +1,7 @@
-# sync-tasks-list.md
-
 # タスクリスト同期（RDD準拠・差分PR版）
 
-## タスク全容: $ARGUMENTS
-`$ARGUMENTS = TASK-LIST のパス（例: ai-task/task-list.md）`
+## タスクリスト: $ARGUMENTS
+`$ARGUMENTS`： TASK-LIST のパス（例: ai-task/task-list.md）
 
 引数で渡された既存の**タスクリスト**を、**現在のコードベースの事実**と **doc/rdd.md（要件・非機能・制約）** に基づいて再同期します。  
 すでに**実行済み**のタスクは「完了扱い＋実績追記」、**未実行スプリントのみ**内容を**修正・再配列**し、**差分のみ**を提示します（ここで停止）。  

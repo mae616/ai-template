@@ -1,6 +1,4 @@
-# generate-task-list.md
-
-# TASKリストの生成（RDD遵守版）
+# [タスク実行] 1. TASKリストの生成 (引数:doc/rdd.mdなどのコンテキストファイル)
 
 ## タスク全容: $ARGUMENTS
 
