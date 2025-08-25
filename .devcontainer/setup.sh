@@ -18,19 +18,19 @@ mise --version
 echo "🔧 miseの環境を設定中..."
 mise activate
 
-# .mise.tomlに基づいてツールをインストール（メモリ使用量を最小限に）
+# .mise.tomlに基づいてツールをインストール（メモリ使用量を最適化）
 echo "🔧 .mise.tomlに基づいてツールをインストール中..."
 if [ -f ".mise.toml" ]; then
     mise install
-    # メモリ使用量を削減するための設定
-    export NODE_OPTIONS="--max-old-space-size=512"
+    # メモリ使用量を最適化するための設定（一般開発用途に適した1GB）
+    export NODE_OPTIONS="--max-old-space-size=1024"
     export pnpm_store_dir="/tmp/.pnpm-store"
     export pnpm_cache_dir="/tmp/.pnpm-cache"
     
     echo "📦 Node.jsとpnpmをインストール中..."
 else
     echo "⚠️  .mise.tomlファイルが見つかりません。デフォルトのツールをインストールします..."
-    export NODE_OPTIONS="--max-old-space-size=512"
+    export NODE_OPTIONS="--max-old-space-size=1024"
     export pnpm_store_dir="/tmp/.pnpm-store"
     export pnpm_cache_dir="/tmp/.pnpm-cache"
     
@@ -111,8 +111,8 @@ export MISE_CONFIG_DIR="/root/.config/mise"
 export CURSOR_CONFIG_PATH="/root/.cursor"
 export CURSORRULES_PATH="/root/.cursorrules"
 
-# メモリ使用量削減のための環境変数
-export NODE_OPTIONS="--max-old-space-size=512"
+# メモリ使用量最適化のための環境変数（一般開発用途に適した1GB）
+export NODE_OPTIONS="--max-old-space-size=1024"
 export pnpm_store_dir="/tmp/.pnpm-store"
 export pnpm_cache_dir="/tmp/.pnpm-cache"
 ENV_VARS

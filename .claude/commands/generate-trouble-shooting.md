@@ -1,4 +1,4 @@
-# generate-trouble-log.md
+# generate-trouble-shooting.md
 
 # トラブルシューティングログ生成コマンド
 
