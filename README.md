@@ -1,13 +1,17 @@
-# AI Project Prompt Template
+# Project AI Prompt Template
 
-AIアプリケーション開発用の汎用テンプレートプロジェクトです。
-Claude Code, Cursor などのコード支援AIによる開発のプロンプトテンプレートを提供します。
+アプリケーション開発プロジェクト用の汎用AIテンプレートです。
+Claude Code, Cursor などのコード支援AIによるアプリ開発のプロンプトテンプレートを提供します。
 
 
 !! このプロジェクトは現在開発中です !!
 
 ## 🚀 AIタスクシステムの特徴
-このプロジェクトでは、[Cole Medin氏によるcontext-engineering-intro](https://github.com/coleam00/context-engineering-intro)の内容を日本語版にし、コンテキスト・エンジニアリングを活かしつつも、スクラム的なサイクルでTASK-LISTとTASKによりスプリントごとに確認可能な開発のプロンプトを提供します。
+このプロジェクトは、[Cole Medin氏によるcontext-engineering-intro](https://github.com/coleam00/context-engineering-intro)をベースとして参考にしました。
+コンテキスト・エンジニアリングを活かしつつも、スクラム的なサイクルでTASK-LISTとTASKによりスプリントごとに確認可能な開発のプロンプトを提供します。
+
+
+このプロジェクトは少し変わっていて、平たく言うと、私(mae616)のエンジニアリングする際の思考や手順をAIで完全再現したものです。
 
 ## 🚀 使用AI支援開発環境
 * Claude Code<br>https://github.com/anthropics/claude-code
@@ -21,6 +25,20 @@ Claude Code, Cursor などのコード支援AIによる開発のプロンプト�
 - **Node.js**: LTS + pnpm
 - **AI支援**: Claude Code + Serena AI + Cursor
 - **ツール管理**: mise
+
+### ポート設定
+
+- **3000**: 開発サーバー用
+- **5173**: Vite開発サーバー用
+- **8000**: Serena MCPサーバー用
+- **8888**: 8000ポートへのマッピング（追加開発サーバー用）
+
+## 🌟 対応技術スタック
+
+### 現在サポート済み
+- **Node.js**: LTS + pnpm (パッケージ管理)
+
+## 使い方
 
 ### 環境セットアップ
 
@@ -63,29 +81,15 @@ pnpm --version
 pnpm install
 ```
 
-### ポート設定
+## Claude Code コマンドの使い方
 
-- **3000**: 開発サーバー用
-- **5173**: Vite開発サーバー用
-- **8000**: Serena MCPサーバー用
-- **8888**: 8000ポートへのマッピング（追加開発サーバー用）
+このリポジトリでは、AIと人間が協調して安全に実装へ落とし込むためのコマンドを用意しています。  
+目的は AIによるブラックボックス化を避けつつ、人間と対話しつつ再現性のある開発 を進めることです。
 
-## 🌟 対応技術スタック
 
-### 現在サポート済み
-- **Node.js**: LTS + pnpm (パッケージ管理)
+### 1. デザイン連携フロー（Figma MCP → 実装/ドキュメント） (この機能は現在制作中です)
 
-### 今後の拡張予定（コントリビューション歓迎）
-他の言語やフレームワークのサポートを追加したい場合は、コントリビューションをお願いします！
-
-### デザイン連携フロー（Figma MCP → 実装/ドキュメント） (Claude Code)
-
-このリポジトリでは **Figma MCP** から設計情報を抽出し、AIと人間が協調して安全に実装へ落とし込むためのコマンドを用意しています。  
-目的は **ブラックボックス化を避けつつ、再現性のあるUI開発** を進めることです。
-
----
-
-### フロー概要
+#### フロー概要
 
 1. **design-extract**  
    - Figma MCPから **Design Tokens / Components / Constraints** をJSON化  
@@ -113,50 +117,34 @@ pnpm install
    - ゲート: Story/テスト/Lintすべて緑。  
    - 異なるスタックを指定する場合は **ADR-lite承認必須**。
 
----
+#### 実行例
 
-### この流れのメリット
-
-- **段階停止**でのゲート管理により「暴走・崩壊」を防ぐ  
-- **設計情報(JSON)** を常にSSOTにすることで透明性を確保  
-- **ドキュメント/実装**を同じ元データから生成し、齟齬を防止  
-- **スタック依存部**は design-bind に隔離 → 他スタックでも再利用可能  
-
----
-
-### 実行例
-
-#### 1. Figma設計の抽出
+1. Figma設計の抽出
 `/design-extract HomePage`
 
-#### 2. 骨格生成（既定スタック=React）
+
+2. 骨格生成（既定スタック=React）
 `/design-skeleton`
 
-#### 3. ドキュメント用HTMLを生成
+
+3. ドキュメント用HTMLを生成
 `/design-export-html HomePage`
 
-#### 4. スタック結合（例: Vueにバインド）
+
+4. スタック結合（例: Vueにバインド）
 `/design-bind vue`
 
 
-## 📚 AIタスクシステムの使用方法 (Claude Code)
+### 2. AIタスクシステム
 
-このプロジェクトでは、AIと人間が協力して高品質なコードを効率的に開発するためのプロンプトテンプレートを提供しています。コンテキスト・エンジニアリングを活かしつつ、スクラム的なサイクルでTASK-LISTとTASKによりスプリントごとに確認可能な開発をサポートします。
+#### フロー概要
 
-### プロンプトテンプレートの特徴
-
-- **コンテキスト・エンジニアリング**: 適切なコンテキストを提供してAIの理解を促進
-- **スクラム的サイクル**: スプリントごとの計画・実行・確認・改善
-- **TASK-LIST**: 全体のタスク一覧と優先順位の管理
-- **TASK**: 個別タスクの詳細な実装と検証
-
-### タスクコマンドの使用手順
-
-#### **Step 1: RDDやコンテキストの作成**
+**Step 1: RDDやコンテキストの作成**
 アプリの新規作成の場合 `doc/` フォルダの配下にrdd.mdで要件定義を記述してください。
 改修の場合は `ai-task/` フォルダ配下の `INITIAL.md` をコピーして、要件を記述してください。
 
-#### **Step 2: TASK-LIST生成（generate-task-list）**
+
+**Step 2: TASK-LIST生成（generate-task-list）**
 Claude Code で `/generate-task-list` を実行します。
 要件定義書の相対パスか `ai-task/` フォルダ配下に記述した要件ファイルを引数に渡してください。
 
@@ -174,7 +162,8 @@ Claude Code で `/generate-task-list` を実行します。
 - スプリント計画
 - 成功基準
 
-#### **Step 3: TASK生成（generate-task）**
+
+**Step 3: TASK生成（generate-task）**
 生成されたタスクリストから、スプリント分のタスクの内容のプロンプトを生成します。
 
 **使用例:**
@@ -188,7 +177,8 @@ Claude Code で `/generate-task-list` を実行します。
 - 必要なコンテキストと調査結果
 - 検証手順
 
-#### **Step 3: TASK実行（execute-task）**
+
+**Step 3: TASK実行（execute-task）**
 ```bash
 # TASKファイルが生成されたら
 1. execute-taskコマンドでTASKを実行
@@ -203,10 +193,17 @@ Claude Code で `/generate-task-list` を実行します。
 # 実行: /execute-task ai-task/機能名/TASK_{sprint_number}_{feature_name}.md
 ```
 
-### スクラム的開発サイクル
+#### 使用例
+
+#### スクラム的開発サイクル
 ```
 1. スプリント計画 → 2. TASK-LIST生成 → 3. TASK生成 → 4. TASK1実行 → ユーザーがアプリを確認 → 5. TASK2実行 → ユーザーがアプリを確認 → ...
 ```
+
+### 3. マニュアルシステム
+
+
+### 4. トラブルシューティングシステム
 
 ## 📁 プロジェクト構成
 
@@ -236,6 +233,9 @@ ai-template/
 ```
 
 ## 🤝 コントリビューション
+
+Feedback only OSS
+
 
 このプロジェクトへの貢献を歓迎します！
 
