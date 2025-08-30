@@ -238,7 +238,7 @@ pnpm install
 ```
 - `doc/manual/手順書名.md` が生成される  
 
-1. **マニュアルガイド（guide-manual）**  
+3. **マニュアルガイド（guide-manual）**  
 ```bash
 /guide-manual doc/manual/手順書名.md
 ```
