@@ -4,8 +4,6 @@
 Claude Code, Cursor などのコード支援AIによるアプリ開発のプロンプトテンプレートを提供します。
 
 
-!! このプロジェクトは現在開発中です !!
-
 ## 🚀 AIタスクシステムの特徴
 このプロジェクトは、[Cole Medin氏によるcontext-engineering-intro](https://github.com/coleam00/context-engineering-intro)をベースとして参考にしました。
 コンテキスト・エンジニアリングを活かしつつも、スクラム的なサイクルでTASK-LISTとTASKによりスプリントごとに確認可能な開発のプロンプトを提供します。
