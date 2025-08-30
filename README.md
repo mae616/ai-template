@@ -234,7 +234,7 @@ pnpm install
 
 2. **マニュアル生成（generate-manual）**  
 ```bash
-/generate-manual "supabaseの設定手順書"
+/generate-manual supabaseの設定手順書
 ```
 - `doc/manual/手順書名.md` が生成される  
 
