@@ -1,4 +1,4 @@
-# design-extract.md
+# [デザイン] 1. Design Tokens / Components / Constraints をJSON化 (引数: FigmaのページのフレームのURL)  
 
 ## コマンド: /design-extract $FIGMA_REF
 Figma MCPから設計情報を抽出し、AI/人間が参照するSSOTを作る。**実装はしない**。

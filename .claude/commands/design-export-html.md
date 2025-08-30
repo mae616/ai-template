@@ -1,4 +1,4 @@
-# design-export-html.md
+# [デザイン] 3. JSONから 静的HTML を生成し、`doc/design/html/` に保存  
 
 ## コマンド: /design-export-html [$PAGE_KEY]
 設計JSONから**静的HTML**を生成し、ドキュメント配布可能な形で保存。

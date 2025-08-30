@@ -1,4 +1,4 @@
-# design-skeleton.md
+# [デザイン] 2. JSONを参照して静的UI骨格を生成 
 
 ## コマンド: /design-skeleton [$TARGET]
 設計JSON（tokens/components/design_context）を参照し、**静的UI骨格**のみ生成。

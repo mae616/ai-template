@@ -1,4 +1,4 @@
-# design-bind.md
+# [デザイン] 4. RDD準拠の技術スタックに結合するアダプタ層を生成。  
 
 ## コマンド: /design-bind [$TARGET]
 `design/components.json` の variants を **型付きProps/属性** にマッピングし、選択スタックへ**結合（再利用可能UI）**するアダプタ層。  

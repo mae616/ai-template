@@ -40,6 +40,27 @@ Claude Code, Cursor などのコード支援AIによるアプリ開発のプロ�
 
 ## 使い方
 
+このプロジェクトは、**AIがすべてを自動で行ってくれるわけではありません**。  
+利用者であるあなたは **管理者（ディレクター／マネージャー／指導員の立場）** として、私(mae616)のAIクローンが行う作業の方向性を決め、指示を出す役割を担います。
+
+### あなたの役割
+- 要件や修正内容などの **コンテキストを提供すること**  
+- タスクやバグ改修の進め方について **判断と指示を行うこと**  
+
+### 主なタスク
+- タスクリストを渡して作業を依頼する  
+- バグ改修（トラブルシューティング）の起票を指示する  
+- 複数段階のバグ改修で行き詰まった場合、新しいバグとして扱うかを判断する  
+- バグ調査の結果を受け、新規タスク化するかを判断する  
+- 作業が誤った方向に進んでいる場合、方向性を修正したり、中断を指示する  
+
+---
+
+このように、**AIは実行役、あなたは監督役**という関係で開発が進みます。  
+「AIに丸投げ」ではなく、「人間の判断を織り込みながら安全に進める」ことが前提です。
+
+※ このプロジェクトは、AIの応答が遅くても、トークンを多く消費しても、**確実で再現性のある作業**を行うことを目指しています。
+
 ### 環境セットアップ
 
 このリポジトリをローカル環境に `git clone` してください。
@@ -83,135 +104,169 @@ pnpm install
 
 ## Claude Code コマンドの使い方
 
-このリポジトリでは、AIと人間が協調して安全に実装へ落とし込むためのコマンドを用意しています。  
-目的は AIによるブラックボックス化を避けつつ、人間と対話しつつ再現性のある開発 を進めることです。
+このリポジトリでは、**AIと人間が協調して安全に実装へ落とし込むためのコマンド**を提供しています。  
+目的は **AIによるブラックボックス化を避けつつ、人間と対話しながら再現性のある開発** を進めることです。
+
+---
+
+### 1. カスタム指示を読み込む
+
+通常は自動で読み込まれますが、最初に以下を実行することを推奨します。  
+
+```bash
+/read-instructions
+```
+- `.ai-instructions/core-personality.md` の「## ペルソナ設定 🐱 !!重要!!」は好みに応じて編集してください。
+- このリポジトリを使用する場合、各コマンド実行時に `/clear` → `/read-instructions` が走ることを前提としています。
 
 
-### 1. デザイン連携フロー（Figma MCP → 実装/ドキュメント） (この機能は現在制作中です)
+### 2. デザイン連携フロー（Figma MCP → 実装/ドキュメント）
+
+⚠️ **現在制作中（設計も未確定のため実用不可）**
 
 #### フロー概要
 
 1. **design-extract**  
-   - Figma MCPから **Design Tokens / Components / Constraints** をJSON化  
-   - 出力:  
-     - `design/design-tokens.json`  
-     - `design/components.json`  
-     - `doc/design/design_context.json`  
-   - 実装禁止。まずは**SSOT（Single Source of Truth）**を確立するステージ。
+    - Figma MCPから **Design Tokens / Components / Constraints** をJSON化  
+    - 出力:  
+        - `design/design-tokens.json`  
+        - `design/components.json`  
+        - `doc/design/design_context.json`  
+    - 実装は禁止。まずは **SSOT（Single Source of Truth）** を確立  
 
 2. **design-skeleton**  
-   - JSONを参照して **静的UI骨格** を生成  
-   - ロジックや状態は持たず、**tokens/variantsに基づく見た目のみ**  
-   - RDDの技術スタックを既定に採用（React/Vue/SwiftUIなど）。  
-   - ゲート: Storybookやプレビューでデザイン一致を確認。
+    - JSONから **静的UI骨格** を生成（見た目のみ）  
+    - RDD準拠の技術スタックを採用（React/Vue/SwiftUIなど）  
 
 3. **design-export-html**  
-   - JSONから **静的HTML** を生成し、`doc/design/html/` に保存  
-   - ドキュメント用の配布形式。外部依存なく閲覧可能。  
-   - 主要ブレークポイントでレイアウトが崩れないことを確認。
+    - JSONから **静的HTML** を生成し、`doc/design/html/` に保存  
+    - ドキュメント配布用に使用  
 
 4. **design-bind**  
-   - `components.json` の variants を **props/属性** に落とし込み、  
-     RDD準拠の技術スタックに結合するアダプタ層を生成。  
-   - 出力は各スタックの再利用可能コンポーネント（React/Vue/Svelte/SwiftUI/Flutterなど）。  
-   - ゲート: Story/テスト/Lintすべて緑。  
-   - 異なるスタックを指定する場合は **ADR-lite承認必須**。
+    - `components.json` を基に、各スタックに結合するアダプタを生成  
+    - 出力: 再利用可能なUIコンポーネント（React/Vue/Svelte/SwiftUI/Flutterなど）  
+    - ゲート: Story/テスト/Lint がすべて緑であること  
+    - 異なるスタック指定時は **ADR-lite承認必須**  
 
 #### 実行例
+```bash
+/design-extract HomePage
+/design-skeleton
+/design-export-html HomePage
+/design-bind vue
+```
 
-1. Figma設計の抽出
-`/design-extract HomePage`
-
-
-2. 骨格生成（既定スタック=React）
-`/design-skeleton`
-
-
-3. ドキュメント用HTMLを生成
-`/design-export-html HomePage`
-
-
-4. スタック結合（例: Vueにバインド）
-`/design-bind vue`
-
-
-### 2. AIタスクシステム
+### 3. AIタスクシステム
 
 #### フロー概要
 
-**Step 1: RDDやコンテキストの作成**
-アプリの新規作成の場合 `doc/` フォルダの配下にrdd.mdで要件定義を記述してください。
-改修の場合は `ai-task/` フォルダ配下の `INITIAL.md` をコピーして、要件を記述してください。
+1. **要件定義作成**  
+- 新規: `doc/rdd.md` に記述  
+- 改修: `ai-task/INITIAL.md` をコピーして記述  
 
-
-**Step 2: TASK-LIST生成（generate-task-list）**
-Claude Code で `/generate-task-list` を実行します。
-要件定義書の相対パスか `ai-task/` フォルダ配下に記述した要件ファイルを引数に渡してください。
-
-包括的なTASK-LISTが生成されます。
-
-**使用例:**
+2. **TASK-LIST生成**  
 ```bash
-# 要件ファイル: ai-task/project-overview.md
-# 実行: /generate-task-list ai-task/project-overview.md
+/generate-task-list ai-task/project-overview.md
 ```
+- タスク一覧、依存関係、優先度、スプリント計画が生成される  
 
-**生成されるもの:**
-- `ai-task/機能名/task-list*.md` - 全体のタスク一覧
-- 優先順位と依存関係
-- スプリント計画
-- 成功基準
-
-
-**Step 3: TASK生成（generate-task）**
-生成されたタスクリストから、スプリント分のタスクの内容のプロンプトを生成します。
-
-**使用例:**
+3. **TASK生成**  
 ```bash
-# タスク概要: ai-task/機能名/task-list-*.md
-# 実行: /generate-task ai-task/機能名/task-list-*.md
+/generate-task ai-task/機能名/task-list-*.md sprint1
 ```
+- Sprintごとの詳細タスクを生成  
 
-**生成されるもの:**
-- `ai-task/機能名/TASK_{sprint_number}_{feature_name}.md` - 詳細な実装TASK
-- 必要なコンテキストと調査結果
-- 検証手順
-
-
-**Step 3: TASK実行（execute-task）**
+4. **TASK実行**  
 ```bash
-# TASKファイルが生成されたら
-1. execute-taskコマンドでTASKを実行
-2. AIが段階的に実装を進める
-3. 各段階で検証を実行
-4. 完了まで自動的に進む
+/execute-task ai-task/機能名/TASK_{sprint_number}_{feature_name}.md
 ```
+- AIが段階的に実装・検証を進める  
 
-**使用例:**
-```bash
-# TASKファイル: ai-task/機能名/TASK_{sprint_number}_{feature_name}.md
-# 実行: /execute-task ai-task/機能名/TASK_{sprint_number}_{feature_name}.md
+---
+
+#### スクラム的サイクル
+
 ```
-
-#### 使用例
-
-#### スクラム的開発サイクル
+1.	要件定義やスプリント計画の作成
+→ 2. TASK-LIST生成
+→ 3. Sprint1のTASK生成
+→ 4. Sprint1のTASK実行（ユーザー確認）
+→ 5. Sprint2のTASK生成
+→ 6. Sprint2のTASK実行（ユーザー確認）
+→ …
 ```
-1. スプリント計画 → 2. TASK-LIST生成 → 3. TASK生成 → 4. TASK1実行 → ユーザーがアプリを確認 → 5. TASK2実行 → ユーザーがアプリを確認 → ...
-```
-
-### 3. マニュアルシステム
-
 
 ### 4. トラブルシューティングシステム
+
+#### フロー概要
+
+1. **バグ起票（generate-trouble-shooting）**  
+```bash
+/generate-trouble-shooting podmanが起動しない
+```
+- `ai-task/trouble-shooting/バグファイル名.md` を生成  
+
+2. **調査（investigate-trouble-shooting）**  
+```bash
+/investigate-trouble-shooting ai-task/trouble-shooting/バグファイル名.md
+```
+- 現状調査と仮説を追記  
+
+3. **裏付け（propose-trouble-shooting）**  
+```bash
+/propose-trouble-shooting ai-task/trouble-shooting/バグファイル名.md
+```
+- Web検索で修正案を確認  
+- ⚠️ 環境構築・既存バグには有効  
+- ⚠️ アプリのロジックバグの場合はスキップ、または新規タスク化推奨  
+
+4. **修正実行（execute-fix-trouble-shooting）**  
+```bash
+/execute-fix-trouble-shooting ai-task/trouble-shooting/バグファイル名.md
+```
+- 修正を実行  
+- 新たなエラーが出た場合は再度起票し、フローを繰り返す  
+
+### 5. マニュアルシステム
+
+#### フロー概要
+
+1. **ソースコード生成**  
+- タスクシステムやバグ改修システムでソースを生成  
+
+2. **マニュアル生成（generate-manual）**  
+```bash
+/generate-manual "supabaseの設定手順書"
+```
+- `doc/manual/手順書名.md` が生成される  
+
+1. **マニュアルガイド（guide-manual）**  
+```bash
+/guide-manual doc/manual/手順書名.md
+```
+- 生成された手順書をステップごとに案内  
+
+### 6. ドキュメント生成（開発中）
+
+このプロジェクトは、以下の主要ファイル以外のドキュメントを  
+**AIによるリバースエンジニアリングで生成**することを想定しています。  
+
+- `doc/rdd.md`  
+- `doc/Architecture.md`  
+- `doc/design/*`  
+
+#### 使用例
+```bash
+/reverse-docs
+```
 
 ## 📁 プロジェクト構成
 
 ```
 ai-template/
-├── .ai-instructions/          # AI指示ファイル
+├── .ai-instructions/          # AI指示ファイル⭐
 ├── .claude/                   # Claude Code設定
-│   ├── commands/              # AIタスクシステムのコマンド
+│   ├── commands/              # Claude Codeのコマンド⭐
 │   └── settings.local.json    # AIのコマンド権限
 ├── .devcontainer/             # DevContainer設定
 ├── ai-task/                   # AIタスク管理
@@ -232,6 +287,13 @@ ai-template/
 └── README.md                  # このファイル
 ```
 
+### ⭐ このテンプレートの本質
+- **`.ai-instructions/`** → AIに与える「思考や行動の設計書」  
+- **`.claude/commands/`** → 実際の「作業フローを動かすコマンド群」  
+
+この2つが中核であり、他の構成要素はそれを支える仕組みになっています。
+
+
 ## 🤝 コントリビューション
 
 Feedback only OSS
@@ -246,8 +308,7 @@ Feedback only OSS
 **本リポジトリは個人メンテナンス（ボランティア）です。**
 
 ### 対応スケジュール
-- **返信・レビュー**: 週1回を目安にまとめて行います
-- **緊急対応**: お急ぎの方はPRで具体例を添えてください🙏
+- **返信**: 週1回を目安にまとめて行います
 
 ### メンテナンス方針
 - 個人の時間の範囲内で対応
@@ -282,8 +343,6 @@ Feedback only OSS
 - **個人利用**: 可能
 - **責任**: 作者は一切の責任を負いません
 
-### ライセンステキスト
-
 
 ## 🙏 謝辞
 
@@ -299,8 +358,8 @@ Feedback only OSS
 
 ### 問題の報告
 
-- **GitHub Issues**:
-- **ディスカッション**
+- **[GitHub Issues](./issues)**:
+- **[Discussions](./discussions)**
 
 ---
 
