@@ -327,6 +327,7 @@ Feedback only OSS
 
 ## 📚 参考資料
 
+- [Claude Code](https://github.com/anthropics/claude-code)
 - [Serena GitHub](https://github.com/oraios/serena)
 - [Serena Documentation](https://github.com/oraios/serena#readme)
 - [MCP Protocol](https://modelcontextprotocol.io/)
