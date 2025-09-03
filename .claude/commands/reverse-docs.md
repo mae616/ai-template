@@ -96,7 +96,7 @@
 - `class-diagram.md`（主要クラス/関係/SRP境界）
 - `system-overview.md`（外部連携/ランタイム/インフラ）
 - `data-flow.md`（主フローの入力→変換→出力）
-- `page-flow-diagram.md`（UIがある場合のみ。デザイン無しなら生成しない）
+- `page-flow-diagram.md`（UIがある場合のみ）
 
 ### 5) `doc/test_case/*`
 - 代表ユースケースについて **Given-When-Then**
@@ -106,7 +106,7 @@
 ### 6) `doc/design_document/*`
 - Googleデザインドキュメント準拠（Context/Goals/Actual/Alternatives/Cross-cutting）
 - 「今回の改修で追加/変更された判断」を短く追記
-- **デザイン無し/空**の場合は、デザイン文書は出力しない（スキップ）
+- 全ての画面とAPIで、1画面または1エントリーポイントにたいして1デザインドキュメントのmdファイルを作成する。
 
 ---
 
