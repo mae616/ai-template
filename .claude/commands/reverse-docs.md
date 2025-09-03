@@ -15,10 +15,6 @@
 
 ## 前提/参照（SSOT）
 - **SSOT**: `doc/rdd.md`, `doc/architecture.md`, `doc/design/*`（存在すれば）
-- **デザイン無しの扱い**: `doc/design/design_context.json` と `doc/html/` が
-  - 存在しない、または
-  - 存在するが空/未記述
-  の場合は「**デザインなし**」として扱い、デザイン参照や整合チェックを**スキップ**する
 
 ---
 
@@ -149,8 +145,6 @@
 ---
 
 ## 例外/スキップ条件
-- **デザイン無し/空**: `doc/design/design_context.json` と `doc/html/` が無い/空 →  
-  - `doc/ui-ux.md`, `page-flow-diagram.md` の生成/更新は**スキップ**
 - **フロントが無い**: UI関連は生成しない
 - **APIが無い**: `doc/api-specification.md` は生成しない（サーバレス等は別章で表現）
 
