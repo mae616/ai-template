@@ -1,0 +1,52 @@
+{
+    "permissions": {
+        "allow": [
+            "Edit",
+            "Read",
+            "Write",
+            "List",
+            "Bash(npm *)",
+            "Bash(node *)",
+            "Bash(bun *)",
+            "Bash(pnpm *)",
+            "Bash(vitest *)",
+            "Bash(git status)",
+            "Bash(git diff *)",
+            "Bash(git add *)",
+            "Bash(git commit:*)",
+            "Bash(git switch:*)",
+            "Bash(git checkout:*)",
+            "Bash(grep:*)",
+            "Bash(ls:*)",
+            "Bash(source:*)",
+            "Bash(find:*)",
+            "Bash(mv:*)",
+            "Bash(mkdir:*)",
+            "Bash(tree:*)",
+            "Bash(ruff:*)",
+            "Bash(touch:*)",
+            "Bash(chmod:*)",
+            "Bash(cat:*)",
+            "WebFetch(domain:*)",
+            "Bash(gh issue view:*)",
+            "WebFetch(domain:docs.anthropic.com)",
+            "mcp__serena"
+        ],
+        "ask": [
+            "Bash(npm i -g *)",
+            "Bash(pnpm add -g *)",
+            "Bash(brew *)",
+            "Bash(docker *)",
+            "Bash(curl http*:*)",
+            "Bash(wget http*:*)"
+        ],
+        "deny": [
+            "Bash(rm -rf /*)",
+            "Bash(rm -rf .*)",
+            "Bash(chmod -R */ /)",
+            "Bash(chown -R */ /)",
+            "Bash(curl * | sh)",
+            "Bash(bash -c *mkfs*)"
+        ]
+    }
+}

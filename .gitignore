@@ -2,6 +2,7 @@
 .ssh/
 .serena/
 .pnpm-store
+!.claude/settings.local.json
 
 # Logs
 logs
