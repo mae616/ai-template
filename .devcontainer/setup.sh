@@ -3,6 +3,56 @@ set -e
 
 echo "🚀 Serena AI Coding Agent DevContainer セットアップを開始します..."
 
+# 冪等化のための共通関数
+ensure_bashrc_block() {
+    local marker_begin="# >>> ai-template devcontainer (BEGIN)"
+    local marker_end="# <<< ai-template devcontainer (END)"
+    local bashrc_file="${HOME}/.bashrc"
+
+    touch "$bashrc_file"
+
+    if grep -qF "$marker_begin" "$bashrc_file"; then
+        echo "ℹ️  既に ~/.bashrc に ai-template の設定ブロックがあるため追記しません"
+        return 0
+    fi
+
+    cat >> "$bashrc_file" << 'BASHRC_BLOCK'
+
+# >>> ai-template devcontainer (BEGIN)
+# Python開発用エイリアス
+alias py='python'
+alias pip='uv pip'
+alias venv='uv venv'
+
+# プロジェクト管理用エイリアス
+alias dev='pnpm run dev'
+alias build='pnpm run build'
+alias test='pnpm run test'
+alias lint='pnpm run lint'
+
+# Python環境変数
+export PYTHONPATH="/workspace:$PYTHONPATH"
+export PATH="/workspace/node_modules/.bin:$PATH"
+
+# mise環境変数（コンテナ起動時に自動適用）
+export PATH="/root/.local/share/mise/shims:/root/.local/bin:$PATH"
+export MISE_DATA_DIR="/root/.local/share/mise"
+export MISE_CONFIG_DIR="/root/.config/mise"
+
+# Cursor設定
+export CURSOR_CONFIG_PATH="/root/.cursor"
+export CURSORRULES_PATH="/root/.cursorrules"
+
+# メモリ使用量最適化（一般開発用途に適した1GB）
+export NODE_OPTIONS="--max-old-space-size=1024"
+export pnpm_store_dir="/tmp/.pnpm-store"
+export pnpm_cache_dir="/tmp/.pnpm-cache"
+# <<< ai-template devcontainer (END)
+BASHRC_BLOCK
+
+    echo "✅ ~/.bashrc に ai-template の設定ブロックを追記しました"
+}
+
 # Python環境の確認
 echo "📋 Python環境を確認中..."
 python --version
@@ -16,7 +66,8 @@ uv --version
 echo "📋 mise環境を確認中..."
 mise --version
 echo "🔧 miseの環境を設定中..."
-mise activate
+# mise activate はシェルへevalして効かせるのが前提（非対話でもこのプロセス内に適用する）
+eval "$(mise activate bash 2>/dev/null || true)"
 
 # .mise.tomlに基づいてツールをインストール（メモリ使用量を最適化）
 echo "🔧 .mise.tomlに基づいてツールをインストール中..."
@@ -53,7 +104,11 @@ node --version
 npm --version
 
 echo "📋 claude-codeをインストール中..."
-npm install -g @anthropic-ai/claude-code
+if command -v claude >/dev/null 2>&1; then
+    echo "✅ claude-code は既にインストール済みです: $(claude --version 2>/dev/null || true)"
+else
+    npm install -g @anthropic-ai/claude-code
+fi
 
 # ホストの設定ファイルを確認・コピー
 echo "📋 ホストの設定ファイルを確認中..."
@@ -100,47 +155,22 @@ else
 fi
 
 echo "📋 Claude Code MCPサーバーをインストール中..."
-claude mcp add serena -- uvx --from git+https://github.com/oraios/serena serena start-mcp-server --context ide-assistant --project $(pwd)
+if command -v claude >/dev/null 2>&1; then
+    if (claude mcp list 2>/dev/null || true) | grep -qE '(^|\\s)serena(\\s|$)'; then
+        echo "✅ Serena MCP は既に登録済みです（claude mcp list）"
+    elif [ -f "/root/.claude/mcp-config.json" ] && grep -q '"serena"' "/root/.claude/mcp-config.json"; then
+        echo "✅ Serena MCP は既に登録済みです（/root/.claude/mcp-config.json）"
+    else
+        claude mcp add serena -- uvx --from git+https://github.com/oraios/serena serena start-mcp-server --context ide-assistant --project "$(pwd)"
+    fi
+else
+    echo "⚠️  claude コマンドが見つからないため、Serena MCP の登録をスキップします"
+fi
 
 
 # 開発用の便利なエイリアスを設定
-echo "🔧 開発用エイリアスを設定中..."
-cat >> ~/.bashrc << 'ALIASES'
-
-# Python開発用エイリアス
-alias py='python'
-alias pip='uv pip'
-alias venv='uv venv'
-
-# プロジェクト管理用エイリアス
-alias dev='pnpm run dev'
-alias build='pnpm run build'
-alias test='pnpm run test'
-alias lint='pnpm run lint'
-ALIASES
-
-# 環境変数を設定
-echo "🔧 環境変数を設定中..."
-cat >> ~/.bashrc << 'ENV_VARS'
-
-# Python環境変数
-export PYTHONPATH="/workspace:$PYTHONPATH"
-export PATH="/workspace/node_modules/.bin:$PATH"
-
-# mise環境変数（コンテナ起動時に自動適用）
-export PATH="/root/.local/share/mise/shims:/root/.local/bin:$PATH"
-export MISE_DATA_DIR="/root/.local/share/mise"
-export MISE_CONFIG_DIR="/root/.config/mise"
-
-# Cursor MCP環境変数
-export CURSOR_CONFIG_PATH="/root/.cursor"
-export CURSORRULES_PATH="/root/.cursorrules"
-
-# メモリ使用量最適化のための環境変数（一般開発用途に適した1GB）
-export NODE_OPTIONS="--max-old-space-size=1024"
-export pnpm_store_dir="/tmp/.pnpm-store"
-export pnpm_cache_dir="/tmp/.pnpm-cache"
-ENV_VARS
+echo "🔧 ~/.bashrc を更新中（冪等）..."
+ensure_bashrc_block
 
 # セットアップ完了メッセージ
 echo ""

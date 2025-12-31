@@ -34,6 +34,9 @@ Dev Containers: Reopen in Container
 - Claude Code のインストール
 - Serena AI MCPサーバーのセットアップ
 
+補足：
+- `.devcontainer/setup.sh` は **冪等**（同じ設定を何度も追記しない）になるようにしています。
+
 ### 3. AI支援開発の利用
 
 コンテナ内で以下のAI支援機能が利用可能になります：
