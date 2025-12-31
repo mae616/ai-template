@@ -126,7 +126,15 @@ INCLUDES=(
   "CLAUDE.md"
   ".cursorrules"
   ".claude/"
+  ".devcontainer/"
+  ".mise.toml"
+  "doc/index.md"
   "doc/ai_guidelines.md"
+  "doc/Architecture.md"
+  "doc/manual/"
+  "doc/design/"
+  "doc/_generated/README.md"
+  "doc/devlog/README.md"
   # RDDは基本的に各プロジェクト固有。初回導入（未存在）だけ反映する。
   "doc/rdd.md"
   # ai-task は運用中に中身が増えるため、基本は初回導入（未存在）だけ反映する。
