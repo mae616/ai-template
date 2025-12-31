@@ -74,6 +74,31 @@ else
     echo "⚠️  Cursor設定ディレクトリがマウントされていません"
 fi
 
+# Figma公式（Dev Mode）MCPサーバーの接続設定（Cursor向け）
+# - 注意: Figma Desktop（ホスト側）で Dev Mode MCP サーバーを有効化している必要があります。
+# - DevContainer内からは 127.0.0.1 はコンテナ自身になるため、host.docker.internal 経由で接続します。
+echo "📋 Figma（Dev Mode）MCPサーバーの接続設定を準備中..."
+FIGMA_MCP_URL="${FIGMA_MCP_URL:-http://host.docker.internal:3845/mcp}"
+CURSOR_MCP_FILE="/root/.cursor/mcp.json"
+if [ -d "/root/.cursor" ]; then
+    if [ -f "$CURSOR_MCP_FILE" ]; then
+        echo "ℹ️  既に $CURSOR_MCP_FILE が存在するため上書きしません（必要なら figma サーバー定義を手動で追記してください）"
+    else
+        cat > "$CURSOR_MCP_FILE" << EOF
+{
+  "mcpServers": {
+    "figma": {
+      "url": "$FIGMA_MCP_URL"
+    }
+  }
+}
+EOF
+        echo "✅ Cursor用Figma MCP設定を書き込みました: $CURSOR_MCP_FILE"
+    fi
+else
+    echo "⚠️  /root/.cursor が無いためスキップします"
+fi
+
 echo "📋 Claude Code MCPサーバーをインストール中..."
 claude mcp add serena -- uvx --from git+https://github.com/oraios/serena serena start-mcp-server --context ide-assistant --project $(pwd)
 
