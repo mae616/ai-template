@@ -19,6 +19,7 @@ Claude Code, Cursor などのコード支援AIによるアプリ開発のプロ�
 ## 🚀 使用AI支援開発環境
 - [Claude Code](https://github.com/anthropics/claude-code)
 - [Serena AI Coding Agent](https://github.com/oraios/serena)
+- [Figma MCPサーバー](https://help.figma.com/hc/ja/articles/32132100833559-Figma-MCP%E3%82%B5%E3%83%BC%E3%83%90%E3%83%BC%E3%81%AE%E3%82%AC%E3%82%A4%E3%83%89) 
 - [Cursor](https://cursor.com/)
 
 ## 🛠️ 開発環境
