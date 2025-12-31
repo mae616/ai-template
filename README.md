@@ -130,45 +130,56 @@ pnpm install
 
 ### 2. デザイン連携フロー（Figma MCP → 実装/ドキュメント）
 
-⚠️ **現在制作中（設計も未確定のため実用不可）**
+#### 前提（SSOT）
+- 技術スタックは [doc/rdd.md](doc/rdd.md) をSSOTとして扱います（design系コマンドもこれに従う）
+- SSOT JSONの契約は [doc/design/ssot_schema.md](doc/design/ssot_schema.md) を参照します
 
-#### フロー概要
+#### ルートA: 会話 → HTML（会話起点）
+1. **[/design-mock](.claude/commands/design-mock.md)**（会話から1枚ペラHTML + SSOT JSONを生成）
+    - **入力**: ユーザーとの会話（画面/要素/雰囲気/制約）
+    - **出力**:
+        - `doc/design/html/mock.html`
+        - `doc/design/design-tokens.json`
+        - `doc/design/components.json`
+        - `doc/design/design_context.json`
+    - **次**: 共通ルートへ合流（HTML分割→コンポーネント抽出→組み立て）
 
-0. **design-mock（会話起点のルート）**  
-    - 会話から **1枚ペラの静的HTML** を生成  
-    - 併せてSSOT（`doc/design/design-tokens.json` / `doc/design/components.json` / `doc/design/design_context.json`）も生成して共通ルートへ合流  
-    - 技術スタックは [doc/rdd.md](doc/rdd.md) をSSOTとして扱う  
-    - 出力: `doc/design/html/mock.html` 等  
+#### ルートB: Figma（Dev Mode）→ SSOT → HTML（Figma起点）
+1. **[/design-ssot](.claude/commands/design-ssot.md)**（Figma MCPからSSOT JSONを確立）
+    - **入力**: Figma（Dev Mode）上の対象（ページ/フレーム等）
+    - **出力**:
+        - `doc/design/design-tokens.json`
+        - `doc/design/components.json`
+        - `doc/design/design_context.json`
+2. **[/design-ui](.claude/commands/design-ui.md)**（SSOT JSON → 静的UI骨格）
+    - **入力**: 上記SSOT JSON
+    - **出力**: （技術スタック準拠の）静的UI骨格（見た目のみ）
+3. **[/design-html](.claude/commands/design-html.md)**（SSOT JSON → 1枚ペラHTML）
+    - **入力**: 上記SSOT JSON
+    - **出力**: `doc/design/html/{name}.html`
+    - **次**: 共通ルートへ合流（HTML分割→コンポーネント抽出→組み立て）
 
-1. **design-ssot**  
-    - Figma MCPから **Design Tokens / Components / Constraints** をJSON化  
-    - 出力:  
-        - `doc/design/design-tokens.json`  
-        - `doc/design/components.json`  
-        - `doc/design/design_context.json`  
-    - 実装は禁止。まずは **SSOT（Single Source of Truth）** を確立  
+#### 共通ルート（HTML/骨格 → コンポーネント設計 → 技術スタックへ結合）
+1. **[/design-split](.claude/commands/design-split.md)**（1枚ペラHTML → ページ分割）
+    - **入力**: `doc/design/html/*.html`
+    - **出力**: `doc/design/html/{page}.html`
+2. **[/design-components](.claude/commands/design-components.md)**（静的UI骨格 → コンポーネント/レイアウト抽出）
+    - **入力**: 静的UI骨格（見た目のみ。ロジック禁止）
+    - **出力**: （必要に応じて）`doc/design/components.json` の追記/整理
+3. **[/design-assemble](.claude/commands/design-assemble.md)**（components.json → 各技術スタック用UIへ組み立て）
+    - **入力**: `doc/design/components.json`
+    - **出力**: 再利用可能なUIコンポーネント（技術スタック準拠）
+    - **ゲート**: Story/テスト/Lint がすべて緑であること（異なるスタック指定時はADR-lite承認）
 
-2. **design-ui**  
-    - JSONから **静的UI骨格** を生成（見た目のみ）  
-    - RDD準拠の技術スタックを採用（React/Vue/SwiftUIなど）  
+#### 実行例（会話ルート）
+```bash
+/design-mock
+/design-split doc/design/html/mock.html
+/design-components src
+/design-assemble vue
+```
 
-3. **design-html**  
-    - JSONから **静的HTML** を生成し、`doc/design/html/` に保存  
-    - ドキュメント配布用に使用  
-
-3.5. **design-split（共通ルート）**  
-    - 1枚ペラのHTMLを **ページ単位に分割** して `doc/design/html/{page}.html` に保存  
-
-3.6. **design-components（共通ルート）**  
-    - 静的UI骨格から **コンポーネント/レイアウトを抽出**（見た目のみ、ロジック禁止）
-
-4. **design-assemble**  
-    - `components.json` を基に、各スタックに結合するアダプタを生成  
-    - 出力: 再利用可能なUIコンポーネント（React/Vue/Svelte/SwiftUI/Flutterなど）  
-    - ゲート: Story/テスト/Lint がすべて緑であること  
-    - 異なるスタック指定時は **ADR-lite承認必須**  
-
-#### 実行例
+#### 実行例（Figmaルート）
 ```bash
 /design-ssot HomePage
 /design-ui
