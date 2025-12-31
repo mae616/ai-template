@@ -332,7 +332,7 @@ ai-template/
 │   └── devlog/                # AI作業ログ（任意）
 ├── .mise.toml                 # ツール管理設定
 ├── CLAUDE.md                  # Claude Code設定
-├── .cursorrules               # Cursor設定
+├── AGENTS.md                  # エージェント指示（Cursor推奨）
 ├── CONTRIBUTING.md            # コントリビューションガイド
 ├── CODE_OF_CONDUCT.md         # 行動規範
 ├── LICENSE                    # MITライセンス

@@ -23,8 +23,7 @@
         "source=${localEnv:HOME}${localEnv:USERPROFILE}/.vscode/extensions,target=/root/.vscode/extensions,type=bind,consistency=cached",
         "source=${localEnv:HOME}${localEnv:USERPROFILE}/.claude,target=/root/.claude,type=bind,consistency=cached",
         "source=${localEnv:HOME}${localEnv:USERPROFILE}/.cursor,target=/root/.cursor,type=bind,consistency=cached",
-        "source=${localEnv:HOME}${localEnv:USERPROFILE}/.anthropic,target=/root/.anthropic,type=bind,consistency=cached",
-        "source=${localEnv:HOME}${localEnv:USERPROFILE}/.cursorrules,target=/root/.cursorrules,type=bind,consistency=cached"
+        "source=${localEnv:HOME}${localEnv:USERPROFILE}/.anthropic,target=/root/.anthropic,type=bind,consistency=cached"
     ],
     "initializeCommand": "mkdir -p ${localEnv:HOME}${localEnv:USERPROFILE}/.vscode/extensions ${localEnv:HOME}${localEnv:USERPROFILE}/.claude ${localEnv:HOME}${localEnv:USERPROFILE}/.cursor ${localEnv:HOME}${localEnv:USERPROFILE}/.anthropic"
 }

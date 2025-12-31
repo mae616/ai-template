@@ -15,7 +15,7 @@ scripts/apply_template.sh --target /abs/path/to/your-project --safe
 ```
 
 ## 2. テンプレ更新の反映（既存リポジトリへ）
-まずは **上書きしてよい領域**（`CLAUDE.md` / `.cursorrules` / `.claude/` / `doc/ai_guidelines.md`）だけ更新する。
+まずは **上書きしてよい領域**（`CLAUDE.md` / `AGENTS.md` / `.claude/` / `doc/ai_guidelines.md`）だけ更新する。
 
 ```bash
 cd /path/to/ai-template
@@ -58,13 +58,13 @@ ts="<timestamp>"
 
 # まずはdry-runで確認
 rsync -av --dry-run ".ai-template-backup/$ts/CLAUDE.md" "./CLAUDE.md"
-rsync -av --dry-run ".ai-template-backup/$ts/.cursorrules" "./.cursorrules"
+rsync -av --dry-run ".ai-template-backup/$ts/AGENTS.md" "./AGENTS.md"
 rsync -av --dry-run ".ai-template-backup/$ts/.claude/" "./.claude/"
 rsync -av --dry-run ".ai-template-backup/$ts/doc/ai_guidelines.md" "./doc/ai_guidelines.md"
 
 # 問題なければ実行
 rsync -av ".ai-template-backup/$ts/CLAUDE.md" "./CLAUDE.md"
-rsync -av ".ai-template-backup/$ts/.cursorrules" "./.cursorrules"
+rsync -av ".ai-template-backup/$ts/AGENTS.md" "./AGENTS.md"
 rsync -av ".ai-template-backup/$ts/.claude/" "./.claude/"
 rsync -av ".ai-template-backup/$ts/doc/ai_guidelines.md" "./doc/ai_guidelines.md"
 ```

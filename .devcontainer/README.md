@@ -72,7 +72,7 @@ Dev Containers: Reopen in Container
 
 ### Cursor MCP設定
 - **設定ディレクトリ**: `/root/.cursor`（ホストからマウント）
-- **Cursor Rules**: `/root/.cursorrules`（ホストからマウント）
+- **エージェント指示**: `AGENTS.md`（リポジトリ直下。Cursor推奨）
 
 ## 🔐 セキュリティ注意（ホスト設定のマウントは任意）
 
@@ -82,7 +82,6 @@ Dev Containers: Reopen in Container
   - `~/.claude` → `/root/.claude`
   - `~/.cursor` → `/root/.cursor`
   - `~/.anthropic` → `/root/.anthropic`
-  - `~/.cursorrules` → `/root/.cursorrules`
 
 注意:
 - **これは任意**です。社内規定/セキュリティ方針により「ホストの設定（場合によっては認証情報を含む）をコンテナへ渡したくない」場合は、`mounts` から該当行を削除（またはコメントアウト）してください。

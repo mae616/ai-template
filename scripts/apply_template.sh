@@ -124,7 +124,7 @@ ensure_target_parent_dir() {
 # 反映対象（AIテンプレとして必要最小）
 INCLUDES=(
   "CLAUDE.md"
-  ".cursorrules"
+  "AGENTS.md"
   ".claude/"
   ".devcontainer/"
   ".mise.toml"
