@@ -19,14 +19,18 @@ TEMPLATE_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 TARGET_DIR=""
 DRY_RUN="false"
 BACKUP="true"
+MODE="safe" # safe(default): 既存を上書きしない / force: 上書きする / sync: 上書き＋削除で同期（危険）
 
 usage() {
   cat <<'USAGE'
 使い方:
-  scripts/apply_template.sh --target /abs/path/to/project [--dry-run] [--no-backup]
+  scripts/apply_template.sh --target /abs/path/to/project [--safe|--force|--sync] [--dry-run] [--no-backup]
 
 オプション:
   --target <dir>   反映先（必須）
+  --safe           既存ファイルは上書きしない（デフォルト）
+  --force          テンプレ対象ファイルを上書きする（バックアップ推奨）
+  --sync           テンプレ対象ファイルを同期（上書き＋削除）。危険：テンプレ配下で削除が発生しうる
   --dry-run        実際には書き込まず、差分だけ表示
   --no-backup      上書き前バックアップを作成しない（非推奨）
   -h, --help       ヘルプ
@@ -41,6 +45,18 @@ while [ "$#" -gt 0 ]; do
       ;;
     --dry-run)
       DRY_RUN="true"
+      shift
+      ;;
+    --safe)
+      MODE="safe"
+      shift
+      ;;
+    --force)
+      MODE="force"
+      shift
+      ;;
+    --sync)
+      MODE="sync"
       shift
       ;;
     --no-backup)
@@ -103,13 +119,30 @@ if [ "$BACKUP" = "true" ] && [ "$DRY_RUN" = "false" ]; then
   echo "バックアップ作成: $backup_dir"
 fi
 
-RSYNC_FLAGS=(-a --delete)
+RSYNC_FLAGS=(-a)
 if [ "$DRY_RUN" = "true" ]; then
   RSYNC_FLAGS+=("--dry-run")
 fi
 
+case "$MODE" in
+  safe)
+    RSYNC_FLAGS+=("--ignore-existing")
+    ;;
+  force)
+    # 既存を上書きする（削除はしない）
+    ;;
+  sync)
+    RSYNC_FLAGS+=("--delete")
+    ;;
+  *)
+    echo "ERROR: 不正なMODE: $MODE" >&2
+    exit 2
+    ;;
+esac
+
 echo "テンプレート: $TEMPLATE_ROOT"
 echo "反映先:       $TARGET_DIR"
+echo "モード:       $MODE"
 echo "対象:         ${INCLUDES[*]}"
 echo
 

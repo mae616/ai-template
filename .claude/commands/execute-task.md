@@ -8,6 +8,7 @@ TASKに従って実装を行います。
 ## 共通前提（参照）
 - 実装規約・口調・出力規約・TDD・Docコメント等は `CLAUDE.md` に従う。
 - `/doc/rdd.md` を読み、該当する `.claude/skills/*` を適用して判断軸を揃える（例: `architecture-expert` / `developer-specialist` / `security-expert`）。
+- 詳細運用（サンプル運用/依存評価補助/ADR-lite）は `doc/ai_guidelines.md` を参照。
 
 
 最後にTASKを実行したものを TASKファイル ($ARGUMENTS) に進捗状況として追記してください。

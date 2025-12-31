@@ -6,6 +6,7 @@ Figma MCPから設計情報を抽出し、AI/人間が参照するSSOTを作る�
 ## 共通前提（参照）
 - 口調・出力規約・差分出力の方針は `CLAUDE.md` に従う。
 - `/doc/rdd.md` を読み、該当する `.claude/skills/*` を適用して判断軸を揃える（例: `ui-designer` / `usability-psychologist`）。
+- 詳細運用（サンプル運用/依存評価補助/ADR-lite）は `doc/ai_guidelines.md` を参照。
 
 ### 入力
 - $FIGMA_REF: Figmaファイル/ページ識別子（MCPが認識できる指定）

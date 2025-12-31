@@ -79,12 +79,13 @@ Claude Code, Cursor などのコード支援AIによるアプリ開発のプロ�
 例（まずはdry-run推奨）:
 ```bash
 cd /path/to/ai-template
-scripts/apply_template.sh --target /abs/path/to/your-project --dry-run
-scripts/apply_template.sh --target /abs/path/to/your-project
+scripts/apply_template.sh --target /abs/path/to/your-project --safe --dry-run
+scripts/apply_template.sh --target /abs/path/to/your-project --safe
 ```
 
 補足:
 - 上書き前に `your-project/.ai-template-backup/<timestamp>/` へバックアップします（`--no-backup` で無効化可能）
+- `--safe`（デフォルト）は既存ファイルを上書きしません。テンプレ側の更新を反映したい場合は `--force`、同期して削除も伴う場合は `--sync` を使用します。
 
 #### 開発プロジェクトの作成
 ボイラーテンプレートなどでReactなどの開発プロジェクトを作成してください。
