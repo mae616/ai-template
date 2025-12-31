@@ -90,6 +90,7 @@ scripts/apply_template.sh --target /abs/path/to/your-project --safe
 
 詳細な運用方法は `doc/manual/ai_template_operation.md` を参照してください。
 skills一覧（索引）は `doc/manual/skills_catalog.md` を参照してください。
+コマンド一覧（索引）は `doc/manual/commands_catalog.md` を参照してください。
 
 #### 開発プロジェクトの作成
 ボイラーテンプレートなどでReactなどの開発プロジェクトを作成してください。
@@ -120,9 +121,9 @@ pnpm install
 通常は自動で読み込まれますが、最初に以下を実行することを推奨します。  
 
 ```bash
-/read-instructions
+/setup
 ```
-- このリポジトリを使用する場合、各コマンド実行時に `/clear` → `/read-instructions` が走ることを前提としています。
+- このリポジトリを使用する場合、各コマンド実行時に `/clear` → `/setup` が走ることを前提としています。
 
 
 ### 2. デザイン連携フロー（Figma MCP → 実装/ドキュメント）
@@ -157,7 +158,7 @@ pnpm install
 ```bash
 /design-extract HomePage
 /design-skeleton
-/design-export-html HomePage
+/design-export HomePage
 /design-bind vue
 ```
 
@@ -171,19 +172,19 @@ pnpm install
 
 2. **TASK-LIST生成**  
 ```bash
-/generate-task-list ai-task/project-overview.md
+/task-list ai-task/project-overview.md
 ```
 - タスク一覧、依存関係、優先度、スプリント計画が生成される  
 
 3. **TASK生成**  
 ```bash
-/generate-task ai-task/機能名/task-list-*.md sprint1
+/task-gen ai-task/機能名/task-list-*.md sprint1
 ```
 - Sprintごとの詳細タスクを生成  
 
 4. **TASK実行**  
 ```bash
-/execute-task ai-task/機能名/TASK_{sprint_number}_{feature_name}.md
+/task-run ai-task/機能名/TASK_{sprint_number}_{feature_name}.md
 ```
 - AIが段階的に実装・検証を進める  
 
@@ -207,19 +208,19 @@ pnpm install
 
 1. **バグ起票（generate-trouble-shooting）**  
 ```bash
-/generate-trouble-shooting podmanが起動しない
+/bug-new podmanが起動しない
 ```
 - `ai-task/trouble-shooting/バグファイル名.md` を生成  
 
 2. **調査（investigate-trouble-shooting）**  
 ```bash
-/investigate-trouble-shooting ai-task/trouble-shooting/バグファイル名.md
+/bug-investigate ai-task/trouble-shooting/バグファイル名.md
 ```
 - 現状調査と仮説を追記  
 
 3. **裏付け（propose-trouble-shooting）**  
 ```bash
-/propose-trouble-shooting ai-task/trouble-shooting/バグファイル名.md
+/bug-propose ai-task/trouble-shooting/バグファイル名.md
 ```
 - Web検索で修正案を確認  
 - ⚠️ 環境構築・既存バグには有効  
@@ -227,7 +228,7 @@ pnpm install
 
 4. **修正実行（execute-fix-trouble-shooting）**  
 ```bash
-/execute-fix-trouble-shooting ai-task/trouble-shooting/バグファイル名.md
+/bug-fix ai-task/trouble-shooting/バグファイル名.md
 ```
 - 修正を実行  
 - 新たなエラーが出た場合は再度起票し、フローを繰り返す  
@@ -241,13 +242,13 @@ pnpm install
 
 2. **マニュアル生成（generate-manual）**  
 ```bash
-/generate-manual supabaseの設定手順書
+/manual-gen supabaseの設定手順書
 ```
 - `doc/manual/手順書名.md` が生成される  
 
 3. **マニュアルガイド（guide-manual）**  
 ```bash
-/guide-manual doc/manual/手順書名.md
+/manual-guide doc/manual/手順書名.md
 ```
 - 生成された手順書をステップごとに案内  
 
@@ -262,7 +263,7 @@ pnpm install
 
 #### 使用例
 ```bash
-/reverse-docs
+/docs-reverse
 ```
 
 ## 📁 プロジェクト構成

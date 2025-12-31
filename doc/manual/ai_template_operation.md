@@ -5,7 +5,7 @@
 ## 0. 前提（守ること）
 - 反映は必ず **dry-run → 実反映** の順で行う。
 - `doc/rdd.md` と `ai-task/` は原則 **プロジェクト固有**。テンプレ更新で上書きしない（必要なら明示フラグ）。
-- 迷ったら `/read-instructions` を実行し、`CLAUDE.md` → `doc/rdd.md` → `.claude/skills` の順で前提を揃える。
+- 迷ったら `/setup` を実行し、`CLAUDE.md` → `doc/rdd.md` → `.claude/skills` の順で前提を揃える。
 
 ## 1. 初回導入（新しい開発リポジトリ）
 ```bash
