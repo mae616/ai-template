@@ -86,6 +86,10 @@ scripts/apply_template.sh --target /abs/path/to/your-project --safe
 補足:
 - 上書き前に `your-project/.ai-template-backup/<timestamp>/` へバックアップします（`--no-backup` で無効化可能）
 - `--safe`（デフォルト）は既存ファイルを上書きしません。テンプレ側の更新を反映したい場合は `--force`、同期して削除も伴う場合は `--sync` を使用します。
+- `doc/rdd.md` と `ai-task/` は原則 **プロジェクト固有** です。テンプレ更新で上書きしたい場合のみ `--overwrite-rdd` / `--overwrite-ai-task` を明示してください。
+
+詳細な運用方法は `doc/manual/ai_template_operation.md` を参照してください。
+skills一覧（索引）は `doc/manual/skills_catalog.md` を参照してください。
 
 #### 開発プロジェクトの作成
 ボイラーテンプレートなどでReactなどの開発プロジェクトを作成してください。
