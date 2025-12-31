@@ -127,6 +127,22 @@ pnpm install
 ```
 - このリポジトリを使用する場合、各コマンド実行時に `/clear` → `/setup` が走ることを前提としています。
 
+### 補助: リポジトリ案内・壁打ち（任意）
+
+- **[/repo-tour](.claude/commands/repo-tour.md)**: 初見向けに「どこに何があるか」を短時間で案内します
+  - **入力**: 任意（例: `全体`, `AI運用`, `design`, `commands`, `skills`）
+  - **出力**: 全体像 / コアファイル / よく触る場所 / 次の一手
+- **[/pair](.claude/commands/pair.md)**: 企画/設計/実装/デザインの壁打ちを、短い反復で進めます
+  - **入力**: `plan` | `design` | `arch` | `dev`（必須）＋相談内容（任意）
+  - **出力**: 短問（1〜3）→選択肢（2〜3）→推奨→次の一手
+
+使用例:
+
+```bash
+/repo-tour design
+/pair design 設定画面の情報設計を壁打ちしたい
+```
+
 
 ### 2. デザイン連携フロー（Figma MCP → 実装/ドキュメント）
 
@@ -279,16 +295,19 @@ pnpm install
 ```
 - 生成された手順書をステップごとに案内  
 
-### 6. ドキュメント生成（開発中）
+### 6. ドキュメント生成（/docs-reverse）
 
-このプロジェクトは、以下の主要ファイル以外のドキュメントを  
-**AIによるリバースエンジニアリングで生成**することを想定しています。  
+このプロジェクトは、**SSOT（人間が維持する設計情報）**と、**AIが生成して更新するドキュメント**を分離します。
 
-- [doc/rdd.md](doc/rdd.md)  
-- [doc/Architecture.md](doc/Architecture.md)  
-- [doc/design/](doc/design/)  
+- **SSOT（手編集・入力）**
+  - [doc/rdd.md](doc/rdd.md)
+  - [doc/Architecture.md](doc/Architecture.md)
+  - [doc/design/](doc/design/)（`design-tokens.json` / `components.json` / `design_context.json` など）
+- **AI生成（出力・上書きOK）**
+  - `doc/_generated/`（`/docs-reverse` の出力先）
 
 #### 使用例
+
 ```bash
 /docs-reverse
 ```

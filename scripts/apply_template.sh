@@ -107,6 +107,20 @@ need() { command -v "$1" >/dev/null 2>&1 || { echo "ERROR: '$1' が必要です"
 need rsync
 need date
 
+# dry-run 以外では、rsync の出力先（親ディレクトリ）が無いとエラーになる。
+# 例: 反映先リポジトリに doc/ が存在しない場合、`doc/ai_guidelines.md` のコピーで失敗する。
+ensure_target_parent_dir() {
+  local rel_path="$1"
+
+  if [[ "$rel_path" == */ ]]; then
+    # ディレクトリの同期先（末尾 /）はディレクトリ自体を作っておく。
+    mkdir -p "$TARGET_DIR/$rel_path"
+    return 0
+  fi
+
+  mkdir -p "$TARGET_DIR/$(dirname -- "$rel_path")"
+}
+
 # 反映対象（AIテンプレとして必要最小）
 INCLUDES=(
   "CLAUDE.md"
@@ -173,6 +187,11 @@ for p in "${INCLUDES[@]}"; do
   fi
   if [ "$p" = "ai-task/" ] && [ "$OVERWRITE_AI_TASK" != "true" ]; then
     EXTRA_FLAGS+=("--ignore-existing")
+  fi
+
+  # 実反映時のみ、出力先ディレクトリを事前作成して rsync エラーを防ぐ。
+  if [ "$DRY_RUN" = "false" ]; then
+    ensure_target_parent_dir "$p"
   fi
 
   rsync "${RSYNC_FLAGS[@]}" \
