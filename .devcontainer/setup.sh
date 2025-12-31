@@ -108,7 +108,21 @@ if command -v claude >/dev/null 2>&1; then
     echo "✅ claude-code は既にインストール済みです: $(claude --version 2>/dev/null || true)"
 else
     npm install -g @anthropic-ai/claude-code
+    # mise の shims 運用では、グローバルインストール後に reshim しないと新規コマンドが見えないことがある。
+    echo "🔧 miseのshimsを更新中（claude を有効化）..."
+    mise reshim
 fi
+
+# 期待するCLIが使えることをここで確定させる（ここで落ちれば原因が追いやすい）
+if ! command -v claude >/dev/null 2>&1; then
+    echo "❌ claude コマンドが見つかりません（インストール後のPATH/reshimが不整合の可能性）" >&2
+    echo "   - PATH: $PATH" >&2
+    echo "   - npm prefix: $(npm config get prefix 2>/dev/null || echo 'unknown')" >&2
+    echo "   - node: $(which node 2>/dev/null || echo 'not-found') / $(node --version 2>/dev/null || echo 'unknown')" >&2
+    echo "   - npm:  $(which npm  2>/dev/null || echo 'not-found') / $(npm --version 2>/dev/null || echo 'unknown')" >&2
+    exit 1
+fi
+echo "✅ claude コマンドを確認しました: $(claude --version 2>/dev/null || true)"
 
 # ホストの設定ファイルを確認・コピー
 echo "📋 ホストの設定ファイルを確認中..."
