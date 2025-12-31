@@ -6,7 +6,7 @@
 
 ## 共通前提（参照）
 - 口調・出力規約・差分出力の方針は `CLAUDE.md` に従う。
-- `/doc/rdd.md` を読み、該当する `.claude/skills/*` を適用して判断軸を揃える（例: `ui-designer` / `tailwind` / `creative-coder`）。
+- `doc/rdd.md` を読み、該当する `.claude/skills/*` を適用して判断軸を揃える（例: `ui-designer` / `tailwind` / `creative-coder`）。
 - 詳細運用（ADR-lite/差分/サンプル運用等）は `doc/ai_guidelines.md` を参照。
 - SSOT JSON のスキーマ（variants命名/props/slots）は `doc/design/ssot_schema.md` を参照。
 

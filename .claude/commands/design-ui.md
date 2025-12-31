@@ -6,7 +6,7 @@
 
 ## 共通前提（参照）
 - 口調・出力規約・差分出力の方針は `CLAUDE.md` に従う。
-- `/doc/rdd.md` を読み、該当する `.claude/skills/*` を適用して判断軸を揃える（例: `tailwind` / `creative-coder`）。
+- `doc/rdd.md` を読み、該当する `.claude/skills/*` を適用して判断軸を揃える（例: `tailwind` / `creative-coder`）。
 - 詳細運用（サンプル運用/依存評価補助/ADR-lite）は `doc/ai_guidelines.md` を参照。
 
 ### 入力
@@ -35,7 +35,7 @@
   - vertical: TOP_BOTTOM → `h-full`（文脈でcol）
   - resizing: FILL → `flex-1` / `w-full`
   - resizing: HUG → `inline-size: max-content` / `inline-block`
-- breakpoints → design-tokens.json の `breakpoints` 準拠
+- breakpoints → `doc/design/design-tokens.json` の `primitives.breakpoints` 準拠
 - **tokens外の値禁止 / magic number禁止**
 
 ### 禁止

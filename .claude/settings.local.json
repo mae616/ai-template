@@ -11,6 +11,8 @@
             "Bash(bun :*)",
             "Bash(pnpm :*)",
             "Bash(vitest :*)",
+            "Bash(rsync :*)",
+            "Bash(curl :*)",
 
             "Bash(git status)",
             "Bash(git diff :*)",
@@ -32,6 +34,13 @@
             "Bash(cat :*)",
 
             "WebFetch(domain:docs.anthropic.com)",
+            "WebFetch(domain:help.figma.com)",
+            "WebFetch(domain:figma.com)",
+            "WebFetch(domain:modelcontextprotocol.io)",
+            "WebFetch(domain:cursor.com)",
+            "WebFetch(domain:containers.dev)",
+            "WebFetch(domain:mise.jdx.dev)",
+            "WebFetch(domain:podman.io)",
 
             "WebFetch(domain:astro.build)",
             "WebFetch(domain:docs.astro.build)",

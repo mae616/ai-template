@@ -1,19 +1,19 @@
 ---
 name: svelte
 category: tech
-description: Svelte/SvelteKitプロジェクトにおいて、UI=状態の直接的な反映という思想を軸に、コンパイル時最適化・状態管理・レンダリング・配信量の設計を整理する。/doc/rdd.md に「技術スタック Svelte」または「技術スタック SvelteKit」がある場合や、Svelteの設計・パフォーマンス・構造理解の相談で使う。
+description: Svelte/SvelteKitプロジェクトにおいて、UI=状態の直接的な反映という思想を軸に、コンパイル時最適化・状態管理・レンダリング・配信量の設計を整理する。doc/rdd.md に「技術スタック Svelte」または「技術スタック SvelteKit」がある場合や、Svelteの設計・パフォーマンス・構造理解の相談で使う。
 ---
 
 # Svelte UI Compiler Skill
 
 ## 公式情報
-- Svelte: https://svelte.dev
-- Svelte Docs: https://svelte.dev/docs
-- SvelteKit: https://kit.svelte.dev
-- SvelteKit Docs: https://kit.svelte.dev/docs
+- [Svelte](https://svelte.dev)
+- [Svelte Docs](https://svelte.dev/docs)
+- [SvelteKit](https://kit.svelte.dev)
+- [SvelteKit Docs](https://kit.svelte.dev/docs)
 
 ## 発火条件（リポジトリ判定）
-- `/doc/rdd.md` に `技術スタック Svelte` または `技術スタック SvelteKit` が記載されている場合、このSkillを優先適用する。
+- `doc/rdd.md` に `技術スタック Svelte` または `技術スタック SvelteKit` が記載されている場合、このSkillを優先適用する。
 - 記載がなくても、依頼内容が Svelte / SvelteKit / コンパイラ最適化 / 軽量UI / 状態管理 / 配信量削減 に関係する場合は適用する。
 
 ## このSkillの基本方針（整理軸）
@@ -21,7 +21,7 @@ description: Svelte/SvelteKitプロジェクトにおいて、UI=状態の直接
 - 実行モデル: 仮想DOMではなく、DOM操作をコンパイル時に決定する。
 - 状態管理: シンプルな state とリアクティビティを優先し、抽象を増やしすぎない。
 - 配信量: ランタイムを極限まで薄くし、JS送信量を減らす。
-- 参考: https://svelte.dev / https://kit.svelte.dev
+- 参考: [Svelte](https://svelte.dev) / [SvelteKit](https://kit.svelte.dev)
 
 ## 思想（判断ルール）
 1. UIは state の結果であり、DOM更新は機械に任せる。

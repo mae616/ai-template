@@ -1,17 +1,17 @@
 ---
 name: astro
 category: tech
-description: Astroプロジェクトの設計・実装・レビューを、HTML中心/Islands/JS最小化の思想で整理する。/doc/rdd.md に「技術スタック Astro」があるリポジトリ、またはAstro/Islands/SSG/SSR/パフォーマンス最適化の相談で使う。
+description: Astroプロジェクトの設計・実装・レビューを、HTML中心/Islands/JS最小化の思想で整理する。doc/rdd.md に「技術スタック Astro」があるリポジトリ、またはAstro/Islands/SSG/SSR/パフォーマンス最適化の相談で使う。
 ---
 
 # Astro Web-First Skill
 
 ## 参照（公式）
-- Astro公式: https://astro.build
-- Docs: https://docs.astro.build
+- [Astro公式](https://astro.build)
+- [Docs](https://docs.astro.build)
 
 ## 発火条件（リポジトリ判定）
-- まず `/doc/rdd.md` を確認し、そこに `技術スタック Astro` が書かれている場合は、このSkillの方針をデフォルト採用する。
+- まず `doc/rdd.md` を確認し、そこに `技術スタック Astro` が書かれている場合は、このSkillの方針をデフォルト採用する。
 - 書かれていない場合でも、ユーザーの依頼がAstro/Islands/SSG/SSR/JS削減/速度改善に該当するなら適用する。
 
 ## このSkillの基本方針
@@ -19,7 +19,7 @@ description: Astroプロジェクトの設計・実装・レビューを、HTML�
 - レンダリング: まずSSGを第一候補。更新頻度が高い箇所のみSSR/オンデマンドを検討。
 - Islands設計: 動的UIは小さく分割し、責務を限定する。島の肥大化は避ける。
 - パフォーマンス: 「送らない最適化」を優先（クライアントJS、画像、フォント、3rd party）。
-- 参考: Astro公式 https://astro.build / Docs https://docs.astro.build
+- 参考: [Astro公式](https://astro.build) / [Docs](https://docs.astro.build)
 
 ## 思想（判断ルール）
 1. HTMLを先に完成させる（Webはまずドキュメント）。

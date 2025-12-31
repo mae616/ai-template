@@ -26,7 +26,7 @@
    - 既存テストとカバレッジ対象を検出（あればリンク）
 
 2. **SSOT整合チェック**
-   - `doc/rdd.md`, `doc/architecture.md`（＋デザインがあれば `doc/design/*`）と差分比較
+   - `doc/rdd.md`, `doc/Architecture.md`（＋デザインがあれば `doc/design/*`）と差分比較
    - 不一致/未記載は **差分提案** として記録
    - 技術スタック逸脱が必要な場合は **変更要求（ADR-lite）** を起票（テンプレは下記）
 

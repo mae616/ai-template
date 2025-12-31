@@ -8,7 +8,7 @@ AIエージェントがスクラムで段階的な最小限の開発を繰り返
 
 ## 共通前提（参照）
 - 口調・出力規約・調査方針・TDD・Docコメント等は `CLAUDE.md` に従う。
-- `/doc/rdd.md` を読み、該当する `.claude/skills/*` を適用して判断軸を揃える（例: `architecture-expert` / `developer-specialist` / `security-expert`）。
+- `doc/rdd.md` を読み、該当する `.claude/skills/*` を適用して判断軸を揃える（例: `architecture-expert` / `developer-specialist` / `security-expert`）。
 - 詳細運用（サンプル運用/依存評価補助/ADR-lite）は `doc/ai_guidelines.md` を参照。
 
 ---
@@ -51,7 +51,7 @@ AIエージェントがスクラムで段階的な最小限の開発を繰り返
   - 検証ゲート:  
         pnpm lint --fix && pnpm type-check  
         pnpm test
-  - 参照: doc/rdd.md §..., doc/architecture.md §..., path/to/code
+  - 参照: doc/rdd.md §..., doc/Architecture.md §..., path/to/code
   - 依存: ...
   - 決定理由: ...
 
