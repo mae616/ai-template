@@ -240,19 +240,61 @@ echo "📋 Figma（Dev Mode）MCPサーバーの接続設定を準備中..."
 FIGMA_MCP_URL="${FIGMA_MCP_URL:-http://host.docker.internal:3845/mcp}"
 CURSOR_MCP_FILE="/root/.cursor/mcp.json"
 if [ -d "/root/.cursor" ]; then
-    if [ -f "$CURSOR_MCP_FILE" ]; then
-        echo "ℹ️  既に $CURSOR_MCP_FILE が存在するため上書きしません（必要なら figma サーバー定義を手動で追記してください）"
+    # Cursor MCP 設定は既存ファイルがあるケースが多いので、
+    # 他サーバー設定を壊さずに mcpServers.figma.url だけ追加/更新する（冪等）
+    # - もし自動更新したくない場合は SKIP_CURSOR_MCP_FIGMA=1 を設定する
+    if [ "${SKIP_CURSOR_MCP_FIGMA:-0}" = "1" ]; then
+        echo "ℹ️  SKIP_CURSOR_MCP_FIGMA=1 のため Cursor 用 Figma MCP 設定をスキップします"
     else
-        cat > "$CURSOR_MCP_FILE" << EOF
-{
-  "mcpServers": {
-    "figma": {
-      "url": "$FIGMA_MCP_URL"
-    }
-  }
-}
-EOF
-        echo "✅ Cursor用Figma MCP設定を書き込みました: $CURSOR_MCP_FILE"
+        echo "📋 Cursor 用 Figma MCP 設定を適用します: ${FIGMA_MCP_URL}"
+        python - << 'PY'
+import json
+import os
+import shutil
+from datetime import datetime
+
+cursor_mcp_file = os.environ.get("CURSOR_MCP_FILE", "/root/.cursor/mcp.json")
+figma_mcp_url = os.environ.get("FIGMA_MCP_URL", "http://host.docker.internal:3845/mcp")
+
+def load_json_or_none(path: str):
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return None
+    except Exception:
+        return "__INVALID__"
+
+data = load_json_or_none(cursor_mcp_file)
+if data == "__INVALID__":
+    ts = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+    backup_path = f"{cursor_mcp_file}.bak.{ts}"
+    shutil.copyfile(cursor_mcp_file, backup_path)
+    data = None
+    print(f"⚠️  Cursor MCP 設定がJSONとして読めなかったためバックアップしました: {backup_path}")
+
+if not isinstance(data, dict):
+    data = {}
+
+mcp_servers = data.get("mcpServers")
+if not isinstance(mcp_servers, dict):
+    mcp_servers = {}
+    data["mcpServers"] = mcp_servers
+
+figma_entry = mcp_servers.get("figma")
+if not isinstance(figma_entry, dict):
+    figma_entry = {}
+    mcp_servers["figma"] = figma_entry
+
+figma_entry["url"] = figma_mcp_url
+
+os.makedirs(os.path.dirname(cursor_mcp_file), exist_ok=True)
+with open(cursor_mcp_file, "w", encoding="utf-8") as f:
+    json.dump(data, f, ensure_ascii=False, indent=2)
+    f.write("\n")
+
+print(f"✅ Cursor 用 MCP 設定を更新しました: {cursor_mcp_file}")
+PY
     fi
 else
     echo "⚠️  /root/.cursor が無いためスキップします"
@@ -266,6 +308,19 @@ if command -v claude >/dev/null 2>&1; then
         echo "✅ Serena MCP は既に登録済みです（/root/.claude/mcp-config.json）"
     else
         claude mcp add serena -- uvx --from git+https://github.com/oraios/serena serena start-mcp-server --context ide-assistant --project "$(pwd)"
+    fi
+
+    # Figma（Dev Mode）MCP を Claude Code に登録する（冪等）
+    # - デフォルトはホスト側（Figma Desktop）のMCPを利用する想定
+    # - すでに登録済みならスキップする
+    # - もし自動登録したくない場合は SKIP_CLAUDE_MCP_FIGMA=1 を設定する
+    if [ "${SKIP_CLAUDE_MCP_FIGMA:-0}" = "1" ]; then
+        echo "ℹ️  SKIP_CLAUDE_MCP_FIGMA=1 のため Figma MCP の登録をスキップします"
+    elif (claude mcp list 2>/dev/null || true) | grep -qE '(^|\\s)figma(\\s|$)'; then
+        echo "✅ Figma MCP は既に登録済みです（claude mcp list）"
+    else
+        echo "📋 Figma MCP を Claude Code に登録します: ${FIGMA_MCP_URL}"
+        claude mcp add --transport http figma "${FIGMA_MCP_URL}"
     fi
 else
     echo "⚠️  claude コマンドが見つからないため、Serena MCP の登録をスキップします"

@@ -116,6 +116,10 @@ Serena AIはAPIキーなしで動作します。特別な設定は不要です�
 - **8001**: 追加開発サーバー用
 - **8888**: Jupyter Notebook用
 
+補足（Figma MCP）:
+- **Figma Desktop（ホスト側）の Dev Mode MCP** にコンテナ内の Claude Code から接続する場合、`forwardPorts` は原則不要です（用途が「コンテナ→ホスト」接続のため）。
+- 接続先は `http://host.docker.internal:3845/mcp` を想定し、`.devcontainer/setup.sh` で `FIGMA_MCP_URL` として扱います（必要なら環境変数で上書き可能）。
+
 ## 🔍 トラブルシューティング
 
 ### 拡張機能が同期されない場合
