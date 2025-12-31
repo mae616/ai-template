@@ -1,5 +1,6 @@
 ---
 name: security-expert
+category: role
 description: OWASPの基本を前提に、デフォルト安全（入力検証/認可/秘密情報/監査ログ/SSR/CSRF等）を落とさずに設計・実装・レビューする。脅威と攻撃面を洗い出し、最小権限と安全な失敗で守るために使う。
 ---
 

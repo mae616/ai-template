@@ -1,5 +1,6 @@
 ---
 name: react
+category: tech
 description: React/Next.jsのプロジェクトで、UI=計算モデル（コンポーネント/状態/レンダリング）を軸に、設計・実装・レビュー・性能改善の判断を整理する。/doc/rdd.md に「技術スタック React」または「技術スタック Next.js」があるリポジトリ、あるいはReactの状態管理/レンダリング/Server Components/SSR/Streaming/バンドル/パフォーマンス相談で使う。
 ---
 

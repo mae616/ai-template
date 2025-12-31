@@ -3,6 +3,13 @@
 このページは `.claude/skills/*/SKILL.md` の一覧です。  
 プロジェクトの事実は `doc/rdd.md`（先頭のAI用事実ブロック）に書き、適用すべきskillを選びます。
 
+## 命名と分類（重要）
+このリポジトリのskillは、**ディレクトリ名（slug）**で識別する。  
+「ロール（観点）」なのか「技術（スタック）」なのかは、各 `SKILL.md` のYAMLにある `category` で区別する。
+
+- `category: role` … 役職/専門ロール（観点）を表すskill
+- `category: tech` … 技術スタック（React/Astroなど）に紐づくskill
+
 ## 事業
 - `persona-designer`: ペルソナ/想定ユーザー像の設計（※会話口調のペルソナとは別）
 - `biz-researcher`: 市場/競合/仮説検証のための調査整理
