@@ -17,9 +17,9 @@ Claude Code, Cursor などのコード支援AIによるアプリ開発のプロ�
 このプロジェクトは少し変わっていて、平たく言うと、私(mae616)のエンジニアリングする際の思考や手順をAIで再現したものです。
 
 ## 🚀 使用AI支援開発環境
-* Claude Code<br>https://github.com/anthropics/claude-code
-* Serena AI Coding Agent<br>https://github.com/oraios/serena
-* Cursor<br>https://cursor.com/
+- [Claude Code](https://github.com/anthropics/claude-code)
+- [Serena AI Coding Agent](https://github.com/oraios/serena)
+- [Cursor](https://cursor.com/)
 
 ## 🛠️ 開発環境
 
@@ -34,7 +34,7 @@ Claude Code, Cursor などのコード支援AIによるアプリ開発のプロ�
 - **3000**: 開発サーバー用
 - **5173**: Vite開発サーバー用
 - **8000**: Serena MCPサーバー用
-- **8888**: 8000ポートへのマッピング（追加開発サーバー用）
+- **8888**: ポートフォワード用（用途はプロジェクト次第）
 
 ## 🌟 対応技術スタック
 
@@ -86,11 +86,12 @@ scripts/apply_template.sh --target /abs/path/to/your-project --safe
 補足:
 - 上書き前に `your-project/.ai-template-backup/<timestamp>/` へバックアップします（`--no-backup` で無効化可能）
 - `--safe`（デフォルト）は既存ファイルを上書きしません。テンプレ側の更新を反映したい場合は `--force`、同期して削除も伴う場合は `--sync` を使用します。
-- `doc/rdd.md` と `ai-task/` は原則 **プロジェクト固有** です。テンプレ更新で上書きしたい場合のみ `--overwrite-rdd` / `--overwrite-ai-task` を明示してください。
+- [doc/rdd.md](doc/rdd.md) と `ai-task/` は原則 **プロジェクト固有** です。テンプレ更新で上書きしたい場合のみ `--overwrite-rdd` / `--overwrite-ai-task` を明示してください。
 
-詳細な運用方法は `doc/manual/ai_template_operation.md` を参照してください。
-skills一覧（索引）は `doc/manual/skills_catalog.md` を参照してください。
-コマンド一覧（索引）は `doc/manual/commands_catalog.md` を参照してください。
+詳細な運用方法は [doc/manual/ai_template_operation.md](doc/manual/ai_template_operation.md) を参照してください。
+skills一覧（索引）は [doc/manual/skills_catalog.md](doc/manual/skills_catalog.md) を参照してください。
+コマンド一覧（索引）は [doc/manual/commands_catalog.md](doc/manual/commands_catalog.md) を参照してください。
+ドキュメント全体の入口は [doc/index.md](doc/index.md) です。
 
 #### 開発プロジェクトの作成
 ボイラーテンプレートなどでReactなどの開発プロジェクトを作成してください。
@@ -135,7 +136,7 @@ pnpm install
 0. **design-mock（会話起点のルート）**  
     - 会話から **1枚ペラの静的HTML** を生成  
     - 併せてSSOT（`doc/design/design-tokens.json` / `doc/design/components.json` / `doc/design/design_context.json`）も生成して共通ルートへ合流  
-    - 技術スタックは `doc/rdd.md` をSSOTとして扱う  
+    - 技術スタックは [doc/rdd.md](doc/rdd.md) をSSOTとして扱う  
     - 出力: `doc/design/html/mock.html` 等  
 
 1. **design-ssot**  
@@ -181,8 +182,8 @@ pnpm install
 #### フロー概要
 
 1. **要件定義作成**  
-- 新規: `doc/rdd.md` に記述  
-- 改修: `doc/rdd.md` に追記（差分で更新）  
+- 新規: [doc/rdd.md](doc/rdd.md) に記述  
+- 改修: [doc/rdd.md](doc/rdd.md) に追記（差分で更新）  
 
 2. **TASK-LIST生成**  
 ```bash
@@ -224,7 +225,7 @@ pnpm install
 ```bash
 /bug-new podmanが起動しない
 ```
-- `ai-task/bug/バグファイル名.md` を生成  
+- [ai-task/bug/バグファイル名.md](ai-task/bug/README.md) を生成（実体は `ai-task/bug/` 配下に作成）  
 
 2. **調査（bug-investigate）**  
 ```bash
@@ -258,7 +259,7 @@ pnpm install
 ```bash
 /manual-gen supabaseの設定手順書
 ```
-- `doc/manual/手順書名.md` が生成される  
+- `doc/manual/手順書名.md` が生成される（例：`doc/manual/` 配下。索引は [doc/manual/](doc/manual/)）  
 
 3. **マニュアルガイド（manual-guide）**  
 ```bash
@@ -271,9 +272,9 @@ pnpm install
 このプロジェクトは、以下の主要ファイル以外のドキュメントを  
 **AIによるリバースエンジニアリングで生成**することを想定しています。  
 
-- `doc/rdd.md`  
-- `doc/Architecture.md`  
-- `doc/design/*`  
+- [doc/rdd.md](doc/rdd.md)  
+- [doc/Architecture.md](doc/Architecture.md)  
+- [doc/design/](doc/design/)  
 
 #### 使用例
 ```bash
@@ -284,13 +285,11 @@ pnpm install
 
 ```
 ai-template/
-├── .ai-instructions/          # AI指示ファイル⭐
 ├── .claude/                   # Claude Code設定
 │   ├── commands/              # Claude Codeのコマンド⭐
 │   └── settings.local.json    # AIのコマンド権限
 ├── .devcontainer/             # DevContainer設定
 ├── ai-task/                   # AIタスク管理
-│   ├── templates/             # タスクテンプレート
 │   ├── task/                  # 開発タスク（/task-* の出力先）
 │   └── bug/                   # バグ対応ログ（/bug-* の出力先）
 ├── doc/                       # ドキュメント
@@ -308,8 +307,8 @@ ai-template/
 ```
 
 ### ⭐ このテンプレートの本質
-- **`.ai-instructions/`** → AIに与える「思考や行動の設計書」  
 - **`.claude/commands/`** → 実際の「作業フローを動かすコマンド群」  
+ - **[CLAUDE.md](CLAUDE.md) / [doc/rdd.md](doc/rdd.md) / [.claude/skills/](.claude/skills/) / [doc/ai_guidelines.md](doc/ai_guidelines.md)** → 判断軸（SSOT/運用）
 
 この2つが中核であり、他の構成要素はそれを支える仕組みになっています。
 
@@ -347,8 +346,11 @@ Feedback only OSS
 - [Serena GitHub](https://github.com/oraios/serena)
 - [Serena Documentation](https://github.com/oraios/serena#readme)
 - [MCP Protocol](https://modelcontextprotocol.io/)
-- [Cursor IDE](https://cursor.sh/)
+- [Figma MCPサーバーのガイド（公式）](https://help.figma.com/hc/ja/articles/32132100833559-Figma-MCP%E3%82%B5%E3%83%BC%E3%83%90%E3%83%BC%E3%81%AE%E3%82%AC%E3%82%A4%E3%83%89)
+- [Figma MCPカタログ（公式）](https://www.figma.com/ja-jp/mcp-catalog/)
+- [Cursor IDE](https://cursor.com/)
 - [mise](https://mise.jdx.dev/)
+- [uv](https://github.com/astral-sh/uv)
 - [Podman](https://podman.io/)
 - [DevContainer](https://containers.dev/)
 
@@ -369,8 +371,10 @@ Feedback only OSS
 
 このプロジェクトは以下のプロジェクトの恩恵を受けています：
 
+- [Claude Code](https://github.com/anthropics/claude-code) - コード支援AI（CLI/拡張）
 - [Serena AI](https://github.com/oraios/serena) - AI支援開発エージェント
-- [Cursor IDE](https://cursor.sh/) - AI統合開発環境
+- [Cursor IDE](https://cursor.com/) - AI統合開発環境
+- [Figma MCPサーバー（公式ガイド）](https://help.figma.com/hc/ja/articles/32132100833559-Figma-MCP%E3%82%B5%E3%83%BC%E3%83%90%E3%83%BC%E3%81%AE%E3%82%AC%E3%82%A4%E3%83%89) - デザイン情報連携（Dev Mode）
 - [DevContainer](https://containers.dev/) - コンテナ化された開発環境
 - [Podman](https://podman.io/) - コンテナエンジン
 - [mise](https://mise.jdx.dev/) - ツール管理

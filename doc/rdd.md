@@ -128,7 +128,7 @@ paginate: true
 
 # 📑 参照
 ## コンテキスト（AI用）
-- `doc/architecture.md`
+- `doc/Architecture.md`
 - `doc/design/`
 - 外部仕様書
 - APIリンク
