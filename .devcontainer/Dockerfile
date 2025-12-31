@@ -8,6 +8,8 @@ ENV TZ=Asia/Tokyo
 RUN apt-get update && apt-get install -y \
     curl \
     git \
+    gnupg \
+    xz-utils \
     build-essential \
     ca-certificates \
     python3 \

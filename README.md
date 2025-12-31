@@ -101,6 +101,8 @@ skills一覧（索引）は [doc/manual/skills_catalog.md](doc/manual/skills_cat
 #### DevContainerの起動
 開発プロジェクトをCursor IDEで開き、左下にメッセージが表示されたら、DevContainerの起動ボタンを押してください。
 
+注意: DevContainerは利便性のため **ホスト側の設定ディレクトリ（例: `~/.anthropic` / `~/.claude` / `~/.cursor`）をコンテナへマウント**します。不要な場合は任意で外せます（詳細は [.devcontainer/README.md](.devcontainer/README.md) を参照）。
+
 #### 基本的なセットアップ
 ```bash
 # 環境の確認

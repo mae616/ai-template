@@ -1,7 +1,8 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 echo "🚀 Serena AI Coding Agent DevContainer セットアップを開始します..."
+echo "ℹ️  setup.sh version: 2026-01-01"
 
 # 冪等化のための共通関数
 ensure_bashrc_block() {
@@ -69,10 +70,99 @@ echo "🔧 miseの環境を設定中..."
 # mise activate はシェルへevalして効かせるのが前提（非対話でもこのプロセス内に適用する）
 eval "$(mise activate bash 2>/dev/null || true)"
 
+# mise はセキュリティのため、未信頼の設定ファイル（例: /workspace/.mise.toml）を無視/確認する。
+# DevContainerの初回起動で止まりやすいので、非対話で信頼する（失敗しても後続で再プロンプトされるだけなので致命にはしない）。
+echo "🔐 mise設定ファイルの信頼状態を確認中..."
+# `mise trust` はバージョン差があり得るので、複数パターンを試す（失敗しても後続でプロンプトが出るだけ）
+if mise trust -a >/dev/null 2>&1; then
+    echo "✅ mise trust -a: OK"
+elif command -v yes >/dev/null 2>&1; then
+    # `mise trust` のフラグ差異に依存しないために yes パイプを使う
+    yes | mise trust >/dev/null 2>&1 || true
+fi
+
+ensure_gnupg_home() {
+    # mise が起動する gpg と同じ鍵束を使えるよう、GNUPGHOME を明示する（将来の挙動差にも強い）
+    export GNUPGHOME="${GNUPGHOME:-/root/.gnupg}"
+    mkdir -p "$GNUPGHOME"
+    chmod 700 "$GNUPGHOME"
+}
+
+import_gpg_pubkey_from_keyserver() {
+    local key_fpr="$1"
+    ensure_gnupg_home
+
+    if ! command -v gpg >/dev/null 2>&1; then
+        echo "❌ gpg が見つかりません。Dockerfile側で gnupg を導入してください" >&2
+        exit 1
+    fi
+    if ! command -v curl >/dev/null 2>&1; then
+        echo "❌ curl が見つかりません（鍵取得に必要）" >&2
+        exit 1
+    fi
+
+    if gpg --batch --list-keys "$key_fpr" >/dev/null 2>&1; then
+        return 0
+    fi
+
+    echo "🔑 GPG公開鍵をインポート中... (${key_fpr})"
+    # keyserver を gpg で直接叩くと失敗する環境があるため、HTTPSで取得して import する
+    curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x${key_fpr}" | gpg --batch --import >/dev/null 2>&1 || {
+        echo "❌ GPG公開鍵の取得/インポートに失敗しました（ネットワーク/DNS/鍵サーバー問題の可能性）" >&2
+        exit 1
+    }
+}
+
+extract_gpg_key_fpr_from_mise_log() {
+    # mise/node の失敗ログ例:
+    #   gpg:                using EDDSA key 86C8D7...
+    # ここから 40桁hex指紋を抜く（将来別キーに変わっても追従）
+    sed -nE 's/.*using (EDDSA|RSA|DSA|ECDSA) key ([0-9A-F]{16,40}).*/\\2/p' "$1" | head -n 1
+}
+
+mise_install_with_gpg_key_retry() {
+    ensure_gnupg_home
+
+    local max_attempts=3
+    local attempt=1
+    local log_file
+    log_file="$(mktemp)"
+
+    while [ "$attempt" -le "$max_attempts" ]; do
+        : > "$log_file"
+        echo "📦 mise install を実行中... (attempt ${attempt}/${max_attempts})"
+        if mise install 2>&1 | tee "$log_file"; then
+            rm -f "$log_file"
+            return 0
+        fi
+
+        local key_fpr
+        key_fpr="$(extract_gpg_key_fpr_from_mise_log "$log_file" || true)"
+        if [ -n "${key_fpr:-}" ]; then
+            echo "🧩 mise のログから必要なGPG鍵を検出: ${key_fpr}"
+            import_gpg_pubkey_from_keyserver "$key_fpr"
+            attempt=$((attempt + 1))
+            continue
+        fi
+
+        echo "❌ mise install が失敗しました（GPG鍵指紋をログから抽出できませんでした）" >&2
+        echo "---- mise log (tail) ----" >&2
+        tail -n 60 "$log_file" >&2 || true
+        rm -f "$log_file"
+        return 1
+    done
+
+    echo "❌ mise install が繰り返し失敗しました（GPG鍵の自動導入後も解決しない）" >&2
+    echo "---- mise log (tail) ----" >&2
+    tail -n 60 "$log_file" >&2 || true
+    rm -f "$log_file"
+    return 1
+}
+
 # .mise.tomlに基づいてツールをインストール（メモリ使用量を最適化）
 echo "🔧 .mise.tomlに基づいてツールをインストール中..."
 if [ -f ".mise.toml" ]; then
-    mise install
+    mise_install_with_gpg_key_retry
     # メモリ使用量を最適化するための設定（一般開発用途に適した1GB）
     export NODE_OPTIONS="--max-old-space-size=1024"
     export pnpm_store_dir="/tmp/.pnpm-store"
@@ -85,8 +175,8 @@ else
     export pnpm_store_dir="/tmp/.pnpm-store"
     export pnpm_cache_dir="/tmp/.pnpm-cache"
     
-    mise install node@lts
-    mise install pnpm@latest
+    # 署名鍵問題が出ても自動で追従できるよう、installはまとめて扱う
+    mise install node@lts pnpm@latest
     mise use node@lts
     mise use pnpm@latest
 fi

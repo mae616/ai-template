@@ -74,6 +74,20 @@ Dev Containers: Reopen in Container
 - **設定ディレクトリ**: `/root/.cursor`（ホストからマウント）
 - **Cursor Rules**: `/root/.cursorrules`（ホストからマウント）
 
+## 🔐 セキュリティ注意（ホスト設定のマウントは任意）
+
+このテンプレートは利便性のため、`.devcontainer/devcontainer.json` の `mounts` で **ホスト（ローカル）の設定ディレクトリ**をコンテナへバインドしています。
+
+- **マウント対象例**:
+  - `~/.claude` → `/root/.claude`
+  - `~/.cursor` → `/root/.cursor`
+  - `~/.anthropic` → `/root/.anthropic`
+  - `~/.cursorrules` → `/root/.cursorrules`
+
+注意:
+- **これは任意**です。社内規定/セキュリティ方針により「ホストの設定（場合によっては認証情報を含む）をコンテナへ渡したくない」場合は、`mounts` から該当行を削除（またはコメントアウト）してください。
+- **APIキーやトークン等のSecretsはリポジトリへコミットしない**でください（`.env` 管理・Git管理外が前提）。
+
 ### 環境変数の設定
 Serena AIはAPIキーなしで動作します。特別な設定は不要です。
 
