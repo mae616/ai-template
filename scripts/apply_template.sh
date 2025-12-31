@@ -1,0 +1,138 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ai-template を任意の開発リポジトリへ反映するブートストラップ。
+# - 既存ファイルを破壊しないために、上書き前にバックアップを作成する
+# - まず dry-run を推奨する
+#
+# 使い方:
+#   scripts/apply_template.sh --target /path/to/project --dry-run
+#   scripts/apply_template.sh --target /path/to/project
+#
+# 想定:
+# - このスクリプトは ai-template リポジトリ内から実行する
+# - 反映対象は「AI開発支援用のファイル群」に限定する
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+TEMPLATE_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
+
+TARGET_DIR=""
+DRY_RUN="false"
+BACKUP="true"
+
+usage() {
+  cat <<'USAGE'
+使い方:
+  scripts/apply_template.sh --target /abs/path/to/project [--dry-run] [--no-backup]
+
+オプション:
+  --target <dir>   反映先（必須）
+  --dry-run        実際には書き込まず、差分だけ表示
+  --no-backup      上書き前バックアップを作成しない（非推奨）
+  -h, --help       ヘルプ
+USAGE
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --target)
+      TARGET_DIR="${2:-}"
+      shift 2
+      ;;
+    --dry-run)
+      DRY_RUN="true"
+      shift
+      ;;
+    --no-backup)
+      BACKUP="false"
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "ERROR: 不明な引数: $1" >&2
+      usage >&2
+      exit 2
+      ;;
+  esac
+done
+
+if [ -z "$TARGET_DIR" ]; then
+  echo "ERROR: --target は必須です" >&2
+  usage >&2
+  exit 2
+fi
+
+if [ "${TARGET_DIR:0:1}" != "/" ]; then
+  echo "ERROR: --target は絶対パスで指定してください: $TARGET_DIR" >&2
+  exit 2
+fi
+
+if [ ! -d "$TARGET_DIR" ]; then
+  echo "ERROR: --target が存在しません: $TARGET_DIR" >&2
+  exit 2
+fi
+
+need() { command -v "$1" >/dev/null 2>&1 || { echo "ERROR: '$1' が必要です" >&2; exit 2; }; }
+need rsync
+need date
+
+# 反映対象（AIテンプレとして必要最小）
+INCLUDES=(
+  "CLAUDE.md"
+  ".claude/"
+  "doc/rdd.md"
+  "doc/ai_guidelines.md"
+  "ai-task/"
+)
+
+timestamp="$(date +%Y%m%d-%H%M%S)"
+backup_dir="$TARGET_DIR/.ai-template-backup/$timestamp"
+
+if [ "$BACKUP" = "true" ] && [ "$DRY_RUN" = "false" ]; then
+  mkdir -p "$backup_dir"
+  for p in "${INCLUDES[@]}"; do
+    src="$TARGET_DIR/$p"
+    if [ -e "$src" ]; then
+      mkdir -p "$backup_dir/$(dirname -- "$p")"
+      rsync -a --delete-excluded -- "$src" "$backup_dir/$p" >/dev/null 2>&1 || true
+    fi
+  done
+  echo "バックアップ作成: $backup_dir"
+fi
+
+RSYNC_FLAGS=(-a --delete)
+if [ "$DRY_RUN" = "true" ]; then
+  RSYNC_FLAGS+=("--dry-run")
+fi
+
+echo "テンプレート: $TEMPLATE_ROOT"
+echo "反映先:       $TARGET_DIR"
+echo "対象:         ${INCLUDES[*]}"
+echo
+
+for p in "${INCLUDES[@]}"; do
+  rsync "${RSYNC_FLAGS[@]}" \
+    --exclude ".git/" \
+    --exclude "node_modules/" \
+    --exclude "dist/" \
+    --exclude "build/" \
+    --exclude ".next/" \
+    --exclude "out/" \
+    --exclude "coverage/" \
+    --exclude ".venv/" \
+    --exclude "vendor/" \
+    --exclude ".cache/" \
+    --exclude "target/" \
+    -- "$TEMPLATE_ROOT/$p" "$TARGET_DIR/$p"
+done
+
+echo
+if [ "$DRY_RUN" = "true" ]; then
+  echo "dry-run 完了（実際の反映は行っていません）"
+else
+  echo "反映完了"
+fi
+

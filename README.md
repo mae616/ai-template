@@ -71,27 +71,24 @@ Claude Code, Cursor などのコード支援AIによるアプリ開発のプロ�
 ※ `~/` に `clone` した例でこの先のコマンドを記述します。
 
 #### shellコマンドの設定
-`~/.zshrc`または`~/.bashrc`に以下の関数を追加してください。
+このテンプレートを各開発リポジトリへ反映するために、ブートストラップスクリプトを用意しています。
+
+1) `ai-template` を任意の場所に `git clone`  
+2) 反映したい開発リポジトリの絶対パスを指定して実行
+
+例（まずはdry-run推奨）:
+```bash
+cd /path/to/ai-template
+scripts/apply_template.sh --target /abs/path/to/your-project --dry-run
+scripts/apply_template.sh --target /abs/path/to/your-project
 ```
-# ai-template
-apply_template() {
-    rsync -av \
-      --exclude '.git' \
-      --exclude '.venv' \
-      --exclude 'LICENSE' \
-      --exclude 'CODE_OF_CONDUCT.md' \
-      --exclude 'CONTRIBUTING.md' \
-      --exclude 'SECURITY.md' \
-      --exclude 'MAINTAINERS.md' \
-      --exclude 'README.md' \
-      ~/ai-template/ ./ 
-}
-```
-`source ~/.zshrc`または`source ~/.bashrc` を実行してください。
+
+補足:
+- 上書き前に `your-project/.ai-template-backup/<timestamp>/` へバックアップします（`--no-backup` で無効化可能）
 
 #### 開発プロジェクトの作成
 ボイラーテンプレートなどでReactなどの開発プロジェクトを作成してください。
-そのプロジェクト内で `apply_template` を実行してください。
+その後、`scripts/apply_template.sh` でテンプレートを反映してください。
 
 #### DevContainerの起動
 開発プロジェクトをCursor IDEで開き、左下にメッセージが表示されたら、DevContainerの起動ボタンを押してください。
@@ -120,7 +117,6 @@ pnpm install
 ```bash
 /read-instructions
 ```
-- `.ai-instructions/core-personality.md` の「## ペルソナ設定 🐱 !!重要!!」は好みに応じて編集してください。
 - このリポジトリを使用する場合、各コマンド実行時に `/clear` → `/read-instructions` が走ることを前提としています。
 
 
