@@ -4,6 +4,10 @@
 設計JSON（tokens/components/design_context）を参照し、**静的UI骨格**のみ生成。
 ロジック/状態/データ取得は入れない。ターゲットは **doc/rdd.md** の技術スタックを既定とし、引数で上書きする場合は **ADR-lite承認必須**。
 
+## 共通前提（参照）
+- 口調・出力規約・差分出力の方針は `CLAUDE.md` に従う。
+- `/doc/rdd.md` を読み、該当する `.claude/skills/*` を適用して判断軸を揃える（例: `tailwind` / `creative-coder`）。
+
 ### 入力
 - $TARGET（任意）: react | vue | svelte | swiftui | flutter | web-components | plain-html など
 

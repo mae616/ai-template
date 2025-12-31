@@ -6,6 +6,10 @@
 AIエージェントがスクラムで段階的な最小限の開発を繰り返せるよう、**スプリントごと**にタスクを編成してください。  
 本リストは **doc/rdd.md（要件・技術スタック・非機能要件）を唯一の根拠**として作成します。
 
+## 共通前提（参照）
+- 口調・出力規約・調査方針・TDD・Docコメント等は `CLAUDE.md` に従う。
+- `/doc/rdd.md` を読み、該当する `.claude/skills/*` を適用して判断軸を揃える（例: `architecture-expert` / `developer-specialist` / `security-expert`）。
+
 ---
 
 ## RDD遵守・技術スタックガードレール

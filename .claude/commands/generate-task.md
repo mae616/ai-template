@@ -6,6 +6,10 @@
 **必ず `doc/rdd.md` の技術スタック・制約に準拠**し、必要コンテキストを同梱してください。  
 逸脱が必要な場合は**変更要求(ADR-lite)** をTASK冒頭に挿入し、ユーザー承認後に着手します。
 
+## 共通前提（参照）
+- 口調・出力規約・調査方針・TDD・Docコメント等は `CLAUDE.md` に従う。
+- `/doc/rdd.md` を読み、該当する `.claude/skills/*` を適用して判断軸を揃える（例: `architecture-expert` / `developer-specialist` / `security-expert`）。
+
 
 最後にTASKを生成したものを タスクリストファイル ($ARGUMENTS) に進捗状況として追記してください。
 
