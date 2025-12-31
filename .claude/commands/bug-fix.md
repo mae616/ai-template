@@ -4,7 +4,7 @@
 
 ## 入力
 - `$ARGUMENTS` : 対象のトラブルシューティングログ（Markdown）ファイルのパス  
-  - 例: `ai-task/trouble-shooting/認証失敗.md`
+  - 例: `ai-task/bug/認証失敗.md`
 
 ---
 
@@ -23,6 +23,7 @@
 - **可逆性**：修正ごとにコミットを分離、**無効時は即 `git revert`**（または対応するロールバック手順）  
 - **恒久性**：一時ファイル削除やタイミング依存などの **暫定策は採用しない**  
 - **監査性**：変更差分・ログ・エビデンスを `ai-task/artifacts/` に保存し、ログ本文から参照
+  - 推奨配置: `ai-task/bug/artifacts/YYYYMMDD-HHmm/`
 
 ---
 
@@ -59,7 +60,7 @@
    - `## 自己評価`：今回の結果で更新
 
 5. **成果物の保存**  
-   - 変更差分、テストログ、計測スクショ等を `ai-task/artifacts/YYYYMMDD-HHmm/` に保存  
+   - 変更差分、テストログ、計測スクショ等を `ai-task/bug/artifacts/YYYYMMDD-HHmm/` に保存  
    - 本文から相対リンクを記載
 
 ---

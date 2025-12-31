@@ -1,8 +1,14 @@
 # [デザイン] 4. RDD準拠の技術スタックに結合するアダプタ層を生成。  
 
-## コマンド: /design-bind [$TARGET]
-`design/components.json` の variants を **型付きProps/属性** にマッピングし、選択スタックへ**結合（再利用可能UI）**するアダプタ層。  
+## コマンド: /design-assemble [$TARGET]
+`doc/design/components.json` の variants を **型付きProps/属性** にマッピングし、選択スタックへ**結合（再利用可能UI）**するアダプタ層。  
 既定は doc/rdd.md の技術スタック。引数で変更する際は **ADR-lite承認必須**。
+
+## 共通前提（参照）
+- 口調・出力規約・差分出力の方針は `CLAUDE.md` に従う。
+- `/doc/rdd.md` を読み、該当する `.claude/skills/*` を適用して判断軸を揃える（例: `ui-designer` / `tailwind` / `creative-coder`）。
+- 詳細運用（ADR-lite/差分/サンプル運用等）は `doc/ai_guidelines.md` を参照。
+- SSOT JSON のスキーマ（variants命名/props/slots）は `doc/design/ssot_schema.md` を参照。
 
 ### 入力
 - $TARGET（任意）: react | vue | svelte | swiftui | flutter | web-components | plain-html …

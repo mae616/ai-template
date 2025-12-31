@@ -38,8 +38,8 @@
 ---
 
 ## 出力先
-- `ai-task/trouble-shooting/{title}.md`  
-  - 例: `ai-task/trouble-shooting/認証失敗.md`
+- `ai-task/bug/{title}.md`  
+  - 例: `ai-task/bug/認証失敗.md`
 
 ---
 

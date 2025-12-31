@@ -1,4 +1,4 @@
-# リバースエンジニアリングによるドキュメント作成
+# [ドキュメント] リバースエンジニアリングによるドキュメント作成（俯瞰/引き継ぎ用）
 
 ## 入力: `$ARGUMENTS`（解析対象ディレクトリの相対パスを**半角スペース区切り**で複数可）
 例:
@@ -7,14 +7,15 @@
 ---
 
 ## 🎯 目的
-- コードから **要件/設計/API/UML/テスト** を**一括で自動生成/更新**し、納品品質を担保する
-- **SSOT（Single Source of Truth）** に基づき整合性を担保、**ブラックボックス化を防止**
-- 人間がレビュー/デバッグしやすい形で **判断理由・トレードオフ** を可視化
+- AIが作ったアプリを、人間が **俯瞰/詳細**で理解できるドキュメントを生成/更新する
+- 新しい人が既存アプリを理解でき、開発者が「AIが何をしたか/どう作ったか」を追える状態にする
+- **SSOT（Single Source of Truth）** を守りつつ、生成物を `doc/_generated/` に集約して迷子を防止する
 
 ---
 
 ## 前提/参照（SSOT）
-- **SSOT**: `doc/rdd.md`, `doc/architecture.md`, `doc/design/*`（存在すれば）
+- **SSOT**: `doc/rdd.md`, `doc/Architecture.md`, `doc/design/*`（存在すれば）
+- **生成物の出力先**: `doc/_generated/`（上書き更新してよい。履歴はGitで追跡）
 
 ---
 
@@ -31,7 +32,7 @@
 
 3. **逆生成する文書**（「出力ドキュメント」参照）を**最小差分で更新**
    - 重複は避け、**SSOTへ集約＋相互参照**
-   - 図はすべて **ASCIIアート**（Mermaidは使わない）
+   - 図は **Mermaid を優先**し、必要なら **ASCIIフォールバック**も併記する（描画できない環境への備え）
 
 4. **品質チェック & 自己評価** を末尾に付す
 
@@ -73,36 +74,28 @@
 ---
 
 ## 出力ドキュメント（最小差分更新）
-> すべて **Markdown**。図は **ASCIIアート**。重複は避け**相互参照**で結ぶ。
+> すべて **Markdown**。図は **Mermaid（＋必要ならASCIIフォールバック）**。重複は避け**相互参照**で結ぶ。
 
-### 1) `doc/rdd.md`（Marpスライド）
-- 変更があれば該当スライドに追記（ユースケース/機能要件/非機能/制約）
-- 「AI用コンテキスト」セクションにも箇条書きで反映
+### 1) SSOTへの反映（原則: 提案まで）
+- `doc/rdd.md` / `doc/Architecture.md` は人間が育てるSSOT。
+- 変更が必要そうな場合は **差分提案** として `doc/_generated/ssot_diff.md` に記録し、勝手に上書きしない。
 
-### 2) `doc/architecture.md`
-- 設計原則（SOLID/DIP など適用箇所）の反映
-- コンポーネント図（ASCII）、依存の方向、境界（API/DB/外部）
-- 設計上の判断/トレードオフと選択理由（1〜3行/項目）
+### 2) `doc/_generated/index.md`（入口）
+- 俯瞰/詳細へのリンク集（読む順番を含む）
 
-### 3) `doc/api-specification.md`
-- エンドポイント: メソッド/パス/認証/スキーマ/例/エラー
-- 仕様に対応するテスト参照（`doc/test_case/*` へのリンク）
+### 3) `doc/_generated/overview.md`（俯瞰）
+- システム概要、主要境界、依存方向、データフローの要約
 
-### 4) `doc/uml/*`（すべてASCII）
-- `class-diagram.md`（主要クラス/関係/SRP境界）
-- `system-overview.md`（外部連携/ランタイム/インフラ）
-- `data-flow.md`（主フローの入力→変換→出力）
-- `page-flow-diagram.md`（UIがある場合のみ）
+### 4) `doc/_generated/diagrams/`（図）
+- `system_overview.md`（Mermaid + ASCIIフォールバック）
+- `data_flow.md`（Mermaid + ASCIIフォールバック）
+- `class_overview.md`（必要なら）
 
-### 5) `doc/test_case/*`
-- 代表ユースケースについて **Given-When-Then**
-- 正常/境界/異常/性能（軽量）
-- 既存テストとの対応表（新旧マッピング）
+### 5) `doc/_generated/api.md`（APIがある場合のみ）
+- エンドポイント: メソッド/パス/認証/スキーマ/例/エラー（最小）
 
-### 6) `doc/design_document/*`
-- Googleデザインドキュメント準拠（Context/Goals/Actual/Alternatives/Cross-cutting）
-- 「今回の改修で追加/変更された判断」を短く追記
-- 全ての画面とAPIで、1画面または1エントリーポイントにたいして1デザインドキュメントのmdファイルを作成する。
+### 6) `doc/_generated/modules/`（詳細）
+- 主要モジュールの責務/入出力/例外/依存（必要な範囲だけ）
 
 ---
 
@@ -159,10 +152,10 @@
 
 ## コマンドの使い方（Claude Code）
     # 解析対象を複数ディレクトリで指定
-    /reverse-docs src backend/services packages/auth
+    /docs-reverse src backend/services packages/auth
 
     # 単一ディレクトリ
-    /reverse-docs src
+    /docs-reverse src
 
 > 解析範囲を絞りたい場合は、パス側でサブディレクトリに限定してください（プロンプト側の除外指定は持たない方針）。
 

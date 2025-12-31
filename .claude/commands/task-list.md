@@ -59,7 +59,7 @@ AIエージェントがスクラムで段階的な最小限の開発を繰り返
 
 ## 出力
 保存先:  
-`ai-task/{all-feature-name}/TASK-LIST-{feature-name}.md`
+`ai-task/task/{feature-name}/TASK-LIST-{feature-name}.md`
 
 ---
 

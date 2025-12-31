@@ -1,6 +1,6 @@
-# [デザイン] 2. JSONを参照して静的UI骨格を生成 
+# [デザイン] 2. JSONを参照して静的UI骨格を生成
 
-## コマンド: /design-skeleton [$TARGET]
+## コマンド: /design-ui [$TARGET]
 設計JSON（tokens/components/design_context）を参照し、**静的UI骨格**のみ生成。
 ロジック/状態/データ取得は入れない。ターゲットは **doc/rdd.md** の技術スタックを既定とし、引数で上書きする場合は **ADR-lite承認必須**。
 
@@ -18,6 +18,15 @@
   - 例: Vue → `src/components/*.vue`, `src/stories/*`
   - 例: SwiftUI → `Sources/UI/*`
 - Storybook/プレビュー（対応スタックのみ）
+
+### 前提（入力ファイル）
+- `doc/design/design-tokens.json`
+- `doc/design/components.json`
+- `doc/design/design_context.json`
+（通常は `/design-ssot` の成果物）
+
+### 参照（スキーマ）
+- constraints/resizing/autoLayout の解釈とレスポンシブ対応表は `doc/design/ssot_schema.md` を参照する
 
 ### レスポンシブ適用規則（Figma→CSS/スタイル）
 - Auto Layout → `flex` 等 + tokens の `gap/padding`

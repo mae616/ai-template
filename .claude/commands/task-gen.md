@@ -49,7 +49,7 @@
 
 ## 出力
 保存先:  
-`ai-task/{all-feature-name}/TASK_{sprint}_{feature-name}.md`
+`ai-task/task/{feature-name}/TASK_{sprint}_{feature-name}_{short}.md`
 
 ---
 

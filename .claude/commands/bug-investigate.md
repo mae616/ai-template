@@ -2,7 +2,7 @@
 
 ## 入力
 - `$ARGUMENTS` : 調査対象のトラブルシューティングログファイルのパス  
-  - 例: `ai-task/trouble-shooting/認証失敗.md`
+  - 例: `ai-task/bug/認証失敗.md`
 
 ---
 

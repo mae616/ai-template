@@ -16,35 +16,46 @@
 - セットアップ: `/setup`
 - タスク: `/task-list` → `/task-gen` → `/task-run`
 - バグ: `/bug-new` → `/bug-investigate` → `/bug-propose` → `/bug-fix`
+- デザイン（会話起点）: `/design-mock` → `/design-split` → `/design-ui` → `/design-components` → `/design-assemble`
+- デザイン（Figma起点）: `/design-ssot` → `/design-html` → `/design-split` → `/design-ui` → `/design-components` → `/design-assemble`
+- 壁打ち: `/pair plan|design|arch|dev`
+- 初見: `/repo-tour`
 
 ## コマンド一覧
 ### setup
 - `/setup`: 前提読み込み（`CLAUDE.md` → `doc/rdd.md` → skills → `doc/ai_guidelines.md`）
 
 ### task
-- `/task-list`: タスクリスト生成（旧: `/generate-task-list`）
-- `/task-gen`: スプリントTASK生成（旧: `/generate-task`）
-- `/task-run`: TASK実行（旧: `/execute-task`）
+- `/task-list`: タスクリスト生成
+- `/task-gen`: スプリントTASK生成
+- `/task-run`: TASK実行
 
 ### bug
-- `/bug-new`: トラブルシュートログ生成（旧: `/generate-trouble-shooting`）
-- `/bug-investigate`: 調査と仮説の絞り込み（旧: `/investigate-trouble-shooting`）
-- `/bug-propose`: 修正案の根拠付き列挙（旧: `/propose-trouble-shooting`）
-- `/bug-fix`: 修正実行（恒久対応・段階実施＋無効時ロールバック）（旧: `/execute-fix-trouble-shooting`）
+- `/bug-new`: トラブルシュートログ生成
+- `/bug-investigate`: 調査と仮説の絞り込み
+- `/bug-propose`: 修正案の根拠付き列挙
+- `/bug-fix`: 修正実行（恒久対応・段階実施＋無効時ロールバック）
 
 ### design
-- `/design-extract`: Figma MCPからJSON化（tokens/components/constraints）
-- `/design-export`: JSONから静的HTML生成（旧: `/design-export-html`）
-- `/design-skeleton`: JSONから静的UI骨格生成
-- `/design-bind`: variantsを型付きPropsへマッピングして結合
+- `/design-ssot`: SSOT（tokens/components/context）を生成（Figmaルート）
+- `/design-html`: SSOT JSONから静的HTML生成
+- `/design-mock`: 会話から1枚ペラの静的HTML生成（SSOT JSONも同時に用意）
+- `/design-split`: 1枚ペラHTMLをページ単位に分割
+- `/design-ui`: JSONから静的UI骨格生成
+- `/design-components`: 静的UI骨格をコンポーネント化して分離
+- `/design-assemble`: variantsを型付きPropsへマッピングして結合
 
 ### manual
-- `/manual-gen`: 手順書生成（旧: `/generate-manual`）
-- `/manual-guide`: 手順書をステップ実行支援でガイド（旧: `/guide-manual`）
+- `/manual-gen`: 手順書生成
+- `/manual-guide`: 手順書をステップ実行支援でガイド
 
 ### docs
-- `/docs-reverse`: 逆生成ドキュメント作成（旧: `/reverse-docs`）
+- `/docs-reverse`: 逆生成ドキュメント作成
+
+### pair
+- `/pair`: 壁打ち（`plan`/`design`/`arch`/`dev`）
+- `/repo-tour`: リポジトリ内容の説明（初見向け）
 
 ## 旧コマンド（deprecated）
-旧名は削除した（参照切れ防止のためドキュメント上にマッピングだけ残す）。
+旧名は削除済み。今後はこのページを「現行コマンドのみ」の索引として運用する。
 

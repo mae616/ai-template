@@ -132,23 +132,35 @@ pnpm install
 
 #### フロー概要
 
-1. **design-extract**  
+0. **design-mock（会話起点のルート）**  
+    - 会話から **1枚ペラの静的HTML** を生成  
+    - 併せてSSOT（`doc/design/design-tokens.json` / `doc/design/components.json` / `doc/design/design_context.json`）も生成して共通ルートへ合流  
+    - 技術スタックは `doc/rdd.md` をSSOTとして扱う  
+    - 出力: `doc/design/html/mock.html` 等  
+
+1. **design-ssot**  
     - Figma MCPから **Design Tokens / Components / Constraints** をJSON化  
     - 出力:  
-        - `design/design-tokens.json`  
-        - `design/components.json`  
+        - `doc/design/design-tokens.json`  
+        - `doc/design/components.json`  
         - `doc/design/design_context.json`  
     - 実装は禁止。まずは **SSOT（Single Source of Truth）** を確立  
 
-2. **design-skeleton**  
+2. **design-ui**  
     - JSONから **静的UI骨格** を生成（見た目のみ）  
     - RDD準拠の技術スタックを採用（React/Vue/SwiftUIなど）  
 
-3. **design-export-html**  
+3. **design-html**  
     - JSONから **静的HTML** を生成し、`doc/design/html/` に保存  
     - ドキュメント配布用に使用  
 
-4. **design-bind**  
+3.5. **design-split（共通ルート）**  
+    - 1枚ペラのHTMLを **ページ単位に分割** して `doc/design/html/{page}.html` に保存  
+
+3.6. **design-components（共通ルート）**  
+    - 静的UI骨格から **コンポーネント/レイアウトを抽出**（見た目のみ、ロジック禁止）
+
+4. **design-assemble**  
     - `components.json` を基に、各スタックに結合するアダプタを生成  
     - 出力: 再利用可能なUIコンポーネント（React/Vue/Svelte/SwiftUI/Flutterなど）  
     - ゲート: Story/テスト/Lint がすべて緑であること  
@@ -156,10 +168,12 @@ pnpm install
 
 #### 実行例
 ```bash
-/design-extract HomePage
-/design-skeleton
-/design-export HomePage
-/design-bind vue
+/design-ssot HomePage
+/design-ui
+/design-html HomePage
+/design-split doc/design/html/HomePage.html
+/design-components src
+/design-assemble vue
 ```
 
 ### 3. AIタスクシステム
@@ -168,23 +182,23 @@ pnpm install
 
 1. **要件定義作成**  
 - 新規: `doc/rdd.md` に記述  
-- 改修: `ai-task/INITIAL.md` をコピーして記述  
+- 改修: `doc/rdd.md` に追記（差分で更新）  
 
 2. **TASK-LIST生成**  
 ```bash
-/task-list ai-task/project-overview.md
+/task-list doc/rdd.md
 ```
 - タスク一覧、依存関係、優先度、スプリント計画が生成される  
 
 3. **TASK生成**  
 ```bash
-/task-gen ai-task/機能名/task-list-*.md sprint1
+/task-gen ai-task/task/機能名/TASK-LIST-機能名.md sprint1
 ```
 - Sprintごとの詳細タスクを生成  
 
 4. **TASK実行**  
 ```bash
-/task-run ai-task/機能名/TASK_{sprint_number}_{feature_name}.md
+/task-run ai-task/task/機能名/TASK_{sprint}_{feature_name}_{short}.md
 ```
 - AIが段階的に実装・検証を進める  
 
@@ -206,29 +220,29 @@ pnpm install
 
 #### フロー概要
 
-1. **バグ起票（generate-trouble-shooting）**  
+1. **バグ起票（bug-new）**  
 ```bash
 /bug-new podmanが起動しない
 ```
-- `ai-task/trouble-shooting/バグファイル名.md` を生成  
+- `ai-task/bug/バグファイル名.md` を生成  
 
-2. **調査（investigate-trouble-shooting）**  
+2. **調査（bug-investigate）**  
 ```bash
-/bug-investigate ai-task/trouble-shooting/バグファイル名.md
+/bug-investigate ai-task/bug/バグファイル名.md
 ```
 - 現状調査と仮説を追記  
 
-3. **裏付け（propose-trouble-shooting）**  
+3. **裏付け（bug-propose）**  
 ```bash
-/bug-propose ai-task/trouble-shooting/バグファイル名.md
+/bug-propose ai-task/bug/バグファイル名.md
 ```
 - Web検索で修正案を確認  
 - ⚠️ 環境構築・既存バグには有効  
 - ⚠️ アプリのロジックバグの場合はスキップ、または新規タスク化推奨  
 
-4. **修正実行（execute-fix-trouble-shooting）**  
+4. **修正実行（bug-fix）**  
 ```bash
-/bug-fix ai-task/trouble-shooting/バグファイル名.md
+/bug-fix ai-task/bug/バグファイル名.md
 ```
 - 修正を実行  
 - 新たなエラーが出た場合は再度起票し、フローを繰り返す  
@@ -240,13 +254,13 @@ pnpm install
 1. **ソースコード生成**  
 - タスクシステムやバグ改修システムでソースを生成  
 
-2. **マニュアル生成（generate-manual）**  
+2. **マニュアル生成（manual-gen）**  
 ```bash
 /manual-gen supabaseの設定手順書
 ```
 - `doc/manual/手順書名.md` が生成される  
 
-3. **マニュアルガイド（guide-manual）**  
+3. **マニュアルガイド（manual-guide）**  
 ```bash
 /manual-guide doc/manual/手順書名.md
 ```
@@ -277,13 +291,13 @@ ai-template/
 ├── .devcontainer/             # DevContainer設定
 ├── ai-task/                   # AIタスク管理
 │   ├── templates/             # タスクテンプレート
-│   └── trouble-shooting/      # 問題解決履歴
+│   ├── task/                  # 開発タスク（/task-* の出力先）
+│   └── bug/                   # バグ対応ログ（/bug-* の出力先）
 ├── doc/                       # ドキュメント
-│   ├── design_document/       # 設計ドキュメント
+│   ├── _generated/            # AI生成（/docs-reverse の出力先。上書きOK）
+│   ├── index.md               # ドキュメントの入口（読む順番）
 │   ├── manual/                # マニュアル
-│   ├── pdf/                   # PDFファイル
-│   ├── test_case/             # テストケース
-│   └── uml/                   # UML図
+│   └── devlog/                # AI作業ログ（任意）
 ├── .mise.toml                 # ツール管理設定
 ├── CLAUDE.md                  # Claude Code設定
 ├── .cursorrules               # Cursor設定
