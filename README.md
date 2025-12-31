@@ -17,9 +17,9 @@ Claude Code, Cursor などのコード支援AIによるアプリ開発のプロ�
 このプロジェクトは少し変わっていて、平たく言うと、私(mae616)のエンジニアリングする際の思考や手順をAIで再現したものです。
 
 ## 🚀 使用AI支援開発環境
-* Claude Code<br>https://github.com/anthropics/claude-code
-* Serena AI Coding Agent<br>https://github.com/oraios/serena
-* Cursor<br>https://cursor.com/
+- [Claude Code](https://github.com/anthropics/claude-code)
+- [Serena AI Coding Agent](https://github.com/oraios/serena)
+- [Cursor](https://cursor.com/)
 
 ## 🛠️ 開発環境
 
@@ -34,7 +34,7 @@ Claude Code, Cursor などのコード支援AIによるアプリ開発のプロ�
 - **3000**: 開発サーバー用
 - **5173**: Vite開発サーバー用
 - **8000**: Serena MCPサーバー用
-- **8888**: 8000ポートへのマッピング（追加開発サーバー用）
+- **8888**: ポートフォワード用（用途はプロジェクト次第）
 
 ## 🌟 対応技術スタック
 
@@ -71,27 +71,31 @@ Claude Code, Cursor などのコード支援AIによるアプリ開発のプロ�
 ※ `~/` に `clone` した例でこの先のコマンドを記述します。
 
 #### shellコマンドの設定
-`~/.zshrc`または`~/.bashrc`に以下の関数を追加してください。
+このテンプレートを各開発リポジトリへ反映するために、ブートストラップスクリプトを用意しています。
+
+1) `ai-template` を任意の場所に `git clone`  
+2) 反映したい開発リポジトリの絶対パスを指定して実行
+
+例（まずはdry-run推奨）:
+```bash
+cd /path/to/ai-template
+scripts/apply_template.sh --target /abs/path/to/your-project --safe --dry-run
+scripts/apply_template.sh --target /abs/path/to/your-project --safe
 ```
-# ai-template
-apply_template() {
-    rsync -av \
-      --exclude '.git' \
-      --exclude '.venv' \
-      --exclude 'LICENSE' \
-      --exclude 'CODE_OF_CONDUCT.md' \
-      --exclude 'CONTRIBUTING.md' \
-      --exclude 'SECURITY.md' \
-      --exclude 'MAINTAINERS.md' \
-      --exclude 'README.md' \
-      ~/ai-template/ ./ 
-}
-```
-`source ~/.zshrc`または`source ~/.bashrc` を実行してください。
+
+補足:
+- 上書き前に `your-project/.ai-template-backup/<timestamp>/` へバックアップします（`--no-backup` で無効化可能）
+- `--safe`（デフォルト）は既存ファイルを上書きしません。テンプレ側の更新を反映したい場合は `--force`、同期して削除も伴う場合は `--sync` を使用します。
+- [doc/rdd.md](doc/rdd.md) と `ai-task/` は原則 **プロジェクト固有** です。テンプレ更新で上書きしたい場合のみ `--overwrite-rdd` / `--overwrite-ai-task` を明示してください。
+
+詳細な運用方法は [doc/manual/ai_template_operation.md](doc/manual/ai_template_operation.md) を参照してください。
+skills一覧（索引）は [doc/manual/skills_catalog.md](doc/manual/skills_catalog.md) を参照してください。
+コマンド一覧（索引）は [doc/manual/commands_catalog.md](doc/manual/commands_catalog.md) を参照してください。
+ドキュメント全体の入口は [doc/index.md](doc/index.md) です。
 
 #### 開発プロジェクトの作成
 ボイラーテンプレートなどでReactなどの開発プロジェクトを作成してください。
-そのプロジェクト内で `apply_template` を実行してください。
+その後、`scripts/apply_template.sh` でテンプレートを反映してください。
 
 #### DevContainerの起動
 開発プロジェクトをCursor IDEで開き、左下にメッセージが表示されたら、DevContainerの起動ボタンを押してください。
@@ -118,10 +122,9 @@ pnpm install
 通常は自動で読み込まれますが、最初に以下を実行することを推奨します。  
 
 ```bash
-/read-instructions
+/setup
 ```
-- `.ai-instructions/core-personality.md` の「## ペルソナ設定 🐱 !!重要!!」は好みに応じて編集してください。
-- このリポジトリを使用する場合、各コマンド実行時に `/clear` → `/read-instructions` が走ることを前提としています。
+- このリポジトリを使用する場合、各コマンド実行時に `/clear` → `/setup` が走ることを前提としています。
 
 
 ### 2. デザイン連携フロー（Figma MCP → 実装/ドキュメント）
@@ -130,23 +133,35 @@ pnpm install
 
 #### フロー概要
 
-1. **design-extract**  
+0. **design-mock（会話起点のルート）**  
+    - 会話から **1枚ペラの静的HTML** を生成  
+    - 併せてSSOT（`doc/design/design-tokens.json` / `doc/design/components.json` / `doc/design/design_context.json`）も生成して共通ルートへ合流  
+    - 技術スタックは [doc/rdd.md](doc/rdd.md) をSSOTとして扱う  
+    - 出力: `doc/design/html/mock.html` 等  
+
+1. **design-ssot**  
     - Figma MCPから **Design Tokens / Components / Constraints** をJSON化  
     - 出力:  
-        - `design/design-tokens.json`  
-        - `design/components.json`  
+        - `doc/design/design-tokens.json`  
+        - `doc/design/components.json`  
         - `doc/design/design_context.json`  
     - 実装は禁止。まずは **SSOT（Single Source of Truth）** を確立  
 
-2. **design-skeleton**  
+2. **design-ui**  
     - JSONから **静的UI骨格** を生成（見た目のみ）  
     - RDD準拠の技術スタックを採用（React/Vue/SwiftUIなど）  
 
-3. **design-export-html**  
+3. **design-html**  
     - JSONから **静的HTML** を生成し、`doc/design/html/` に保存  
     - ドキュメント配布用に使用  
 
-4. **design-bind**  
+3.5. **design-split（共通ルート）**  
+    - 1枚ペラのHTMLを **ページ単位に分割** して `doc/design/html/{page}.html` に保存  
+
+3.6. **design-components（共通ルート）**  
+    - 静的UI骨格から **コンポーネント/レイアウトを抽出**（見た目のみ、ロジック禁止）
+
+4. **design-assemble**  
     - `components.json` を基に、各スタックに結合するアダプタを生成  
     - 出力: 再利用可能なUIコンポーネント（React/Vue/Svelte/SwiftUI/Flutterなど）  
     - ゲート: Story/テスト/Lint がすべて緑であること  
@@ -154,10 +169,12 @@ pnpm install
 
 #### 実行例
 ```bash
-/design-extract HomePage
-/design-skeleton
-/design-export-html HomePage
-/design-bind vue
+/design-ssot HomePage
+/design-ui
+/design-html HomePage
+/design-split doc/design/html/HomePage.html
+/design-components src
+/design-assemble vue
 ```
 
 ### 3. AIタスクシステム
@@ -165,24 +182,24 @@ pnpm install
 #### フロー概要
 
 1. **要件定義作成**  
-- 新規: `doc/rdd.md` に記述  
-- 改修: `ai-task/INITIAL.md` をコピーして記述  
+- 新規: [doc/rdd.md](doc/rdd.md) に記述  
+- 改修: [doc/rdd.md](doc/rdd.md) に追記（差分で更新）  
 
 2. **TASK-LIST生成**  
 ```bash
-/generate-task-list ai-task/project-overview.md
+/task-list doc/rdd.md
 ```
 - タスク一覧、依存関係、優先度、スプリント計画が生成される  
 
 3. **TASK生成**  
 ```bash
-/generate-task ai-task/機能名/task-list-*.md sprint1
+/task-gen ai-task/task/機能名/TASK-LIST-機能名.md sprint1
 ```
 - Sprintごとの詳細タスクを生成  
 
 4. **TASK実行**  
 ```bash
-/execute-task ai-task/機能名/TASK_{sprint_number}_{feature_name}.md
+/task-run ai-task/task/機能名/TASK_{sprint}_{feature_name}_{short}.md
 ```
 - AIが段階的に実装・検証を進める  
 
@@ -204,29 +221,29 @@ pnpm install
 
 #### フロー概要
 
-1. **バグ起票（generate-trouble-shooting）**  
+1. **バグ起票（bug-new）**  
 ```bash
-/generate-trouble-shooting podmanが起動しない
+/bug-new podmanが起動しない
 ```
-- `ai-task/trouble-shooting/バグファイル名.md` を生成  
+- [ai-task/bug/バグファイル名.md](ai-task/bug/README.md) を生成（実体は `ai-task/bug/` 配下に作成）  
 
-2. **調査（investigate-trouble-shooting）**  
+2. **調査（bug-investigate）**  
 ```bash
-/investigate-trouble-shooting ai-task/trouble-shooting/バグファイル名.md
+/bug-investigate ai-task/bug/バグファイル名.md
 ```
 - 現状調査と仮説を追記  
 
-3. **裏付け（propose-trouble-shooting）**  
+3. **裏付け（bug-propose）**  
 ```bash
-/propose-trouble-shooting ai-task/trouble-shooting/バグファイル名.md
+/bug-propose ai-task/bug/バグファイル名.md
 ```
 - Web検索で修正案を確認  
 - ⚠️ 環境構築・既存バグには有効  
 - ⚠️ アプリのロジックバグの場合はスキップ、または新規タスク化推奨  
 
-4. **修正実行（execute-fix-trouble-shooting）**  
+4. **修正実行（bug-fix）**  
 ```bash
-/execute-fix-trouble-shooting ai-task/trouble-shooting/バグファイル名.md
+/bug-fix ai-task/bug/バグファイル名.md
 ```
 - 修正を実行  
 - 新たなエラーが出た場合は再度起票し、フローを繰り返す  
@@ -238,15 +255,15 @@ pnpm install
 1. **ソースコード生成**  
 - タスクシステムやバグ改修システムでソースを生成  
 
-2. **マニュアル生成（generate-manual）**  
+2. **マニュアル生成（manual-gen）**  
 ```bash
-/generate-manual supabaseの設定手順書
+/manual-gen supabaseの設定手順書
 ```
-- `doc/manual/手順書名.md` が生成される  
+- `doc/manual/手順書名.md` が生成される（例：`doc/manual/` 配下。索引は [doc/manual/](doc/manual/)）  
 
-3. **マニュアルガイド（guide-manual）**  
+3. **マニュアルガイド（manual-guide）**  
 ```bash
-/guide-manual doc/manual/手順書名.md
+/manual-guide doc/manual/手順書名.md
 ```
 - 生成された手順書をステップごとに案内  
 
@@ -255,33 +272,31 @@ pnpm install
 このプロジェクトは、以下の主要ファイル以外のドキュメントを  
 **AIによるリバースエンジニアリングで生成**することを想定しています。  
 
-- `doc/rdd.md`  
-- `doc/Architecture.md`  
-- `doc/design/*`  
+- [doc/rdd.md](doc/rdd.md)  
+- [doc/Architecture.md](doc/Architecture.md)  
+- [doc/design/](doc/design/)  
 
 #### 使用例
 ```bash
-/reverse-docs
+/docs-reverse
 ```
 
 ## 📁 プロジェクト構成
 
 ```
 ai-template/
-├── .ai-instructions/          # AI指示ファイル⭐
 ├── .claude/                   # Claude Code設定
 │   ├── commands/              # Claude Codeのコマンド⭐
 │   └── settings.local.json    # AIのコマンド権限
 ├── .devcontainer/             # DevContainer設定
 ├── ai-task/                   # AIタスク管理
-│   ├── templates/             # タスクテンプレート
-│   └── trouble-shooting/      # 問題解決履歴
+│   ├── task/                  # 開発タスク（/task-* の出力先）
+│   └── bug/                   # バグ対応ログ（/bug-* の出力先）
 ├── doc/                       # ドキュメント
-│   ├── design_document/       # 設計ドキュメント
+│   ├── _generated/            # AI生成（/docs-reverse の出力先。上書きOK）
+│   ├── index.md               # ドキュメントの入口（読む順番）
 │   ├── manual/                # マニュアル
-│   ├── pdf/                   # PDFファイル
-│   ├── test_case/             # テストケース
-│   └── uml/                   # UML図
+│   └── devlog/                # AI作業ログ（任意）
 ├── .mise.toml                 # ツール管理設定
 ├── CLAUDE.md                  # Claude Code設定
 ├── .cursorrules               # Cursor設定
@@ -292,8 +307,8 @@ ai-template/
 ```
 
 ### ⭐ このテンプレートの本質
-- **`.ai-instructions/`** → AIに与える「思考や行動の設計書」  
 - **`.claude/commands/`** → 実際の「作業フローを動かすコマンド群」  
+ - **[CLAUDE.md](CLAUDE.md) / [doc/rdd.md](doc/rdd.md) / [.claude/skills/](.claude/skills/) / [doc/ai_guidelines.md](doc/ai_guidelines.md)** → 判断軸（SSOT/運用）
 
 この2つが中核であり、他の構成要素はそれを支える仕組みになっています。
 
@@ -331,8 +346,11 @@ Feedback only OSS
 - [Serena GitHub](https://github.com/oraios/serena)
 - [Serena Documentation](https://github.com/oraios/serena#readme)
 - [MCP Protocol](https://modelcontextprotocol.io/)
-- [Cursor IDE](https://cursor.sh/)
+- [Figma MCPサーバーのガイド（公式）](https://help.figma.com/hc/ja/articles/32132100833559-Figma-MCP%E3%82%B5%E3%83%BC%E3%83%90%E3%83%BC%E3%81%AE%E3%82%AC%E3%82%A4%E3%83%89)
+- [Figma MCPカタログ（公式）](https://www.figma.com/ja-jp/mcp-catalog/)
+- [Cursor IDE](https://cursor.com/)
 - [mise](https://mise.jdx.dev/)
+- [uv](https://github.com/astral-sh/uv)
 - [Podman](https://podman.io/)
 - [DevContainer](https://containers.dev/)
 
@@ -353,8 +371,10 @@ Feedback only OSS
 
 このプロジェクトは以下のプロジェクトの恩恵を受けています：
 
+- [Claude Code](https://github.com/anthropics/claude-code) - コード支援AI（CLI/拡張）
 - [Serena AI](https://github.com/oraios/serena) - AI支援開発エージェント
-- [Cursor IDE](https://cursor.sh/) - AI統合開発環境
+- [Cursor IDE](https://cursor.com/) - AI統合開発環境
+- [Figma MCPサーバー（公式ガイド）](https://help.figma.com/hc/ja/articles/32132100833559-Figma-MCP%E3%82%B5%E3%83%BC%E3%83%90%E3%83%BC%E3%81%AE%E3%82%AC%E3%82%A4%E3%83%89) - デザイン情報連携（Dev Mode）
 - [DevContainer](https://containers.dev/) - コンテナ化された開発環境
 - [Podman](https://podman.io/) - コンテナエンジン
 - [mise](https://mise.jdx.dev/) - ツール管理

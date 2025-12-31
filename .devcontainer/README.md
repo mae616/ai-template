@@ -5,7 +5,6 @@
 ## 🚀 主な機能
 
 - **Serena AI統合**: Serena AI Coding Agentが利用可能
-- **Cursor MCPサーバー**: Cursor IDEとの統合
 - **Claude Code統合**: AnthropicのClaude Code拡張機能が利用可能
 - **ホスト拡張機能同期**: ホストのVSCode拡張機能がコンテナ内でも利用可能
 - **Node.js LTS**: 最新のNode.js環境
@@ -34,7 +33,9 @@ Dev Containers: Reopen in Container
 - ホストのVSCode拡張機能の同期
 - Claude Code のインストール
 - Serena AI MCPサーバーのセットアップ
-- Cursor MCPサーバーのセットアップ
+
+補足：
+- `.devcontainer/setup.sh` は **冪等**（同じ設定を何度も追記しない）になるようにしています。
 
 ### 3. AI支援開発の利用
 
@@ -53,11 +54,6 @@ Dev Containers: Reopen in Container
 - コードの最適化提案
 - テストコードの生成
 
-#### Cursor MCPサーバー
-- Cursor IDEとの統合
-- リアルタイムAI支援
-- MCPプロトコルによる標準的なAIツール統合
-
 ### 4. 拡張機能の同期
 
 ホストでインストールしたVSCode拡張機能は、コンテナ内でも自動的に利用可能になります。
@@ -75,12 +71,11 @@ Dev Containers: Reopen in Container
 - **環境変数ファイル**: `/root/.claude/.env`
 
 ### Cursor MCP設定
-- **設定ディレクトリ**: `/root/.cursor`
-- **MCP設定ファイル**: `/root/.cursor/mcp-config.json`
-- **環境変数ファイル**: `/root/.cursor/.env`
+- **設定ディレクトリ**: `/root/.cursor`（ホストからマウント）
+- **Cursor Rules**: `/root/.cursorrules`（ホストからマウント）
 
 ### 環境変数の設定
-Serena AIとCursor MCPサーバーはAPIキーなしで動作します。特別な設定は不要です。
+Serena AIはAPIキーなしで動作します。特別な設定は不要です。
 
 ```bash
 # 環境変数ファイルは自動で作成されます
@@ -99,20 +94,12 @@ Serena AIとCursor MCPサーバーはAPIキーなしで動作します。特別�
 - Serena AI MCPサーバーのセットアップ
 - 開発用エイリアスの設定
 
-### setup-cursor-mcp.sh
-Cursor MCPサーバー専用のセットアップスクリプトで、以下の処理を実行します：
-- ホストのCursor設定の確認とコピー
-- Cursor用MCP設定ファイルの作成
-- 環境変数ファイルの作成
-- Cursor MCPサーバーの起動
-
 ## 🌐 ポート設定
 
 - **3000**: 開発サーバー用
 - **5173**: Vite開発サーバー用
 - **8000**: Serena MCPサーバー用
 - **8001**: 追加開発サーバー用
-- **8002**: Cursor MCPサーバー用
 - **8888**: Jupyter Notebook用
 
 ## 🔍 トラブルシューティング
@@ -177,23 +164,6 @@ Cursor MCPサーバー専用のセットアップスクリプトで、以下の�
    claude-mcp-logs
    ```
 
-### Cursor MCPサーバーが動作しない場合
-
-1. MCPサーバーの状態を確認：
-   ```bash
-   ps aux | grep cursor
-   ```
-
-2. ログを確認：
-   ```bash
-   cat /tmp/cursor-mcp.log
-   ```
-
-3. 手動でセットアップスクリプトを実行：
-   ```bash
-   bash .devcontainer/setup-cursor-mcp.sh
-   ```
-
 ### メモリ不足の問題が発生した場合
 
 1. 環境変数を確認：
@@ -215,7 +185,6 @@ Cursor MCPサーバー専用のセットアップスクリプトで、以下の�
 - `Dockerfile`: コンテナイメージの定義
 - `docker-compose.yml`: コンテナの起動設定
 - `setup.sh`: 初期セットアップスクリプト
-- `setup-cursor-mcp.sh`: Cursor MCPサーバーセットアップスクリプト
 
 ## ⚠️ 注意事項
 
