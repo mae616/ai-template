@@ -1,52 +1,51 @@
-version: '3.8'
+version: "3.8"
 
 services:
-    app:
-        build:
-            context: .
-            dockerfile: Dockerfile
-        # メモリ制限を2GBに設定（一般開発用途に適した設定）
-        mem_limit: 2g
-        memswap_limit: 2g
-        volumes:
-            - ..:/workspace:cached
-            - serena-cache:/root/.cache:Z
-            - serena-data:/root/.local/share:Z
-        command: sleep infinity
-        # 環境変数でポーリングモードも設定（macOS用）
-        environment:
-          - VITE_USE_POLLING=true
-          - NODE_ENV=development
-          - PYTHONUNBUFFERED=1
-          - PYTHONDONTWRITEBYTECODE=1
-          - SERENA_CONFIG_PATH=/workspace/.serena/config.toml
-          - PYTHONPATH=/workspace
-          - CLAUDE_CONFIG_PATH=/root/.claude
-          - CURSOR_CONFIG_PATH=/root/.cursor
-          - ANTHROPIC_CONFIG_PATH=/root/.anthropic
-          - CURSORRULES_PATH=/root/.cursorrules
-          - PATH=/root/.local/share/mise/shims:/root/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-          - MISE_DATA_DIR=/root/.local/share/mise
-          - MISE_CONFIG_DIR=/root/.config/mise
-          - NODE_OPTIONS=--max-old-space-size=2048
-          # ファイル監視の代替対策（macOS用）
-          - CHOKIDAR_USEPOLLING=true
-          - CHOKIDAR_INTERVAL=1000
-          - WATCHPACK_POLLING=true
-          - FAST_REFRESH=false
-        ports:
-            - "3000:3000"
-            - "5173:5173"
-            - "8000:8000"
-            - "8888:8000"
-        working_dir: /workspace
-        user: root
-        stdin_open: true
-        tty: true
-        init: true
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # メモリ制限を2GBに設定（一般開発用途に適した設定）
+    mem_limit: 2g
+    memswap_limit: 2g
+    volumes:
+      - ..:/workspace:cached
+      - serena-cache:/root/.cache:Z
+      - serena-data:/root/.local/share:Z
+    command: sleep infinity
+    # 環境変数でポーリングモードも設定（macOS用）
+    environment:
+      - VITE_USE_POLLING=true
+      - NODE_ENV=development
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+      - SERENA_CONFIG_PATH=/workspace/.serena/config.toml
+      - PYTHONPATH=/workspace
+      - CLAUDE_CONFIG_PATH=/root/.claude
+      - CURSOR_CONFIG_PATH=/root/.cursor
+      - ANTHROPIC_CONFIG_PATH=/root/.anthropic
+      - PATH=/root/.local/share/mise/shims:/root/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      - MISE_DATA_DIR=/root/.local/share/mise
+      - MISE_CONFIG_DIR=/root/.config/mise
+      - NODE_OPTIONS=--max-old-space-size=2048
+      # ファイル監視の代替対策（macOS用）
+      - CHOKIDAR_USEPOLLING=true
+      - CHOKIDAR_INTERVAL=1000
+      - WATCHPACK_POLLING=true
+      - FAST_REFRESH=false
+    ports:
+      - "3000:3000"
+      - "5173:5173"
+      - "8000:8000"
+      - "8888:8000"
+    working_dir: /workspace
+    user: root
+    stdin_open: true
+    tty: true
+    init: true
 
 volumes:
-    serena-cache:
-        driver: local
-    serena-data:
-        driver: local
+  serena-cache:
+    driver: local
+  serena-data:
+    driver: local

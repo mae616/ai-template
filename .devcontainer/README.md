@@ -105,6 +105,7 @@ Serena AIはAPIキーなしで動作します。特別な設定は不要です�
 - pnpmの設定とメモリ最適化
 - Claude Codeのインストール
 - Serena AI MCPサーバーのセットアップ
+- Figma MCP（Dev Mode）を Claude Code に登録
 - 開発用エイリアスの設定
 
 ## 🌐 ポート設定
@@ -139,6 +140,56 @@ Serena AIはAPIキーなしで動作します。特別な設定は不要です�
    ```bash
    serena mcp status
    ```
+
+### Figma MCP が Claude Code に登録されていない（/使えない）場合
+
+前提（ホスト側）:
+- Figma Desktop を起動していること（ホスト側で Dev Mode MCP サーバーが立ち上がります）
+- Figma Desktop で **Dev Mode MCP** を有効化していること
+
+確認（コンテナ内）:
+
+```bash
+claude --version
+claude mcp list
+```
+
+補足:
+- `claude mcp list` が空のままの場合、`postCreateCommand` の `.devcontainer/setup.sh` が途中で失敗している可能性があります（後述の手動実行で切り分けできます）
+
+手動で登録（コンテナ内）:
+
+```bash
+FIGMA_MCP_URL="${FIGMA_MCP_URL:-http://host.docker.internal:3845/mcp}"
+claude mcp add --transport http figma "${FIGMA_MCP_URL}"
+claude mcp list
+```
+
+うまくいかないときの切り分け:
+- `host.docker.internal` が解決できない環境では、ホストのIPへ置き換えてください（例: `http://<host-ip>:3845/mcp`）
+- Podman を使っている場合は `host.containers.internal` が使えることが多いです（例: `http://host.containers.internal:3845/mcp`）
+- Figma側のMCPが起動していない/ポートが違う場合は、Figmaの設定を見直してください
+  - `curl` が `000` や `Connection refused` の場合は、まず **Figma Desktop が起動しているか**を確認してください（起動していないとホスト側で待受が存在しません）
+
+到達性の確認（コンテナ内）:
+
+```bash
+curl -sS -o /dev/null -m 2 -w "%{http_code}\n" http://host.containers.internal:3845/mcp || true
+curl -sS -o /dev/null -m 2 -w "%{http_code}\n" http://host.docker.internal:3845/mcp || true
+```
+
+Serena MCP も未登録の場合（コンテナ内）:
+
+```bash
+claude mcp add serena -- uvx --from git+https://github.com/oraios/serena serena start-mcp-server --context ide-assistant --project "$(pwd)"
+claude mcp list
+```
+
+`setup.sh` を手動実行して切り分け（コンテナ内）:
+
+```bash
+bash .devcontainer/setup.sh
+```
 
 2. プロジェクト設定を確認：
    ```bash

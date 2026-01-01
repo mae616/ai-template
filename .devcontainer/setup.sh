@@ -42,7 +42,6 @@ export MISE_CONFIG_DIR="/root/.config/mise"
 
 # Cursor設定
 export CURSOR_CONFIG_PATH="/root/.cursor"
-export CURSORRULES_PATH="/root/.cursorrules"
 
 # メモリ使用量最適化（一般開発用途に適した1GB）
 export NODE_OPTIONS="--max-old-space-size=1024"
@@ -194,14 +193,10 @@ node --version
 npm --version
 
 echo "📋 claude-codeをインストール中..."
-if command -v claude >/dev/null 2>&1; then
-    echo "✅ claude-code は既にインストール済みです: $(claude --version 2>/dev/null || true)"
-else
-    npm install -g @anthropic-ai/claude-code
-    # mise の shims 運用では、グローバルインストール後に reshim しないと新規コマンドが見えないことがある。
-    echo "🔧 miseのshimsを更新中（claude を有効化）..."
-    mise reshim
-fi
+npm install -g @anthropic-ai/claude-code
+# mise の shims 運用では、グローバルインストール後に reshim しないと新規コマンドが見えないことがある。
+echo "🔧 miseのshimsを更新中（claude を有効化）..."
+mise reshim
 
 # 期待するCLIが使えることをここで確定させる（ここで落ちれば原因が追いやすい）
 if ! command -v claude >/dev/null 2>&1; then
@@ -220,7 +215,10 @@ echo "📋 ホストの設定ファイルを確認中..."
 # VSCode拡張機能の確認
 if [ -d "/root/.vscode/extensions" ]; then
     echo "✅ VSCode拡張機能ディレクトリがマウントされています"
-    ls -la /root/.vscode/extensions | head -5
+    # `set -o pipefail` 下で `ls | head` を使うと、head 側が先に終了したときに
+    # ls が SIGPIPE で失敗扱いになり、スクリプト全体が途中終了することがある。
+    # ここはログ表示のため、失敗扱いにしない。
+    ls -la /root/.vscode/extensions | head -5 || true
 else
     echo "⚠️  VSCode拡張機能ディレクトリがマウントされていません"
 fi
@@ -233,98 +231,98 @@ else
     echo "⚠️  Cursor設定ディレクトリがマウントされていません"
 fi
 
-# Figma公式（Dev Mode）MCPサーバーの接続設定（Cursor向け）
-# - 注意: Figma Desktop（ホスト側）で Dev Mode MCP サーバーを有効化している必要があります。
-# - DevContainer内からは 127.0.0.1 はコンテナ自身になるため、host.docker.internal 経由で接続します。
-echo "📋 Figma（Dev Mode）MCPサーバーの接続設定を準備中..."
-FIGMA_MCP_URL="${FIGMA_MCP_URL:-http://host.docker.internal:3845/mcp}"
-CURSOR_MCP_FILE="/root/.cursor/mcp.json"
-if [ -d "/root/.cursor" ]; then
-    # Cursor MCP 設定は既存ファイルがあるケースが多いので、
-    # 他サーバー設定を壊さずに mcpServers.figma.url だけ追加/更新する（冪等）
-    # - もし自動更新したくない場合は SKIP_CURSOR_MCP_FIGMA=1 を設定する
-    if [ "${SKIP_CURSOR_MCP_FIGMA:-0}" = "1" ]; then
-        echo "ℹ️  SKIP_CURSOR_MCP_FIGMA=1 のため Cursor 用 Figma MCP 設定をスキップします"
+detect_figma_mcp_url() {
+    # Figma Desktop（ホスト側）の Dev Mode MCP へ「コンテナ→ホスト」で到達するためのURLを決める。
+    # - Docker: host.docker.internal が使えることが多い
+    # - Podman: host.containers.internal が使えることが多い
+    # - どちらも無い環境では、ユーザーが FIGMA_MCP_URL を明示する前提にする（推測で壊さない）
+    local port="3845"
+    local path="/mcp"
+
+    is_reachable_http() {
+        local url="$1"
+        if ! command -v curl >/dev/null 2>&1; then
+            return 1
+        fi
+        # 返ってくるHTTPステータスは問わず「到達できたか」だけを見る（000 は到達不能）
+        local code
+        code="$(curl -sS -o /dev/null -m 2 -w '%{http_code}' "$url" || true)"
+        [ "$code" != "000" ]
+    }
+
+    host_exists() {
+        local host="$1"
+        command -v getent >/dev/null 2>&1 && getent hosts "$host" >/dev/null 2>&1
+    }
+
+    # Podman っぽい環境では host.containers.internal を優先する（host-gateway が無くても動かせる）
+    local candidates=()
+    if [ -f /run/.containerenv ] && grep -qi podman /run/.containerenv 2>/dev/null; then
+        candidates+=("http://host.containers.internal:${port}${path}")
+        candidates+=("http://host.docker.internal:${port}${path}")
     else
-        echo "📋 Cursor 用 Figma MCP 設定を適用します: ${FIGMA_MCP_URL}"
-        python - << 'PY'
-import json
-import os
-import shutil
-from datetime import datetime
-
-cursor_mcp_file = os.environ.get("CURSOR_MCP_FILE", "/root/.cursor/mcp.json")
-figma_mcp_url = os.environ.get("FIGMA_MCP_URL", "http://host.docker.internal:3845/mcp")
-
-def load_json_or_none(path: str):
-    try:
-        with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return None
-    except Exception:
-        return "__INVALID__"
-
-data = load_json_or_none(cursor_mcp_file)
-if data == "__INVALID__":
-    ts = datetime.utcnow().strftime("%Y%m%d%H%M%S")
-    backup_path = f"{cursor_mcp_file}.bak.{ts}"
-    shutil.copyfile(cursor_mcp_file, backup_path)
-    data = None
-    print(f"⚠️  Cursor MCP 設定がJSONとして読めなかったためバックアップしました: {backup_path}")
-
-if not isinstance(data, dict):
-    data = {}
-
-mcp_servers = data.get("mcpServers")
-if not isinstance(mcp_servers, dict):
-    mcp_servers = {}
-    data["mcpServers"] = mcp_servers
-
-figma_entry = mcp_servers.get("figma")
-if not isinstance(figma_entry, dict):
-    figma_entry = {}
-    mcp_servers["figma"] = figma_entry
-
-figma_entry["url"] = figma_mcp_url
-
-os.makedirs(os.path.dirname(cursor_mcp_file), exist_ok=True)
-with open(cursor_mcp_file, "w", encoding="utf-8") as f:
-    json.dump(data, f, ensure_ascii=False, indent=2)
-    f.write("\n")
-
-print(f"✅ Cursor 用 MCP 設定を更新しました: {cursor_mcp_file}")
-PY
+        candidates+=("http://host.docker.internal:${port}${path}")
+        candidates+=("http://host.containers.internal:${port}${path}")
     fi
-else
-    echo "⚠️  /root/.cursor が無いためスキップします"
-fi
+
+    # デフォルトゲートウェイIP（Docker on Linux 等で有効なことがある）
+    if command -v ip >/dev/null 2>&1; then
+        local gw_ip
+        gw_ip="$(ip route show default 2>/dev/null | awk '{print $3}' | head -n 1)"
+        if [ -n "${gw_ip:-}" ]; then
+            candidates+=("http://${gw_ip}:${port}${path}")
+        fi
+    fi
+
+    # まずは「名前解決できる」かつ「HTTP到達できる」候補を採用する
+    local url host
+    for url in "${candidates[@]}"; do
+        host="$(echo "$url" | sed -nE 's#^https?://([^:/]+).*#\1#p')"
+        if [[ "$host" == "host."* ]] && ! host_exists "$host"; then
+            continue
+        fi
+        if is_reachable_http "$url"; then
+            echo "$url"
+            return 0
+        fi
+    done
+
+    # 最後のフォールバック（固定値）。到達不能なら README の手順に従い FIGMA_MCP_URL を上書きする。
+    echo "http://host.docker.internal:${port}${path}"
+}
+
+FIGMA_MCP_URL="${FIGMA_MCP_URL:-$(detect_figma_mcp_url)}"
 
 echo "📋 Claude Code MCPサーバーをインストール中..."
-if command -v claude >/dev/null 2>&1; then
-    if (claude mcp list 2>/dev/null || true) | grep -qE '(^|\\s)serena(\\s|$)'; then
-        echo "✅ Serena MCP は既に登録済みです（claude mcp list）"
-    elif [ -f "/root/.claude/mcp-config.json" ] && grep -q '"serena"' "/root/.claude/mcp-config.json"; then
-        echo "✅ Serena MCP は既に登録済みです（/root/.claude/mcp-config.json）"
-    else
-        claude mcp add serena -- uvx --from git+https://github.com/oraios/serena serena start-mcp-server --context ide-assistant --project "$(pwd)"
-    fi
+export CLAUDE_CONFIG_PATH="${CLAUDE_CONFIG_PATH:-/root/.claude}"
+mkdir -p "$CLAUDE_CONFIG_PATH"
 
-    # Figma（Dev Mode）MCP を Claude Code に登録する（冪等）
-    # - デフォルトはホスト側（Figma Desktop）のMCPを利用する想定
-    # - すでに登録済みならスキップする
-    # - もし自動登録したくない場合は SKIP_CLAUDE_MCP_FIGMA=1 を設定する
-    if [ "${SKIP_CLAUDE_MCP_FIGMA:-0}" = "1" ]; then
-        echo "ℹ️  SKIP_CLAUDE_MCP_FIGMA=1 のため Figma MCP の登録をスキップします"
-    elif (claude mcp list 2>/dev/null || true) | grep -qE '(^|\\s)figma(\\s|$)'; then
-        echo "✅ Figma MCP は既に登録済みです（claude mcp list）"
-    else
-        echo "📋 Figma MCP を Claude Code に登録します: ${FIGMA_MCP_URL}"
-        claude mcp add --transport http figma "${FIGMA_MCP_URL}"
-    fi
-else
-    echo "⚠️  claude コマンドが見つからないため、Serena MCP の登録をスキップします"
+echo "📋 Claude MCP 現在の登録状況（事前）:"
+(claude mcp list 2>/dev/null || true)
+
+echo "📋 Serena MCP を Claude Code に登録します"
+if ! claude mcp add serena -- uvx --from git+https://github.com/oraios/serena serena start-mcp-server --context ide-assistant --project "$(pwd)"; then
+    echo "❌ Serena MCP の登録に失敗しました" >&2
+    echo "📋 Claude MCP 登録状況（失敗時）:" >&2
+    (claude mcp list 2>/dev/null || true) >&2
+    echo "📋 claude doctor（失敗時）:" >&2
+    (claude doctor 2>/dev/null || true) >&2
+    exit 1
 fi
+
+echo "📋 Figma MCP を Claude Code に登録します: ${FIGMA_MCP_URL}"
+if ! claude mcp add --transport http figma "${FIGMA_MCP_URL}"; then
+    echo "❌ Figma MCP の登録に失敗しました" >&2
+    echo "   - FIGMA_MCP_URL: ${FIGMA_MCP_URL}" >&2
+    echo "📋 Claude MCP 登録状況（失敗時）:" >&2
+    (claude mcp list 2>/dev/null || true) >&2
+    echo "📋 claude doctor（失敗時）:" >&2
+    (claude doctor 2>/dev/null || true) >&2
+    exit 1
+fi
+
+echo "📋 Claude MCP 登録状況（事後）:"
+(claude mcp list 2>/dev/null || true)
 
 
 # 開発用の便利なエイリアスを設定
@@ -344,7 +342,6 @@ echo ""
 echo "📁 共有設定:"
 echo "  - VSCode拡張機能: /root/.vscode/extensions"
 echo "  - Cursor設定: /root/.cursor"
-echo "  - Cursor Rules: /root/.cursorrules"
 echo ""
 echo "🚀 新しいターミナルを開くか、source ~/.bashrc を実行してエイリアスを有効にしてください"
 echo ""
