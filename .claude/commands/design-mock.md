@@ -9,6 +9,7 @@
 - ユーザーとの会話（要件/トーン/主要導線）から、**1枚ペラの静的HTML**を生成する
 - 実装（状態/データ取得/ルーティング）は入れず、**見た目と情報設計**に集中する
 - 以降の共通ルート（`/design-ui` 等）へ合流できるよう、**SSOT（design JSON）も同時に用意**する
+- 生成したHTMLは、**ユーザーが目で見ながら調整するためのプレビュー**として扱う（調整点は会話で共有し、SSOT（JSON）側にも反映する）
 
 ---
 
@@ -29,6 +30,13 @@
 - 技術スタックは **`doc/rdd.md`** をSSOTとして扱う（ここで勝手に変えない）
 - `doc/design/components.json` の variants 命名規約は `doc/design/ssot_schema.md` を参照し、プロジェクト横断で揃える
 - ここで停止（次工程は `/design-split` → `/design-ui`）
+
+---
+
+## 反復（重要）
+- ユーザーが `doc/design/html/mock.html` を手で編集して調整した場合は、**差分（diff）または変更点の箇条書き**を入力として受け取る（状況で使い分けOK）
+- その調整内容を根拠に、**HTMLだけでなくSSOT（`design-tokens.json` / `components.json` / `design_context.json`）も同時に更新**する
+- SSOTが古いままだと、後続（`/design-ui` / `/design-components` / `/design-assemble`）で不整合が出るため、**HTML単独修正で終わらせない**
 
 ---
 
