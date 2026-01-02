@@ -29,6 +29,12 @@ Claude Code, Cursor などのコード支援AIによるアプリ開発のプロ�
 - **Node.js**: LTS + pnpm
 - **AI支援**: Claude Code + Serena AI + Cursor
 - **ツール管理**: mise
+- **開発補助**: ni（lockfileに応じて正しいパッケージマネージャを選ぶ）
+
+#### ni について（コンテナ内にインストール済み）
+`ni` は lockfile（`pnpm-lock.yaml` / `package-lock.json` など）を見て、適切なパッケージマネージャで `install/run/dlx` を実行するための薄いラッパです（例: `ni`, `nr`, `nlx`）。  
+DevContainerの `.devcontainer/setup.sh` で `npm i -g @antfu/ni` を実行し、コンテナ内で利用できるようにしています。  
+参照: [antfu-collective/ni](https://github.com/antfu-collective/ni)
 
 ### ポート設定
 

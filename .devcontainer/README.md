@@ -10,7 +10,7 @@
 - **Node.js LTS**: 最新のNode.js環境
 - **Python + uv**: 効率的なPython環境管理
 - **mise**: 統一されたツール管理
-- **開発ツール**: pnpm、その他の開発支援ツール
+- **開発ツール**: pnpm、ni（@antfu/ni）、その他の開発支援ツール
 
 ## 🛠️ 使用方法
 
@@ -32,6 +32,7 @@ Dev Containers: Reopen in Container
 - Python環境のセットアップ
 - ホストのVSCode拡張機能の同期
 - Claude Code のインストール
+- ni（@antfu/ni）のインストール（`ni` / `nr` / `nlx` など）
 - Serena AI MCPサーバーのセットアップ
 
 補足：
@@ -104,6 +105,7 @@ Serena AIはAPIキーなしで動作します。特別な設定は不要です�
 - Node.js環境のセットアップ
 - pnpmの設定とメモリ最適化
 - Claude Codeのインストール
+- ni（@antfu/ni）のインストール（lockfileに応じたパッケージマネージャ選択）
 - Serena AI MCPサーバーのセットアップ
 - Figma MCP（Dev Mode）を Claude Code に登録
 - 開発用エイリアスの設定

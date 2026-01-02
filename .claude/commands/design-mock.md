@@ -26,6 +26,13 @@
 - プロジェクト固有の事実は `doc/rdd.md`（先頭のAI用事実ブロック）を参照する。
 - 判断軸は `.claude/skills/*` を適用する（例: `ui-designer` / `usability-psychologist` / `tailwind` / `creative-coder`）。
 
+## 見た目の基準（ビューポート）について
+- まず `doc/rdd.md` の「ターゲット表示環境（事実）」を参照し、**そのビューポートを基準**に叩き台（HTML/SSOT）を作る
+- 未記入の場合は、以下を **推奨デフォルト**として仮置きし、出力やレビューの前提に明記する：
+  - desktop: 1440x900
+  - mobile: 390x844
+  - tablet: 834x1194
+
 ---
 
 ## 仕様

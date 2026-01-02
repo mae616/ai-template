@@ -17,6 +17,13 @@
 - `doc/rdd.md` を読み、該当する `.claude/skills/*` を適用して判断軸を揃える（例: `tailwind` / `creative-coder`）。
 - 詳細運用（サンプル運用/依存評価補助/ADR-lite）は `doc/ai_guidelines.md` を参照。
 
+## 見た目の基準（ビューポート）について
+- まず `doc/rdd.md` の「ターゲット表示環境（事実）」を参照し、プレビュー/Story等の確認は **そのビューポートを基準**に行う
+- 未記入の場合は、以下を **推奨デフォルト**として仮置きする：
+  - desktop: 1440x900
+  - mobile: 390x844
+  - tablet: 834x1194
+
 ### 入力
 - $TARGET（任意）: react | vue | svelte | swiftui | flutter | web-components | plain-html など
 

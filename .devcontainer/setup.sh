@@ -209,6 +209,19 @@ if ! command -v claude >/dev/null 2>&1; then
 fi
 echo "✅ claude コマンドを確認しました: $(claude --version 2>/dev/null || true)"
 
+echo "📋 ni（@antfu/ni）をインストール中..."
+# lockfileに応じて正しいパッケージマネージャを選ぶための薄いラッパ（ni/nr/nlx 等）
+npm install -g @antfu/ni
+echo "🔧 miseのshimsを更新中（ni を有効化）..."
+mise reshim
+if ! command -v ni >/dev/null 2>&1; then
+    echo "❌ ni コマンドが見つかりません（インストール後のPATH/reshimが不整合の可能性）" >&2
+    echo "   - PATH: $PATH" >&2
+    echo "   - npm prefix: $(npm config get prefix 2>/dev/null || echo 'unknown')" >&2
+    exit 1
+fi
+echo "✅ ni コマンドを確認しました: $(ni -v 2>/dev/null || true)"
+
 # ホストの設定ファイルを確認・コピー
 echo "📋 ホストの設定ファイルを確認中..."
 

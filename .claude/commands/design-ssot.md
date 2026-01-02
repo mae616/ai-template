@@ -16,6 +16,13 @@ Figma MCPから設計情報を抽出し、AI/人間が参照するSSOTを作る�
 - `doc/rdd.md` を読み、該当する `.claude/skills/*` を適用して判断軸を揃える（例: `ui-designer` / `usability-psychologist`）。
 - 詳細運用（サンプル運用/依存評価補助/ADR-lite）は `doc/ai_guidelines.md` を参照。
 
+## 見た目の基準（ビューポート）について
+- まず `doc/rdd.md` の「ターゲット表示環境（事実）」を参照し、**そのビューポートを基準**にSSOTを作る
+- 未記入の場合は、以下を **推奨デフォルト**として仮置きし、出力やレビューの前提に明記する：
+  - desktop: 1440x900
+  - mobile: 390x844
+  - tablet: 834x1194
+
 ## 事前チェック（必須）：Figma MCPが「使える」状態か
 `/design-ssot` は **Figma MCPが利用可能であることが前提**。最初に必ず以下を確認してから進める。
 

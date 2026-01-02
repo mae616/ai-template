@@ -17,6 +17,13 @@
 - `doc/rdd.md` を読み、該当する `.claude/skills/*` を適用して判断軸を揃える（例: `ui-designer` / `usability-psychologist` / `tailwind`）。
 - 詳細運用（ADR-lite/差分/サンプル運用等）は `doc/ai_guidelines.md` を参照。
 
+## 見た目の基準（ビューポート）について
+- まず `doc/rdd.md` の「ターゲット表示環境（事実）」を参照し、生成HTMLの確認は **そのビューポートを基準**に行う
+- 未記入の場合は、以下を **推奨デフォルト**として仮置きする：
+  - desktop: 1440x900
+  - mobile: 390x844
+  - tablet: 834x1194
+
 ### 入力
 - $PAGE_KEY（任意）: 画面キー（省略時は主要画面）
 
