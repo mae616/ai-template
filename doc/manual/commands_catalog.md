@@ -17,8 +17,11 @@
 - コミット文: `/commit-msg`（ステージ差分から日本語コミットメッセージ生成）
 - タスク: `/task-list` → `/task-gen` → `/task-run`
 - バグ: `/bug-new` → `/bug-investigate` → `/bug-propose` → `/bug-fix`
-- デザイン（会話起点）: `/design-mock` → `/design-split` → `/design-ui` → `/design-components` → `/design-assemble`
-- デザイン（Figma起点）: `/design-ssot` → `/design-html` → `/design-split` → `/design-ui` → `/design-components` → `/design-assemble`
+- デザイン（会話起点）: `/design-mock` → `/design-ui` → `/design-components` → `/design-assemble`
+  - 補足: `/design-mock` が `mock.html`（1枚ペラ）を出した場合のみ、必要に応じて `/design-split` を使う
+- デザイン（Figma起点）: `/design-ssot` → `/design-ui` → `/design-components` → `/design-assemble`
+  - 補足: 静的HTMLが欲しい場合のみ `/design-html`（任意）
+  - 補足: 1枚ペラHTMLをページ分割したい場合のみ `/design-split`（任意）
 - 壁打ち: `/pair plan|design|arch|dev`
 - 初見: `/repo-tour`
 

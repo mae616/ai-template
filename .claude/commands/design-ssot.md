@@ -140,7 +140,8 @@ DevContainerを使わない場合は「自動登録」が効かないため、�
   - 写真/ラスタ: WebP または PNG（透過が必要ならPNG）
   - 複雑なイラスト: SVG優先、無理ならPNG
 - **命名**
-  - `doc/design/assets/{kind}/{name}@{scale}.{ext}` を基本（例: `icons/search@1x.svg`, `images/hero@2x.webp`）
+  - `public/design-assets/{kind}/{name}@{scale}.{ext}` または `static/design-assets/{kind}/{name}@{scale}.{ext}` を基本
+    - 例: `icons/search@1x.svg`, `images/hero@2x.webp`
   - `name` は英小文字 + `-`（kebab-case）で安定させる
 
 ### ダウンロードできない場合（ユーザーにお願いする手順）

@@ -172,6 +172,8 @@ HTMLは**必須ではありません**（必要なときだけオプションで
         - `doc/design/design-tokens.json`
         - `doc/design/components.json`
         - `doc/design/design_context.json`
+        - `doc/design/copy.json`
+        - `doc/design/assets/assets.json`
         - `doc/design/html/mock.html`（目で見て調整するための静的HTML）
     - **反復（推奨）**:
         - `mock.html` を手で調整したら、**差分（diff）または変更点の箇条書きを会話で共有**する（状況で使い分けOK）
@@ -194,6 +196,8 @@ HTMLは**必須ではありません**（必要なときだけオプションで
         - `doc/design/design-tokens.json`
         - `doc/design/components.json`
         - `doc/design/design_context.json`
+        - `doc/design/copy.json`
+        - `doc/design/assets/assets.json`
     - **前提（重要）**:
         - Figma MCP（Dev Mode）が利用可能であること（未設定だと `/design-ssot` は動きません）
         - 迷ったら `/design-ssot` の「事前チェック（必須）：Figma MCPが使える状態か」を参照
@@ -216,7 +220,7 @@ HTMLは**必須ではありません**（必要なときだけオプションで
 
 #### 実行例（Figmaルート：最短）
 ```bash
-/design-ssot HomePage
+/design-ssot HomePage=https://...
 /design-ui
 /design-components src
 /design-assemble vue
