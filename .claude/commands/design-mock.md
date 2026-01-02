@@ -1,7 +1,15 @@
-# [デザイン] ルート1: 会話から1枚ペラの静的HTMLを生成（SSOTも同時に用意）
+# [デザイン] 1.（会話起点）SSOT + 静的HTML（叩き台）を生成
 
 ## 入力: $ARGUMENTS（任意）
 - 画面名/用途（例: `HomePage`, `Pricing`, `Login`）
+
+## いつ使う？（位置づけ）
+- Figmaが無い/固まっていない状態で、まず叩き台を作って会話で詰めたいとき
+- 「静的HTMLで目視」しながら調整し、その根拠を **SSOT（tokens/components/context）** に反映して後続へ合流したいとき
+
+## 次に何をする？
+- 1枚ペラをページ単位にしたい → `/design-split`（任意）
+- 実装に進む → `/design-ui` → `/design-components` → `/design-assemble`
 
 ---
 

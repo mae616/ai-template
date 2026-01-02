@@ -1,12 +1,51 @@
-# [デザイン] 1. SSOT（tokens/components/context）を生成（Figmaルート）
+# [デザイン] 1.（Figma起点）SSOT（tokens/components/context/assets）を生成
 
 ## コマンド: /design-ssot $FIGMA_REF
 Figma MCPから設計情報を抽出し、AI/人間が参照するSSOTを作る。**実装はしない**。
+
+## いつ使う？（位置づけ）
+- Figma（Dev Mode）を根拠に、後続でブレない **SSOT（tokens/components/context/assets）** を確立したいとき
+- 会話起点なら `/design-mock`、Figma起点ならこの `/design-ssot` から始める
+
+## 次に何をする？
+- 実装に進む → `/design-ui` → `/design-components` → `/design-assemble`
+- ドキュメント/共有用の静的HTMLが欲しい → `/design-html`（任意）
 
 ## 共通前提（参照）
 - 口調・出力規約・差分出力の方針は `CLAUDE.md` に従う。
 - `doc/rdd.md` を読み、該当する `.claude/skills/*` を適用して判断軸を揃える（例: `ui-designer` / `usability-psychologist`）。
 - 詳細運用（サンプル運用/依存評価補助/ADR-lite）は `doc/ai_guidelines.md` を参照。
+
+## 事前チェック（必須）：Figma MCPが「使える」状態か
+`/design-ssot` は **Figma MCPが利用可能であることが前提**。最初に必ず以下を確認してから進める。
+
+### 1) Claude Code側：MCP登録の確認
+- `claude mcp list` を確認し、`figma` が登録されていること
+
+### 2) 接続先：Figma MCP（Dev Mode）の到達確認
+- DevContainerからは通常 `http://host.docker.internal:3845/mcp`（環境によっては `host.containers.internal`）に到達する
+- 到達できない場合は、**MCPが未起動/未設定/権限不足**の可能性が高い（推測でSSOT生成を続けない）
+
+### 3) うまくいかないとき（ユーザーにお願いする手順）
+AI側で「MCPが無い/設定されていない」など見当違いな推測をしないために、まず以下をユーザーに依頼する：
+1. **Figma Desktop アプリで Dev Mode / MCP サーバーを有効化**する（Figma公式手順に従う）
+2. **DevContainerを再起動**する（`postCreateCommand` の `.devcontainer/setup.sh` が `claude mcp add --transport http figma ...` を実行する前提）
+3. それでもダメなら、ユーザーに以下を確認してもらう：
+   - 3845番ポートが開いているか（Figma側のMCPが起動しているか）
+   - URLが環境と合っているか（`host.docker.internal` / `host.containers.internal`）
+   - 必要なら `FIGMA_MCP_URL` を明示して再セットアップする
+
+### 4) DevContainer以外で使う場合（ローカル実行/別コンテナ）
+DevContainerを使わない場合は「自動登録」が効かないため、次を前提として扱う：
+- **前提**
+  - Figma Desktop 側で Dev Mode / MCP サーバーが有効で、MCPが起動していること
+  - Claude Code（CLI）を実行する環境から、そのMCPのHTTPエンドポイントに到達できること
+- **手順（最小）**
+  1. `claude mcp list` を確認し、`figma` が無ければ登録する
+     - 例: `claude mcp add --transport http figma "<FIGMA_MCP_URL>"`
+  2. `FIGMA_MCP_URL` を環境に合わせて決める（例: `http://host.docker.internal:3845/mcp`）
+     - コンテナ→ホストの到達名は環境依存（Docker: `host.docker.internal` / Podman: `host.containers.internal`）
+  3. 到達できない場合は、ユーザーに「Figma側のMCP起動・権限・ポート・URL」を確認してもらう（推測で先に進めない）
 
 ### 入力
 - $FIGMA_REF: Figmaファイル/ページ識別子（MCPが認識できる指定）
@@ -39,8 +78,7 @@ Figma MCPから設計情報を抽出し、AI/人間が参照するSSOTを作る�
 - design_context.json に constraints/resizing が含まれる
 - components.json のvariantsが「実装の分岐」に落とせる粒度になっている
 - border/background/gradient/blur/blend/strokeAlign が存在する要素について、tokens と components の `styles` 参照に落ちている（取りこぼし0）
-- 画像アセットが必要な箇所（ロゴ/アイコン/イラスト/写真）が `doc/design/assets/` と `assets.json` に落ちている（取りこぼし0）
- - 画像アセットが必要な箇所（ロゴ/アイコン/イラスト/写真）が「スタック既定の置き場」 と `assets.json` に落ちている（取りこぼし0）
+- 画像アセットが必要な箇所（ロゴ/アイコン/イラスト/写真）が「スタック既定の置き場」 と `doc/design/assets/assets.json` に落ちている（取りこぼし0）
 
 ### 画像アセットの扱い（重要）
 #### アセットの保存先（スタック既定）

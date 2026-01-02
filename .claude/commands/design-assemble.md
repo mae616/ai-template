@@ -1,8 +1,15 @@
-# [デザイン] 4. RDD準拠の技術スタックに結合するアダプタ層を生成。  
+# [デザイン] 4. variants → 型付きProps/属性にマッピングして結合（再利用UI）  
 
 ## コマンド: /design-assemble [$TARGET]
 `doc/design/components.json` の variants を **型付きProps/属性** にマッピングし、選択スタックへ**結合（再利用可能UI）**するアダプタ層。  
 既定は doc/rdd.md の技術スタック。引数で変更する際は **ADR-lite承認必須**。
+
+## いつ使う？（位置づけ）
+- `/design-ui` → `/design-components` が終わって、見た目の部品が分離できたあと
+- `components.json` の variants を「実装の分岐（props/attrs/enum）」に落とし、再利用可能なUIとして仕上げたいとき
+
+## 次に何をする？
+- 実装タスクへ合流（状態/データ取得/ルーティング等は別工程で入れる）
 
 ## 共通前提（参照）
 - 口調・出力規約・差分出力の方針は `CLAUDE.md` に従う。

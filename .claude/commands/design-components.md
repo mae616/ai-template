@@ -1,6 +1,13 @@
-# [デザイン] 共通ルート: 静的UI骨格をコンポーネント化して分離（推奨）
+# [デザイン] 3. 静的UI骨格 → Layout/Component を抽出して分離
 
 ## コマンド: /design-components
+
+## いつ使う？（位置づけ）
+- `/design-ui` で静的UI骨格（見た目のみ）を生成したあと
+- 「ページ固有レイアウト」と「再利用コンポーネント」を分離して、後続の `/design-assemble` をやりやすくしたいとき
+
+## 次に何をする？
+- variants（size/tone/state等）を型付きprops/属性に落として結合 → `/design-assemble`
 
 ## 入力: $ARGUMENTS（任意）
 - 対象ディレクトリ（例: `src/` や `app/` など）

@@ -1,8 +1,16 @@
-# [デザイン] 共通ルート: 1枚ペラHTMLをページ単位に分割（推奨）
+# [デザイン] （任意）1枚ペラHTML → ページ単位の静的HTMLに分割
 
 ## 入力: $ARGUMENTS
 - 分割対象のHTMLパス（例: `doc/design/html/mock.html`）
 - 任意: 分割したいページキー（例: `HomePage Pricing Login`）
+
+## いつ使う？（位置づけ）
+- `/design-mock` で「1枚ペラHTML」を作ったあと、ページ単位に管理したいとき
+- 以降の `/design-ui`（静的UI骨格生成）に渡しやすい形に整えるため
+
+## 次に何をする？
+- 分割した `doc/design/html/{page}.html` を根拠にSSOT（tokens/components/context）も整合させる
+- 実装に進むなら `/design-ui` → `/design-components` → `/design-assemble`
 
 ---
 

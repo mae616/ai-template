@@ -184,6 +184,10 @@ HTMLは**必須ではありません**（必要なときだけオプションで
         - `doc/design/design-tokens.json`
         - `doc/design/components.json`
         - `doc/design/design_context.json`
+    - **前提（重要）**:
+        - Figma MCP（Dev Mode）が利用可能であること（未設定だと `/design-ssot` は動きません）
+        - 迷ったら `/design-ssot` の「事前チェック（必須）：Figma MCPが使える状態か」を参照
+        - DevContainerを使わない場合は、`claude mcp add --transport http figma "<FIGMA_MCP_URL>"` などで **手動登録が必要**（詳細は `/design-ssot` の「DevContainer以外で使う場合」）
 2. **[/design-ui](.claude/commands/design-ui.md)**（SSOT JSON → 静的UI骨格）
 3. **[/design-components](.claude/commands/design-components.md)**（静的UI骨格 → コンポーネント/レイアウト抽出）
 4. **[/design-assemble](.claude/commands/design-assemble.md)**（components.json → 各技術スタック用UIへ結合）

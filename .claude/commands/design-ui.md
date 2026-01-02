@@ -1,8 +1,16 @@
-# [デザイン] 2. JSONを参照して静的UI骨格を生成
+# [デザイン] 2. SSOT → 静的UI骨格（見た目のみ）を生成
 
 ## コマンド: /design-ui [$TARGET]
 設計JSON（tokens/components/design_context）を参照し、**静的UI骨格**のみ生成。
 ロジック/状態/データ取得は入れない。ターゲットは **doc/rdd.md** の技術スタックを既定とし、引数で上書きする場合は **ADR-lite承認必須**。
+
+## いつ使う？（位置づけ）
+- `/design-ssot` または `/design-mock` で **SSOT（tokens/components/context）** が揃ったあと
+- 「実装スタック準拠のファイル配置」で **見た目だけの骨格**を先に作りたいとき（後で分割・結合する前提）
+
+## 次に何をする？
+- 重複UIを減らして保守しやすくする → `/design-components`
+- variantsを型付きprops/属性に落として再利用UIにする → `/design-assemble`
 
 ## 共通前提（参照）
 - 口調・出力規約・差分出力の方針は `CLAUDE.md` に従う。
