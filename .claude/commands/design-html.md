@@ -16,6 +16,7 @@
 
 ### 仕様
 - 入力となるJSON（`doc/design/design-tokens.json`, `doc/design/components.json`, `doc/design/design_context.json`）が存在する前提（通常は `/design-ssot` の成果物）
+- `doc/design/assets/assets.json` が存在する場合は必ず参照し、画像アセットを反映する（baseDir配下の相対パス）
 - React/Vue 等の実装に依存しない生成
 - 画像は相対またはデータURIで完結
 - **RDD準拠**のスタイルのみ（tokens必須）

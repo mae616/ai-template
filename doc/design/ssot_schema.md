@@ -6,6 +6,7 @@
 - `doc/design/design-tokens.json` / `doc/design/components.json` / `doc/design/design_context.json` を **同じ解釈で**後続へ渡す
 - 後続（`/design-html` → `/design-ui` → `/design-components` → `/design-assemble`）の精度と再現性を上げる
 - 技術スタックのSSOTは **`doc/rdd.md`** とし、SSOT JSON は可能な限り **スタック非依存**に保つ
+- CSSだけでは再現できない **画像アセット**（ロゴ/アイコン/イラスト/写真等）も、可能な限りSSOTとして管理する（後続で参照できるように）
 
 ---
 
@@ -15,6 +16,10 @@
 - **物理値（primitive）** と **意味（semantic）** を混ぜない
 - semantic は primitive を参照する（値の重複を避ける）
 - 単位を明記する（px/%/rem など）
+- CSSで表現できる見た目（例: **背景/枠線/角丸/影/不透明度**）は、可能な限り tokens に落とす（後続の再現性を上げる）
+  - 対象例: gradient（グラデ）/ blur（ぼかし）/ blend mode（ブレンド）/ strokeAlign（ストローク位置）
+  - blur は **filter（要素自体）** と **backdrop-filter（背景）** を区別して保持する（同じ“ぼかし”でも意味が違うため）
+  - strokeAlign（inside/center/outside）は、WebのCSSでは完全一致が難しい場合があるため、**意図としてSSOTに保持**し、後続で近似する（近似時は差分を明記）
 
 ### 例（抜粋）
 
@@ -26,6 +31,17 @@
       "gray": { "900": "#111827", "100": "#F3F4F6" },
       "blue": { "600": "#2563EB" }
     },
+    "border": {
+      "width": { "0": "0px", "1": "1px", "2": "2px" },
+      "style": { "solid": "solid" },
+      "align": { "inside": "inside", "center": "center", "outside": "outside" }
+    },
+    "opacity": { "100": 1, "80": 0.8 },
+    "gradient": {
+      "brand": "linear-gradient(90deg, #2563EB 0%, #7C3AED 100%)"
+    },
+    "blur": { "sm": "8px", "md": "16px" },
+    "blendMode": { "normal": "normal", "multiply": "multiply", "screen": "screen", "overlay": "overlay" },
     "space": { "0": "0px", "1": "4px", "2": "8px", "4": "16px" },
     "radius": { "sm": "6px", "md": "10px" },
     "font": {
@@ -42,6 +58,16 @@
         "primary": { "ref": "primitives.color.gray.900" },
         "muted": { "ref": "primitives.color.gray.100" }
       },
+      "surface": {
+        "page": { "ref": "primitives.color.gray.100" },
+        "card": { "ref": "primitives.color.gray.100" }
+      },
+      "surfaceGradient": {
+        "brand": { "ref": "primitives.gradient.brand" }
+      },
+      "border": {
+        "default": { "ref": "primitives.color.gray.900" }
+      },
       "brand": {
         "primary": { "ref": "primitives.color.blue.600" }
       }
@@ -53,6 +79,26 @@
 }
 ```
 
+> 補足: gradient は、スタック非依存の最小形として **CSS文字列**でもよい。  
+> ただし、後続でネイティブUI等へ落とす可能性がある場合は、次のような“構造化”表現を併用してもよい（任意）:
+>
+> ```json
+> {
+>   "primitives": {
+>     "gradientObject": {
+>       "brand": {
+>         "type": "linear",
+>         "angleDeg": 90,
+>         "stops": [
+>           { "color": "#2563EB", "pos": 0 },
+>           { "color": "#7C3AED", "pos": 1 }
+>         ]
+>       }
+>     }
+>   }
+> }
+> ```
+
 ---
 
 ## 2) `doc/design/components.json`（Components / Variants）
@@ -60,6 +106,8 @@
 ### ルール
 - variants は **propsに落とせる粒度**（`size/tone/state` のように実装分岐できる単位）
 - “画面固有の見た目”は、まずはコンポーネント化せずレイアウトで持つ（過剰抽象化を避ける）
+- border/background/影/角丸など **CSSで表現できる見た目**は、可能な限り tokens を参照して `styles` として残す（後続が再現できるように）
+  - `styles` は **実装が復元できる粒度**で残す（例: 背景=塗り/グラデ、枠線=色/太さ/位置、効果=ぼかし/ブレンド）
 
 ### コンポーネント命名規約（固定）
 - `name` は **PascalCase**（例: `Button`, `PriceCard`, `NavBar`）
@@ -125,6 +173,27 @@ variants のキー名は「意味が通る共通語彙」に固定し、**プロ
       },
       "defaults": { "size": "md", "tone": "primary", "state": "default" },
       "slots": ["label", "iconLeading", "iconTrailing"],
+      "styles": {
+        "backgroundColorRef": "semantic.color.brand.primary",
+        "backgroundGradientRef": "semantic.color.surfaceGradient.brand",
+        "textColorRef": "semantic.color.text.primary",
+        "border": {
+          "colorRef": "semantic.color.border.default",
+          "widthRef": "primitives.border.width.1",
+          "styleRef": "primitives.border.style.solid",
+          "alignRef": "primitives.border.align.inside"
+        },
+        "radiusRef": "primitives.radius.md",
+        "shadowRef": "primitives.shadow.sm",
+        "effects": {
+          "blur": {
+            "type": "backdrop",
+            "amountRef": "primitives.blur.sm"
+          },
+          "blendModeRef": "primitives.blendMode.normal",
+          "opacityRef": "primitives.opacity.80"
+        }
+      },
       "a11y": {
         "role": "button",
         "keyboard": true,
@@ -214,5 +283,52 @@ variants のキー名は「意味が通る共通語彙」に固定し、**プロ
 - `/design-html` は上記3ファイルを入力として **スタック非依存HTML** を出す
 - `/design-ui` は上記3ファイルを入力として **スタック別の静的骨格** を出す（スタックは `doc/rdd.md` が既定）
 - `/design-assemble` は `components.json` の variants を **型付きprops** に落として結合する（スタックは `doc/rdd.md` が既定）
+
+---
+
+## 4) `doc/design/assets/assets.json`（Assets Manifest）
+
+### 目的
+- Figma（またはユーザー提供）から取得した画像アセットを `doc/design/assets/` に保存し、どの要素にどの画像を使うかを機械可読で残す
+- `/design-html` や `/design-ui` が参照して、画像の取りこぼしを防ぐ
+
+### ルール
+- 画像の**実体**は「スタック既定の公開ディレクトリ」（例: `public/` や `static/`）配下へ保存する
+- manifestは `doc/` 側に置き、`baseDir` と `files[].path` の組み合わせで参照する（`path` は `baseDir` からの相対）
+- “実装依存の最適化”は後工程で行う（ここでは **SSOTとしての対応関係**を優先）
+
+### 例（抜粋）
+
+```json
+{
+  "meta": { "version": 1 },
+  "baseDir": "public/design-assets",
+  "assets": [
+    {
+      "key": "AppLogo",
+      "type": "logo",
+      "preferredFormat": "svg",
+      "files": [
+        { "path": "logos/app-logo.svg", "format": "svg", "scale": "1x" }
+      ],
+      "usedBy": [
+        { "component": "NavBar", "slot": "brand" }
+      ]
+    },
+    {
+      "key": "HeroImage",
+      "type": "image",
+      "preferredFormat": "webp",
+      "files": [
+        { "path": "images/hero@1x.webp", "format": "webp", "scale": "1x" },
+        { "path": "images/hero@2x.webp", "format": "webp", "scale": "2x" }
+      ],
+      "usedBy": [
+        { "page": "HomePage", "frame": "Hero" }
+      ]
+    }
+  ]
+}
+```
 
 

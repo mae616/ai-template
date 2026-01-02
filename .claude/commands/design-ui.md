@@ -23,6 +23,7 @@
 - `doc/design/design-tokens.json`
 - `doc/design/components.json`
 - `doc/design/design_context.json`
+ - `doc/design/assets/assets.json`（任意。存在する場合は必ず参照して画像を配置する）
 （通常は `/design-ssot` の成果物）
 
 ### 参照（スキーマ）
@@ -41,6 +42,13 @@
 ### 禁止
 - 状態/ロジック/フェッチの追加
 - RDD逸脱スタックの導入（$TARGET指定時はADR-lite要）
+
+### 画像アセット（assets.json）の適用ルール
+- `doc/design/assets/assets.json` が存在する場合は、`baseDir` 配下にある画像を参照してUI骨格に反映する
+  - 例: Next/Astro/React → `public/design-assets/*`
+  - 例: SvelteKit → `static/design-assets/*`
+- `components.json` の `slots` や `usedBy` 情報と照合し、画像が必要な箇所（ロゴ/アイコン/イラスト/写真）の取りこぼしを防ぐ
+- 画像の最適化（次世代フォーマット変換/圧縮/レスポンシブ画像生成等）は、この工程では必須にしない（まず再現性を優先）
 
 ### ゲート
 - 見た目一致（主要variantsのプレビュー/Story）

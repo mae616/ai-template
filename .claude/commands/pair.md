@@ -29,7 +29,7 @@
 - `plan`: `biz-researcher` / `proposition-reviewer` / `persona-designer`
 - `design`: `ui-designer` / `usability-psychologist` / （必要なら）`creative-coder`
 - `arch`: `architecture-expert` / `security-expert`
-- `dev`: `developer-specialist` / （必要なら）`security-expert`
+- `dev`: `developer-specialist` / （必要なら）`security-expert` / （UI実装なら）`frontend-implementation`
 
 ---
 

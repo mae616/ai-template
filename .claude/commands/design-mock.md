@@ -44,4 +44,6 @@
 - 主要ブレイクポイントで破綻しない（簡易でOK）
 - 情報設計（見出し/導線/主要CTA）が説明できる
 - SSOT（tokens/components/context）が矛盾なく、`/design-ui` が実行できる状態になっている
+- CSSで指定できる見た目（background/border/gradient/blur/blend/strokeAlign）が、SSOT（tokens/componentsのstyles参照）に落ちている（取りこぼし0）
+- 画像アセットが必要な箇所（ロゴ/アイコン/イラスト/写真）が `doc/design/assets/assets.json` に定義され、`baseDir` 配下に配置されている（取りこぼし0）
 

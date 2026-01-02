@@ -23,6 +23,7 @@
 - `architecture-expert`: 境界/依存/非機能/運用をトレードオフで設計（ADR-lite）
 - `developer-specialist`: 設計&実装をTDD/差分最小で進める
 - `security-expert`: OWASP基本を前提にデフォルト安全で設計・実装・レビュー
+- `frontend-implementation`: Figma/UI要件を「比率・構造・制約・状態」で実装へ翻訳（px写経を避ける）
 - `creative-coder`: 体験品質（動き/触感）をa11y/性能を守って実装
 
 ## フレームワーク（既存）
