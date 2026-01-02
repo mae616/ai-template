@@ -14,7 +14,9 @@
 
 ## 共通前提（参照）
 - 口調・出力規約・差分出力の方針は `CLAUDE.md` に従う。
-- `doc/rdd.md` を読み、該当する `.claude/skills/*` を適用して判断軸を揃える（例: `tailwind` / `creative-coder`）。
+- `doc/rdd.md` を読み、該当する `.claude/skills/*` を適用して判断軸を揃える。
+  - 例（ロール）: `frontend-implementation` / `accessibility-engineer`
+  - 例（tech）: `react` / `astro` / `svelte` / `tailwind`（※テンプレートでは固定せず、RDDのスタックに合わせて選ぶ）
 - 詳細運用（サンプル運用/依存評価補助/ADR-lite）は `doc/ai_guidelines.md` を参照。
 
 ## 見た目の基準（ビューポート）について
@@ -61,6 +63,7 @@
 - 状態/ロジック/フェッチの追加
 - RDD逸脱スタックの導入（$TARGET指定時はADR-lite要）
 - `copy.json` の文言を推測/言い換えして埋めること（不足は不足として止める）
+ - `div` クリック等でボタン/リンク相当を作ること（セマンティック要素を優先し、必要最小限のWAI-ARIAに限定する）
 
 ### 文言（copy）の適用ルール
 - `design_context.json` の text ノードは `copyKey` を持つ前提で、対応する文言を `doc/design/copy.json` から参照して埋め込む

@@ -13,7 +13,9 @@
 
 ## 共通前提（参照）
 - 口調・出力規約・差分出力の方針は `CLAUDE.md` に従う。
-- `doc/rdd.md` を読み、該当する `.claude/skills/*` を適用して判断軸を揃える（例: `ui-designer` / `tailwind` / `creative-coder`）。
+- `doc/rdd.md` を読み、該当する `.claude/skills/*` を適用して判断軸を揃える。
+  - 例（ロール）: `frontend-implementation` / `accessibility-engineer`
+  - 例（tech）: `react` / `astro` / `svelte` / `tailwind`（※テンプレートでは固定せず、RDDのスタックに合わせて選ぶ）
 - 詳細運用（ADR-lite/差分/サンプル運用等）は `doc/ai_guidelines.md` を参照。
 - SSOT JSON のスキーマ（variants命名/props/slots）は `doc/design/ssot_schema.md` を参照。
 
@@ -38,6 +40,7 @@
 
 ### ルール
 - **RDD準拠/SOLID**。逸脱は ADR-lite で理由と影響を明記
+- **a11y必須**（セマンティックHTML/JSX + 必要最小限のWAI-ARIA）。詳細は `.claude/skills/accessibility-engineer/SKILL.md` に従う。
 - Lint/Type/Test/Story すべて緑
 - ここで停止
 
