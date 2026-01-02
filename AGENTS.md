@@ -14,6 +14,10 @@
 - **1行目は要約**（50〜72文字目安）
 - **必要なら本文で背景/意図/注意点**を箇条書きで補足する
 
+補足（Cursorの自動生成が英語になる場合）:
+- Cursor Settings → Rules and Commands の **「Include `CLAUDE.md` in context」** をONにする（`CLAUDE.md` の日本語規約が効きやすくなる）
+- それでも英語になる場合は、`/commit-msg`（ステージ差分から日本語コミット文を生成）を使う
+
 例:
 - `fix: DevContainerでFigma MCPが未起動時に迷わないようREADMEを追記`
 - `refactor: setup.shのログ出力で途中終了しないようにする`

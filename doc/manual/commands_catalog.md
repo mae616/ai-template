@@ -14,6 +14,7 @@
 
 ## 推奨フロー（よく使う順）
 - セットアップ: `/setup`
+- コミット文: `/commit-msg`（ステージ差分から日本語コミットメッセージ生成）
 - タスク: `/task-list` → `/task-gen` → `/task-run`
 - バグ: `/bug-new` → `/bug-investigate` → `/bug-propose` → `/bug-fix`
 - デザイン（会話起点）: `/design-mock` → `/design-split` → `/design-ui` → `/design-components` → `/design-assemble`
@@ -24,6 +25,9 @@
 ## コマンド一覧
 ### setup
 - `/setup`: 前提読み込み（`CLAUDE.md` → `doc/rdd.md` → skills → `doc/ai_guidelines.md`）
+
+### commit
+- `/commit-msg`: ステージ差分から日本語コミットメッセージ生成
 
 ### task
 - `/task-list`: タスクリスト生成
