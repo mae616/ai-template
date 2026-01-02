@@ -1,6 +1,6 @@
 # [デザイン] 1.（Figma起点）SSOT（tokens/components/context/assets）を生成
 
-## コマンド: /design-ssot $FIGMA_REF
+## コマンド: /design-ssot $FIGMA_REFS
 Figma MCPから設計情報を抽出し、AI/人間が参照するSSOTを作る。**実装はしない**。
 
 ## いつ使う？（位置づけ）
@@ -55,12 +55,32 @@ DevContainerを使わない場合は「自動登録」が効かないため、�
   3. 到達できない場合は、ユーザーに「Figma側のMCP起動・権限・ポート・URL」を確認してもらう（推測で先に進めない）
 
 ### 入力
-- $FIGMA_REF: Figmaファイル/ページ識別子（MCPが認識できる指定）
+- $FIGMA_REFS: Figma参照（MCPが認識できる指定）
+  - **単一**: これまで通り1つのFigma URL/参照を渡す
+  - **複数（推奨）**: 複数のフレーム/ページURLを「ページキー付き」で羅列する（複数ページでも再現性を落とさないため）
+
+#### 複数指定の書式（固定）
+- 1行に1件: `{PageKey}={FIGMA_REF}`
+  - 例: `HomePage=https://...`
+  - 例: `PricingPage=https://...`
+- **禁止**: URLだけの羅列（ページキーが安定しないため）。複数指定時は必ず `PageKey=` を付ける
+
+#### PageKeyのルール（固定）
+- `PascalCase` 推奨（例: `HomePage`, `PricingPage`, `LoginPage`）
+- 既存の `doc/design/design_context.json` に同名 `pages[].key` がある場合は「追記/更新」扱い
+- 同名キーで別画面を指す場合は **衝突**として停止（推測でマージしない）
+
+#### 例
+- 単一:
+  - `/design-ssot https://...`
+- 複数:
+  - `/design-ssot HomePage=https://... PricingPage=https://... LoginPage=https://...`
 
 ### 出力（差分のみ）
 - doc/design/design_context.json   # 画面/レイアウト/constraints/resizing
 - doc/design/design-tokens.json    # 色/タイポ/spacing/半径/影/枠線/不透明度/breakpoints（単位明記）
 - doc/design/components.json       # 主要コンポーネント + variants（例: size/tone/state）
+- doc/design/copy.json             # 文字の文言（copyKey→文言）。一字一句固定（言い換え禁止）
 - (スタック既定の置き場)/design-assets/  # 画像アセット（Figmaからexportして保存）
 - doc/design/assets/assets.json          # 画像アセットのmanifest（どの要素がどのファイルに対応するか）
 
@@ -68,6 +88,9 @@ DevContainerを使わない場合は「自動登録」が効かないため、�
 - JSONは**単位明記**（px/%/unitless）
 - tokens は「物理値」と「semantic（意味）」を混ぜない（例: `color.gray.900` と `color.text.primary` を分け、semanticは物理へ参照する）
 - variants は **props/属性に落とせる粒度**（例: { size:["sm","md","lg"] }）
+- **文字の文言は必ずSSOT化**する（`doc/design/copy.json`）
+  - `design_context.json` の text ノードは **必ず `copyKey` で `copy.json` を参照**する（文言の直書き禁止）
+  - `copy.json` に無い `copyKey` を参照してはいけない（不足時は生成を止め、ユーザーに `FIGMA_REF` 再提示 or 文言提供を依頼する）
 - **CSSで指定できる見た目は可能な限りSSOT化する**（後続の再現性を上げる）
   - 例: background（塗り/グラデ）/ border（stroke: 色・太さ・style・位置）/ radius / shadow / opacity / blur / blend mode
   - blur は **filter（要素自体）** と **backdrop-filter（背景）** を区別してSSOTに残す
@@ -78,14 +101,32 @@ DevContainerを使わない場合は「自動登録」が効かないため、�
 - SSOTの最低限スキーマは `doc/design/ssot_schema.md` を参照。
 - `doc/design/components.json` の variants 命名規約は `doc/design/ssot_schema.md` に従い、プロジェクト横断で揃える。
 - 画像（アイコン/ロゴ/イラスト/写真など）で **CSSだけでは再現できないもの**は、可能な限りFigmaからexportして「スタック既定の置き場」に保存し、`assets.json` に対応関係を残す
+- 動画/アニメ（MP4/GIF/Lottie等）も同様に **assetsとしてmanifest化**する（取得できなければ `status: failed` + `error` を必ず記録し、ユーザーに手順を依頼する）
+- **複数入力のマージ規約（固定）**
+  - `design_context.json.pages` は **入力した PageKey の配列**として統合する
+  - `copy.json` の `copyKey` は **必ずページキーで名前空間を切る**（例: `homePage.hero.title`）
+  - `assets.json` の `assetKey` も **ページ横断で一意**にする
+    - 同じ `assetKey` が複数入力に現れた場合は、同一ファイル（同一内容）であることが確認できる場合のみOK
+    - 内容が異なる場合は **衝突**として停止し、ユーザーにキー命名の修正を依頼する
+- **tokensの整合（固定）**
+  - 複数入力で tokens が矛盾する場合（例: `semantic.color.text.primary` の参照先がページで違う）は **衝突**として停止
+  - 推測で片方に寄せたり、別名tokenを勝手に増やさない（必要ならユーザーと命名/設計を合意してから）
 - ここで停止
 
 ### ゲート
 - tokens/variantsに未定義値なし
 - design_context.json に constraints/resizing が含まれる
 - components.json のvariantsが「実装の分岐」に落とせる粒度になっている
+- `copy.json` に未定義文言なし（参照される `copyKey` の不足0件）
 - border/background/gradient/blur/blend/strokeAlign が存在する要素について、tokens と components の `styles` 参照に落ちている（取りこぼし0）
 - 画像アセットが必要な箇所（ロゴ/アイコン/イラスト/写真）が「スタック既定の置き場」 と `doc/design/assets/assets.json` に落ちている（取りこぼし0）
+  - `assets.json` に `status: "failed"` が1件でもある場合は、**必ずユーザーに失敗理由と次アクション**（Figma Export設定/権限/再提示/手元提供）を明示して停止する
+
+### 再現性（会話コンテキストがクリアでも再現するためのルール）
+- 後続のdesign系コマンドは、`doc/design/*` のSSOT（tokens/components/context/copy/assets）だけで再現できる状態を目標にする
+- もしSSOTが不足/破損している場合は、**推測で補わない**。次のどちらかをユーザーに依頼する：
+  - `FIGMA_REF`（Figma URL等）を再提示して、`/design-ssot` を再実行する
+  - 不足しているSSOT（例: `copy.json` / `assets.json`）の差分をユーザーに提供してもらう
 
 ### 画像アセットの扱い（重要）
 #### アセットの保存先（スタック既定）

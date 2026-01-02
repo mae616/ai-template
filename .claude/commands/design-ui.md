@@ -1,6 +1,6 @@
 # [デザイン] 2. SSOT → 静的UI骨格（見た目のみ）を生成
 
-## コマンド: /design-ui [$TARGET]
+## コマンド: /design-ui [$TARGET] [$PAGE_KEY]
 設計JSON（tokens/components/design_context）を参照し、**静的UI骨格**のみ生成。
 ロジック/状態/データ取得は入れない。ターゲットは **doc/rdd.md** の技術スタックを既定とし、引数で上書きする場合は **ADR-lite承認必須**。
 
@@ -26,6 +26,8 @@
 
 ### 入力
 - $TARGET（任意）: react | vue | svelte | swiftui | flutter | web-components | plain-html など
+- $PAGE_KEY（任意）: 画面キー（`doc/design/design_context.json` の `pages[].key`）
+  - 省略時: **全ページ**を対象に生成する（複数ページ対応の既定）
 
 ### 出力（差分のみ）
 - スタック別の標準配置へ静的UIファイル一式
@@ -38,6 +40,7 @@
 - `doc/design/design-tokens.json`
 - `doc/design/components.json`
 - `doc/design/design_context.json`
+- `doc/design/copy.json`（文言のSSOT。一字一句固定）
  - `doc/design/assets/assets.json`（任意。存在する場合は必ず参照して画像を配置する）
 （通常は `/design-ssot` の成果物）
 
@@ -57,6 +60,13 @@
 ### 禁止
 - 状態/ロジック/フェッチの追加
 - RDD逸脱スタックの導入（$TARGET指定時はADR-lite要）
+- `copy.json` の文言を推測/言い換えして埋めること（不足は不足として止める）
+
+### 文言（copy）の適用ルール
+- `design_context.json` の text ノードは `copyKey` を持つ前提で、対応する文言を `doc/design/copy.json` から参照して埋め込む
+- `copyKey` が未定義/不足している場合は、**推測で生成しない**。ユーザーに以下を依頼して停止する：
+  - `FIGMA_REF` を再提示して `/design-ssot` をやり直す
+  - または `copy.json` の差分（追加すべきキーと文言）を提供してもらう
 
 ### 画像アセット（assets.json）の適用ルール
 - `doc/design/assets/assets.json` が存在する場合は、`baseDir` 配下にある画像を参照してUI骨格に反映する
@@ -64,6 +74,7 @@
   - 例: SvelteKit → `static/design-assets/*`
 - `components.json` の `slots` や `usedBy` 情報と照合し、画像が必要な箇所（ロゴ/アイコン/イラスト/写真）の取りこぼしを防ぐ
 - 画像の最適化（次世代フォーマット変換/圧縮/レスポンシブ画像生成等）は、この工程では必須にしない（まず再現性を優先）
+- `assets.json` に `status: "failed"` がある場合は、**必ずユーザーに不足（動画/画像等）を報告**し、手元提供またはFigma Export設定の依頼をして停止する（推測で代替しない）
 
 ### ゲート
 - 見た目一致（主要variantsのプレビュー/Story）

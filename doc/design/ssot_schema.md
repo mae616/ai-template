@@ -17,6 +17,26 @@
 
 ---
 
+## 複数ページ/複数入力（Figma URLを複数渡す）運用（固定）
+複数ページ対応は、`/design-ssot` に **複数のFigma参照**を渡すことで行う。  
+このとき、後工程の再現性を落とさないために「キーの安定」と「衝突時に止める」を最優先にする。
+
+### 入力の原則
+- 複数入力時は、**必ずページキー付き**（`{PageKey}={FIGMA_REF}`）で受ける（URLだけの羅列はしない）
+- `PageKey` は `pages[].key` のSSOTであり、後工程（`/design-html` / `/design-ui` 等）の選択単位になる
+
+### マージ規約（固定）
+- `design_context.json.pages` は **PageKeyごと**に保持する（ページ同士を勝手に混ぜない）
+- `copy.json` の `copyKey` は **ページキーで名前空間を切る**（例: `homePage.hero.title`）
+- `assets.json` の `assetKey` は **ページ横断で一意**にする（衝突は停止）
+
+### 衝突（conflict）の扱い（固定）
+- tokens が矛盾する場合（同じキーの意味/参照先がページで違う）は **停止**し、ユーザーと命名/設計を合意してから進める
+- `assetKey` が衝突し、内容が異なる場合は **停止**し、キー命名の修正を依頼する
+- 推測で「どちらかを採用」「自動で別名tokenを追加」などはしない
+
+---
+
 ## 1) `doc/design/design-tokens.json`（Design Tokens）
 
 ### ルール
@@ -218,6 +238,8 @@ variants のキー名は「意味が通る共通語彙」に固定し、**プロ
 ### ルール
 - 画面（page）とレイアウト（frame/section）の階層を持つ
 - constraints/resizing（Figma）を、後続がスタック別にマッピングできる形で残す
+- **文言（コピー）はこのファイルに直書きしない**。必ず `doc/design/copy.json` の `copyKey` を参照して紐付ける（AIの言い換え混入を防ぐため）。
+- `pages[].key` は `/design-ssot` の `PageKey` と一致させ、後続コマンドのページ選択単位として扱う
 
 ### constraints/resizing → レスポンシブ対応表（固定）
 この対応表は `/design-ui` が実装へ落とすときの基準。
@@ -266,6 +288,20 @@ variants のキー名は「意味が通る共通語彙」に固定し、**プロ
       "frames": [
         {
           "key": "Hero",
+          "nodes": [
+            {
+              "key": "HeroTitle",
+              "type": "text",
+              "copyKey": "home.hero.title",
+              "typographyTokenRef": "primitives.font.size.lg",
+              "colorTokenRef": "semantic.color.text.primary"
+            },
+            {
+              "key": "HeroImage",
+              "type": "asset",
+              "assetKey": "HeroImage"
+            }
+          ],
           "layout": {
             "type": "autoLayout",
             "direction": "vertical",
@@ -303,6 +339,8 @@ variants のキー名は「意味が通る共通語彙」に固定し、**プロ
 - 画像の**実体**は「スタック既定の公開ディレクトリ」（例: `public/` や `static/`）配下へ保存する
 - manifestは `doc/` 側に置き、`baseDir` と `files[].path` の組み合わせで参照する（`path` は `baseDir` からの相対）
 - “実装依存の最適化”は後工程で行う（ここでは **SSOTとしての対応関係**を優先）
+- **取得/エクスポートできなかったアセットは必ずmanifestに残す**（`status: "failed"` + `error`）。後続が「勝手に近似」しないための安全装置。
+- `assetKey` はページ横断で一意にする（同名で内容が異なる場合は衝突として停止）
 
 ### 例（抜粋）
 
@@ -315,6 +353,7 @@ variants のキー名は「意味が通る共通語彙」に固定し、**プロ
       "key": "AppLogo",
       "type": "logo",
       "preferredFormat": "svg",
+      "status": "ok",
       "files": [
         { "path": "logos/app-logo.svg", "format": "svg", "scale": "1x" }
       ],
@@ -326,6 +365,7 @@ variants のキー名は「意味が通る共通語彙」に固定し、**プロ
       "key": "HeroImage",
       "type": "image",
       "preferredFormat": "webp",
+      "status": "ok",
       "files": [
         { "path": "images/hero@1x.webp", "format": "webp", "scale": "1x" },
         { "path": "images/hero@2x.webp", "format": "webp", "scale": "2x" }
@@ -333,8 +373,50 @@ variants のキー名は「意味が通る共通語彙」に固定し、**プロ
       "usedBy": [
         { "page": "HomePage", "frame": "Hero" }
       ]
+    },
+    {
+      "key": "HeroBackgroundVideo",
+      "type": "video",
+      "preferredFormat": "mp4",
+      "status": "failed",
+      "error": "Figma MCPでexportできませんでした（権限/設定/対象レイヤーのExport未設定の可能性）",
+      "files": [],
+      "usedBy": [
+        { "page": "HomePage", "frame": "Hero" }
+      ]
     }
   ]
+}
+```
+
+---
+
+## 5) `doc/design/copy.json`（Copy / 文言SSOT）
+
+### 目的
+- **文字の文言（コピー）を一字一句固定**し、会話コンテキストがクリアでも同一文言で再現できるようにする
+- Figma由来の文言を「推測/言い換え」せず、後続（`/design-html` / `/design-ui` / 実装）で参照可能にする
+
+### ルール（固定）
+- 当面の運用は `defaultLocale: "ja-JP"` を既定とする（必要になった時点で `locales` に追加して拡張する）
+- `doc/design/design_context.json` の text ノードは **必ず `copyKey` を持ち**、`doc/design/copy.json` を参照する
+- `copy.json` に存在しない `copyKey` を参照してはいけない（不足時は生成を止め、ユーザーに `FIGMA_REF` 再提示 or 文言提供を依頼する）
+- 文言は**改変しない**（空白/改行/記号も含めて一致が目的）
+
+### 例（抜粋）
+
+```json
+{
+  "meta": { "version": 1 },
+  "defaultLocale": "ja-JP",
+  "locales": {
+    "ja-JP": {
+      "copy": {
+        "home.hero.title": "確実にFigmaと同じ見た目にしたい",
+        "home.hero.cta": "今すぐ始める"
+      }
+    }
+  }
 }
 ```
 

@@ -25,14 +25,17 @@
   - tablet: 834x1194
 
 ### 入力
-- $PAGE_KEY（任意）: 画面キー（省略時は主要画面）
+- $PAGE_KEY（任意）: 画面キー（`doc/design/design_context.json` の `pages[].key`）
+  - 省略時: **全ページ**を生成する（複数ページ対応の既定）
 
 ### 出力（差分のみ）
-- `doc/design/html/{page}.html`（tokens/variants反映、外部依存なしで再現）
+- `doc/design/html/{page}.html`（tokens/variants/copy反映、外部依存なしで再現）
 
 ### 仕様
 - 入力となるJSON（`doc/design/design-tokens.json`, `doc/design/components.json`, `doc/design/design_context.json`）が存在する前提（通常は `/design-ssot` の成果物）
+- `doc/design/copy.json`（文言のSSOT。一字一句固定）が存在する前提（不足時は推測で補わず停止）
 - `doc/design/assets/assets.json` が存在する場合は必ず参照し、画像アセットを反映する（baseDir配下の相対パス）
+  - `assets.json` に `status: "failed"` がある場合は、**必ずユーザーに不足（動画/画像等）を報告**し、手元提供またはFigma Export設定の依頼をして停止する（推測で代替しない）
 - React/Vue 等の実装に依存しない生成
 - 画像は相対またはデータURIで完結
 - **RDD準拠**のスタイルのみ（tokens必須）
@@ -41,3 +44,4 @@
 ### ゲート
 - 主要ブレイクポイントでレイアウト崩れなし（簡易スナップ）
 - tokens外の値（magic number）が混入していない
+- `copyKey` の不足0件（`design_context.json` の参照が `copy.json` で解決できる）
