@@ -109,6 +109,10 @@ skills一覧（索引）は [doc/manual/skills_catalog.md](doc/manual/skills_cat
 
 注意: DevContainerは利便性のため **ホスト側の設定ディレクトリ（例: `~/.anthropic` / `~/.claude` / `~/.cursor`）をコンテナへマウント**します。不要な場合は任意で外せます（詳細は [.devcontainer/README.md](.devcontainer/README.md) を参照）。
 
+補足（Dockerでも動く想定）:
+- `.devcontainer/devcontainer.json` は `docker-compose.yml` を利用する構成のため、**Docker Desktop（Docker）でも動作する想定**です。
+- Podman/Dockerでホスト到達名が異なる場合があります（例: `host.docker.internal` / `host.containers.internal`）。Figma MCP等で必要なら `FIGMA_MCP_URL` で上書きしてください。
+
 #### 基本的なセットアップ
 ```bash
 # 環境の確認
