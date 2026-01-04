@@ -35,6 +35,12 @@ Figma MCPから設計情報を抽出し、AI/人間が参照するSSOTを作る�
 
 ### 3) うまくいかないとき（ユーザーにお願いする手順）
 AI側で「MCPが無い/設定されていない」など見当違いな推測をしないために、まず以下をユーザーに依頼する：
+0. **`/mcp` でFigmaの再接続を確認する（推奨）**
+   - `/mcp` を実行
+   - 一覧から **`figma` ツール**を選ぶ
+   - **Reconnect**（再接続）を実行
+   - 再度 `figma` ツールを選んだときに **“View tools” が表示されている状態**になっていることを確認する
+   - 上記が満たせない場合は、以降の手順へ進まず停止（接続/権限/起動状態の問題の可能性が高い）
 1. **Figma Desktop アプリで Dev Mode / MCP サーバーを有効化**する（Figma公式手順に従う）
 2. **DevContainerを再起動**する（`postCreateCommand` の `.devcontainer/setup.sh` が `claude mcp add --transport http figma ...` を実行する前提）
 3. それでもダメなら、ユーザーに以下を確認してもらう：
