@@ -1,3 +1,8 @@
+---
+user-invocable: true
+description: "[デザイン] 3. 静的UI骨格 → Layout/Component を抽出して分離"
+---
+
 # [デザイン] 3. 静的UI骨格 → Layout/Component を抽出して分離
 
 ## コマンド: /design-components
@@ -61,5 +66,3 @@
 - 見た目が維持されている（主要ページ/主要コンポーネント）
 - 重複UIが減っている（同じ構造が3回以上なら抽出を検討）
 - ここで停止
-
-

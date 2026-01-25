@@ -1,3 +1,8 @@
+---
+user-invocable: true
+description: "[マニュアル] 1. 設定手順書の生成"
+---
+
 # [マニュアル] 1. 設定手順書の生成 (引数:作成したい設定手順書)
 
 ## 入力: $ARGUMENTS（トピック/対象サービス名 または 主要ディレクトリ）
@@ -17,7 +22,7 @@
 
 ## 参照ルール（SSOT）
 - 必須参照: `doc/rdd.md`, `doc/Architecture.md`
-- デザイン参照: `doc/design/design_context.json`, `doc/design/html/`  
+- デザイン参照: `doc/design/design_context.json`, `doc/design/html/`
   - 存在しない/空なら **デザイン参照はスキップ**（UI前提の手順は出力しない）
 
 ---
@@ -130,4 +135,3 @@
 
 ## 自己評価
 成功自信度 (1-10) ＋ 一言理由
-

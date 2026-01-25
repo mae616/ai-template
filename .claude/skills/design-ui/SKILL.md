@@ -1,3 +1,8 @@
+---
+user-invocable: true
+description: "[デザイン] 2. SSOT → 静的UI骨格（見た目のみ）を生成"
+---
+
 # [デザイン] 2. SSOT → 静的UI骨格（見た目のみ）を生成
 
 ## コマンド: /design-ui [$TARGET] [$PAGE_KEY]

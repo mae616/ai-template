@@ -1,3 +1,8 @@
+---
+user-invocable: true
+description: "[デザイン] （任意）SSOT → 静的HTML を生成し、doc/design/html/ に保存"
+---
+
 # [デザイン] （任意）SSOT → 静的HTML を生成し、`doc/design/html/` に保存
 
 ## コマンド: /design-html [$PAGE_KEY]

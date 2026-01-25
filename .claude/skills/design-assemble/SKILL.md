@@ -1,7 +1,12 @@
-# [デザイン] 4. variants → 型付きProps/属性にマッピングして結合（再利用UI）  
+---
+user-invocable: true
+description: "[デザイン] 4. variants → 型付きProps/属性にマッピングして結合（再利用UI）"
+---
+
+# [デザイン] 4. variants → 型付きProps/属性にマッピングして結合（再利用UI）
 
 ## コマンド: /design-assemble [$TARGET]
-`doc/design/components.json` の variants を **型付きProps/属性** にマッピングし、選択スタックへ**結合（再利用可能UI）**するアダプタ層。  
+`doc/design/components.json` の variants を **型付きProps/属性** にマッピングし、選択スタックへ**結合（再利用可能UI）**するアダプタ層。
 既定は doc/rdd.md の技術スタック。引数で変更する際は **ADR-lite承認必須**。
 
 ## いつ使う？（位置づけ）

@@ -53,8 +53,10 @@
 
             "WebFetch(domain:tailwindcss.com)",
 
-            "Bash(gh issue view :*)",
-            "mcp__serena"
+            "Bash(gh issue :*)",
+            "Bash(gh project :*)",
+            "Bash(gh pr :*)",
+            "Bash(gh api :*)"
         ],
         "ask": [
             "Bash(npm i -g :*)",
