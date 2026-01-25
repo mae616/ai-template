@@ -120,7 +120,6 @@ INCLUDES=(
   "CLAUDE.md"
   "AGENTS.md"
   ".claude/"
-  ".devcontainer/"
   ".mise.toml"
   "doc/index.md"
   "doc/input/"

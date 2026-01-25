@@ -84,6 +84,18 @@ pnpm test
 ```
 - 失敗時の切り分け（最小サンプル運用等）は `CLAUDE.md` の方針に従う
 
+**UI変更がある場合（Agent Browser利用可能時）:**
+```bash
+# 開発サーバーを起動後、Agent Browserでページを確認
+agent-browser open http://localhost:3000/{対象パス}
+agent-browser snapshot -i  # 要素一覧を取得
+# 必要に応じてインタラクション確認
+agent-browser click @{ref}
+agent-browser fill @{ref} "テスト入力"
+```
+- 表示崩れ、状態遷移、レスポンシブを目視確認
+- 問題発見時は修正後に再スナップショット
+
 ### 6. 進捗報告（適宜）
 ```bash
 gh issue comment {ISSUE_NUMBER} --body "📝 進捗報告

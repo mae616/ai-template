@@ -35,7 +35,7 @@ Figma MCPから設計情報を抽出し、AI/人間が参照するSSOTを作る�
 - `claude mcp list` を確認し、`figma` が登録されていること
 
 ### 2) 接続先：Figma MCP（Dev Mode）の到達確認
-- DevContainerからは通常 `http://host.docker.internal:3845/mcp`（環境によっては `host.containers.internal`）に到達する
+- Figma MCPのエンドポイント（通常 `http://localhost:3845/mcp`）に到達できること
 - 到達できない場合は、**MCPが未起動/未設定/権限不足**の可能性が高い（推測でSSOT生成を続けない）
 
 ### 3) うまくいかないとき（ユーザーにお願いする手順）
@@ -47,23 +47,19 @@ AI側で「MCPが無い/設定されていない」など見当違いな推測�
    - 再度 `figma` ツールを選んだときに **"View tools" が表示されている状態**になっていることを確認する
    - 上記が満たせない場合は、以降の手順へ進まず停止（接続/権限/起動状態の問題の可能性が高い）
 1. **Figma Desktop アプリで Dev Mode / MCP サーバーを有効化**する（Figma公式手順に従う）
-2. **DevContainerを再起動**する（`postCreateCommand` の `.devcontainer/setup.sh` が `claude mcp add --transport http figma ...` を実行する前提）
-3. それでもダメなら、ユーザーに以下を確認してもらう：
+2. それでもダメなら、ユーザーに以下を確認してもらう：
    - 3845番ポートが開いているか（Figma側のMCPが起動しているか）
-   - URLが環境と合っているか（`host.docker.internal` / `host.containers.internal`）
-   - 必要なら `FIGMA_MCP_URL` を明示して再セットアップする
+   - URLが環境と合っているか（例: `http://localhost:3845/mcp`）
+   - 必要なら MCP登録をやり直す
 
-### 4) DevContainer以外で使う場合（ローカル実行/別コンテナ）
-DevContainerを使わない場合は「自動登録」が効かないため、次を前提として扱う：
+### 4) Figma MCPの登録
 - **前提**
   - Figma Desktop 側で Dev Mode / MCP サーバーが有効で、MCPが起動していること
   - Claude Code（CLI）を実行する環境から、そのMCPのHTTPエンドポイントに到達できること
 - **手順（最小）**
   1. `claude mcp list` を確認し、`figma` が無ければ登録する
-     - 例: `claude mcp add --transport http figma "<FIGMA_MCP_URL>"`
-  2. `FIGMA_MCP_URL` を環境に合わせて決める（例: `http://host.docker.internal:3845/mcp`）
-     - コンテナ→ホストの到達名は環境依存（Docker: `host.docker.internal` / Podman: `host.containers.internal`）
-  3. 到達できない場合は、ユーザーに「Figma側のMCP起動・権限・ポート・URL」を確認してもらう（推測で先に進めない）
+     - 例: `claude mcp add --transport http figma "http://localhost:3845/mcp"`
+  2. 到達できない場合は、ユーザーに「Figma側のMCP起動・権限・ポート・URL」を確認してもらう（推測で先に進めない）
 
 ### 入力
 - $FIGMA_REFS: Figma参照（MCPが認識できる指定）

@@ -87,4 +87,21 @@ description: "[デザイン] 2. SSOT → 静的UI骨格（見た目のみ）を�
 ### ゲート
 - 見た目一致（主要variantsのプレビュー/Story）
 - tokens外の値0件 / Lint/Type green
+
+**Agent Browser利用可能時（自律確認）:**
+```bash
+# Storybook または開発サーバーを起動後
+agent-browser open http://localhost:6006  # Storybook
+# または
+agent-browser open http://localhost:3000/{対象パス}
+
+# スナップショットで要素構造を確認
+agent-browser snapshot -i
+
+# 主要breakpointsでの表示確認（viewport変更）
+# 問題発見時は修正後に再スナップショット
+```
+- デザインとの差異（余白/色/タイポ）を目視確認
+- レスポンシブ崩れがないか確認
+
 - ここで停止

@@ -1,76 +1,54 @@
-# Project AI Prompt Template
+# ai-template
 
-アプリケーション開発プロジェクト用の汎用AIテンプレートです。
-Claude Code, Cursor などのコード支援AIによるアプリ開発のプロンプトテンプレートを提供します。
+Claude Code / Cursor 向けの開発プロンプトテンプレート。
 
+「AIに何をどう伝えるか」を構造化し、人間とAIが協調して開発を進めるための仕組みを提供します。
 
-## 🚀 AIプロンプトテンプレートの特徴
-このプロジェクトは、[Cole Medin氏によるcontext-engineering-intro](https://github.com/coleam00/context-engineering-intro)をベースとして参考にしました。
+## 特徴
 
+- **スキルベースの作業フロー**: タスク管理、バグ対応、デザイン連携などを `/command` 形式で実行
+- **判断軸の明文化**: CLAUDE.md とスキル定義で、AIの思考・判断基準を共有
+- **差分ベースの反復**: 小さな変更を積み重ねる前提の設計（TDD・アジャイル寄り）
 
-コンテキスト駆動開発(アジャイル仕様開発)用テンプレート。
-アプリやAPIの仕様ではなく、AIの思考プロセスそのものを仕様化して扱うためのプロンプト群です。
-小さな反復（diff・ストップポイント）を前提とし、アジャイル的に改善しながら開発を進める設計を支援します。
+参考: [Cole Medin氏 context-engineering-intro](https://github.com/coleam00/context-engineering-intro)
 
+## 前提条件
 
+以下が利用可能な状態であること（インストール手順は各公式を参照）:
 
-このプロジェクトは少し変わっていて、平たく言うと、私(mae616)のエンジニアリングする際の思考や手順をAIで再現したものです。
+| 必須/任意 | ツール | 用途 | 確認方法 | 公式 |
+|-----------|--------|------|----------|------|
+| **必須** | Claude Code | コア | `claude --version` | [GitHub](https://github.com/anthropics/claude-code) |
+| **必須** | GitHub CLI | task/bug管理 | `gh auth status` | [公式](https://cli.github.com/) |
+| 任意 | Agent Browser | UI確認/デバッグ | `agent-browser --version` | [GitHub](https://github.com/vercel-labs/agent-browser) |
+| 任意 | Figma MCP | /design-ssot | `/mcp` で確認 | [公式ガイド](https://help.figma.com/hc/en-us/articles/32132100833559-Guide-to-the-Figma-MCP-server) |
+| 任意 | mise | ツール管理 | `mise --version` | [公式](https://mise.jdx.dev/) |
+| 任意 | Cursor | IDE | - | [公式](https://cursor.com/) |
 
-## 🚀 使用AI支援開発環境
-- [Claude Code](https://github.com/anthropics/claude-code)
-- [Figma MCPサーバー](https://help.figma.com/hc/ja/articles/32132100833559-Figma-MCP%E3%82%B5%E3%83%BC%E3%83%90%E3%83%BC%E3%81%AE%E3%82%AC%E3%82%A4%E3%83%89)
-- [Cursor](https://cursor.com/)
+### 公式プラグイン/スキルの設定
 
-## 🛠️ 開発環境
+各ツールに公式プラグインやスキルがある場合は、それを導入することで連携が強化されます。
 
-### 基本環境
-- **DevContainer**: Podman, Ubuntu 22.04 LTS
-- **Node.js**: LTS + pnpm
-- **AI支援**: Claude Code + Cursor
-- **ツール管理**: mise
-- **開発補助**: ni（lockfileに応じて正しいパッケージマネージャを選ぶ）
+```bash
+# Agent Browser（Vercel）: ブラウザ自動化でUI確認・デバッグを自律実行
+npm install -g agent-browser && agent-browser install
 
-#### ni について（コンテナ内にインストール済み）
-`ni` は lockfile（`pnpm-lock.yaml` / `package-lock.json` など）を見て、適切なパッケージマネージャで `install/run/dlx` を実行するための薄いラッパです（例: `ni`, `nr`, `nlx`）。
-DevContainerの `.devcontainer/setup.sh` で `npm i -g @antfu/ni` を実行し、コンテナ内で利用できるようにしています。
-参照: [antfu-collective/ni](https://github.com/antfu-collective/ni)
+# Figma: 公式プラグイン（MCP + Agent Skills）
+claude plugin install figma@claude-plugins-official
+```
 
-### ポート設定
-
-- **3000**: 開発サーバー用
-- **5173**: Vite開発サーバー用
-- **8888**: ポートフォワード用（用途はプロジェクト次第）
-
-## 🌟 対応技術スタック
-
-### 現在サポート済み
-- **Node.js**: LTS + pnpm (パッケージ管理)
+※ Figma以外のデザインツール（[Pencil](https://www.pencil.dev/) など）は公式MCP/Skillsが未提供の場合があります。その場合も判断軸スキル（ui-designer, frontend-implementation, creative-coder 等）は利用可能です。
 
 ## 使い方
 
-このプロジェクトは、**AIがすべてを自動で行ってくれるわけではありません**。
-利用者であるあなたは **管理者（ディレクター／マネージャー／指導員の立場）** として、私(mae616)のAIクローンが行う作業の方向性を決め、指示を出す役割を担います。
+**人間が判断し、AIが実行する**という分担で開発を進めます。
 
-### あなたの役割
-- 要件や修正内容などの **コンテキストを提供すること**
-- タスクやバグ改修の進め方について **判断と指示を行うこと**
+- 人間: コンテキスト提供、方針決定、レビュー
+- AI: 調査、実装、ドキュメント生成
 
-### 主なタスク
-- タスクリストを渡して作業を依頼する
-- バグ改修（トラブルシューティング）の起票を指示する
-- 複数段階のバグ改修で行き詰まった場合、新しいバグとして扱うかを判断する
-- バグ調査の結果を受け、新規タスク化するかを判断する
-- 作業が誤った方向に進んでいる場合、方向性を修正したり、中断を指示する
+「丸投げ」ではなく「協調」が前提。速度より再現性と確実性を重視しています。
 
-
-
-
-このように、**AIは実行役、あなたは監督役**という関係で開発が進みます。
-「AIに丸投げ」ではなく、「人間の判断を織り込みながら安全に進める」ことが前提です。
-
-※ このプロジェクトは、AIの応答が遅くても、トークンを多く消費しても、**確実で再現性のある作業**を行うことを目指しています。
-
-### 環境セットアップ
+### セットアップ
 
 このリポジトリをローカル環境に `git clone` してください。
 ※ `~/` に `clone` した例でこの先のコマンドを記述します。
@@ -118,24 +96,10 @@ skills一覧（索引）は [doc/guide/skills_catalog.md](doc/guide/skills_catal
 ボイラーテンプレートなどでReactなどの開発プロジェクトを作成してください。
 その後、`scripts/apply_template.sh` でテンプレートを反映してください。
 
-#### DevContainerの起動
-開発プロジェクトをCursor IDEで開き、左下にメッセージが表示されたら、DevContainerの起動ボタンを押してください。
+#### 実行環境について
 
-注意: DevContainerは利便性のため **ホスト側の設定ディレクトリ（例: `~/.anthropic` / `~/.claude` / `~/.cursor`）をコンテナへマウント**します。不要な場合は任意で外せます（詳細は [.devcontainer/README.md](.devcontainer/README.md) を参照）。
-
-補足（Dockerでも動く想定）:
-- `.devcontainer/devcontainer.json` は `docker-compose.yml` を利用する構成のため、**Docker Desktop（Docker）でも動作する想定**です。
-- Podman/Dockerでホスト到達名が異なる場合があります（例: `host.docker.internal` / `host.containers.internal`）。Figma MCP等で必要なら `FIGMA_MCP_URL` で上書きしてください。
-
-#### 基本的なセットアップ
-```bash
-# 環境の確認
-node --version
-pnpm --version
-
-# 依存関係のインストール
-pnpm install
-```
+本テンプレートは **Claude Codeをホスト環境で運用することを想定** しています。
+コンテナ化（DevContainer等）での運用は各プロジェクトの判断にお任せします。
 
 ## Gitブランチ運用
 
@@ -236,7 +200,7 @@ HTMLは**必須ではありません**（必要なときだけオプションで
     - **前提（重要）**:
         - Figma MCP（Dev Mode）が利用可能であること（未設定だと `/design-ssot` は動きません）
         - 迷ったら `/design-ssot` の「事前チェック（必須）：Figma MCPが使える状態か」を参照
-        - DevContainerを使わない場合は、`claude mcp add --transport http figma "<FIGMA_MCP_URL>"` などで **手動登録が必要**（詳細は `/design-ssot` の「DevContainer以外で使う場合」）
+        - Figma MCPは `claude mcp add --transport http figma "<FIGMA_MCP_URL>"` などで **手動登録が必要**（詳細は `/design-ssot` の「Figma MCPの登録」）
 2. **[/design-ui](.claude/skills/design-ui/SKILL.md)**（SSOT JSON → 静的UI骨格）
 3. **[/design-components](.claude/skills/design-components/SKILL.md)**（静的UI骨格 → コンポーネント/レイアウト抽出）
 4. **[/design-assemble](.claude/skills/design-assemble/SKILL.md)**（components.json → 各技術スタック用UIへ結合）
@@ -389,7 +353,6 @@ ai-template/
 ├── .claude/                   # Claude Code設定
 │   ├── skills/                # スキル（判断軸 + 手順系）⭐
 │   └── settings.local.json    # AIのコマンド権限
-├── .devcontainer/             # DevContainer設定
 ├── doc/                       # ドキュメント
 │   ├── index.md               # 総合入口
 │   ├── input/                 # 【人間が書く】SSOT
@@ -453,15 +416,8 @@ Feedback only OSS
 
 ## 📚 参考資料
 
-- [Claude Code](https://github.com/anthropics/claude-code)
 - [MCP Protocol](https://modelcontextprotocol.io/)
-- [Figma MCPサーバーのガイド（公式）](https://help.figma.com/hc/ja/articles/32132100833559-Figma-MCP%E3%82%B5%E3%83%BC%E3%83%90%E3%83%BC%E3%81%AE%E3%82%AC%E3%82%A4%E3%83%89)
 - [Figma MCPカタログ（公式）](https://www.figma.com/ja-jp/mcp-catalog/)
-- [Cursor IDE](https://cursor.com/)
-- [mise](https://mise.jdx.dev/)
-- [uv](https://github.com/astral-sh/uv)
-- [Podman](https://podman.io/)
-- [DevContainer](https://containers.dev/)
 
 ## 📄 ライセンス
 
@@ -483,8 +439,6 @@ Feedback only OSS
 - [Claude Code](https://github.com/anthropics/claude-code) - コード支援AI（CLI/拡張）
 - [Cursor IDE](https://cursor.com/) - AI統合開発環境
 - [Figma MCPサーバー（公式ガイド）](https://help.figma.com/hc/ja/articles/32132100833559-Figma-MCP%E3%82%B5%E3%83%BC%E3%83%90%E3%83%BC%E3%81%AE%E3%82%AC%E3%82%A4%E3%83%89) - デザイン情報連携（Dev Mode）
-- [DevContainer](https://containers.dev/) - コンテナ化された開発環境
-- [Podman](https://podman.io/) - コンテナエンジン
 - [mise](https://mise.jdx.dev/) - ツール管理
 
 ## 📞 サポート

@@ -78,6 +78,17 @@ pnpm test
 ```
 再現手順・自動テスト・メトリクスで効果判定
 
+**UI関連のバグの場合（Agent Browser利用可能時）:**
+```bash
+# 再現手順をAgent Browserで実行して修正確認
+agent-browser open http://localhost:3000/{再現パス}
+agent-browser snapshot -i
+# 問題が発生していた操作を再現
+agent-browser click @{ref}
+agent-browser fill @{ref} "{入力値}"
+# 修正後の期待動作を確認
+```
+
 c. **判定**
 - **効果あり** → コミットを保持、次のステップへ
 - **効果なし** → `git revert` でロールバック、次の修正案へ
