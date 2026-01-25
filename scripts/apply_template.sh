@@ -21,7 +21,6 @@ DRY_RUN="false"
 BACKUP="true"
 MODE="safe" # safe(default): 既存を上書きしない / force: 上書きする / sync: 上書き＋削除で同期（危険）
 OVERWRITE_RDD="false"
-OVERWRITE_AI_TASK="false"
 
 usage() {
   cat <<'USAGE'
@@ -34,7 +33,6 @@ usage() {
   --force          テンプレ対象ファイルを上書きする（バックアップ推奨）
   --sync           テンプレ対象ファイルを同期（上書き＋削除）。危険：テンプレ配下で削除が発生しうる
   --overwrite-rdd  `doc/rdd.md` を上書きする（非推奨：通常は各プロジェクト固有）
-  --overwrite-ai-task  `ai-task/`（テンプレ）を上書きする（注意：既存タスクを壊す可能性）
   --dry-run        実際には書き込まず、差分だけ表示
   --no-backup      上書き前バックアップを作成しない（非推奨）
   -h, --help       ヘルプ
@@ -65,10 +63,6 @@ while [ "$#" -gt 0 ]; do
       ;;
     --overwrite-rdd)
       OVERWRITE_RDD="true"
-      shift
-      ;;
-    --overwrite-ai-task)
-      OVERWRITE_AI_TASK="true"
       shift
       ;;
     --no-backup)
@@ -137,8 +131,6 @@ INCLUDES=(
   "doc/devlog/README.md"
   # RDDは基本的に各プロジェクト固有。初回導入（未存在）だけ反映する。
   "doc/rdd.md"
-  # ai-task は運用中に中身が増えるため、基本は初回導入（未存在）だけ反映する。
-  "ai-task/"
 )
 
 timestamp="$(date +%Y%m%d-%H%M%S)"
@@ -182,18 +174,14 @@ echo "テンプレート: $TEMPLATE_ROOT"
 echo "反映先:       $TARGET_DIR"
 echo "モード:       $MODE"
 echo "overwrite-rdd: $OVERWRITE_RDD"
-echo "overwrite-ai-task: $OVERWRITE_AI_TASK"
 echo "対象:         ${INCLUDES[*]}"
 echo
 
 for p in "${INCLUDES[@]}"; do
-  # doc/rdd.md と ai-task/ は「プロジェクト所有」の色が強いので、
+  # doc/rdd.md は「プロジェクト所有」の色が強いので、
   # デフォルトでは上書きしない（安全側）。必要な場合だけ明示フラグで上書きする。
   EXTRA_FLAGS=()
   if [ "$p" = "doc/rdd.md" ] && [ "$OVERWRITE_RDD" != "true" ]; then
-    EXTRA_FLAGS+=("--ignore-existing")
-  fi
-  if [ "$p" = "ai-task/" ] && [ "$OVERWRITE_AI_TASK" != "true" ]; then
     EXTRA_FLAGS+=("--ignore-existing")
   fi
 

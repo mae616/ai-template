@@ -18,8 +18,7 @@ Claude Code, Cursor などのコード支援AIによるアプリ開発のプロ�
 
 ## 🚀 使用AI支援開発環境
 - [Claude Code](https://github.com/anthropics/claude-code)
-- [Serena AI Coding Agent](https://github.com/oraios/serena)
-- [Figma MCPサーバー](https://help.figma.com/hc/ja/articles/32132100833559-Figma-MCP%E3%82%B5%E3%83%BC%E3%83%90%E3%83%BC%E3%81%AE%E3%82%AC%E3%82%A4%E3%83%89) 
+- [Figma MCPサーバー](https://help.figma.com/hc/ja/articles/32132100833559-Figma-MCP%E3%82%B5%E3%83%BC%E3%83%90%E3%83%BC%E3%81%AE%E3%82%AC%E3%82%A4%E3%83%89)
 - [Cursor](https://cursor.com/)
 
 ## 🛠️ 開発環境
@@ -27,7 +26,7 @@ Claude Code, Cursor などのコード支援AIによるアプリ開発のプロ�
 ### 基本環境
 - **DevContainer**: Podman, Ubuntu 22.04 LTS
 - **Node.js**: LTS + pnpm
-- **AI支援**: Claude Code + Serena AI + Cursor
+- **AI支援**: Claude Code + Cursor
 - **ツール管理**: mise
 - **開発補助**: ni（lockfileに応じて正しいパッケージマネージャを選ぶ）
 
@@ -40,7 +39,6 @@ DevContainerの `.devcontainer/setup.sh` で `npm i -g @antfu/ni` を実行し�
 
 - **3000**: 開発サーバー用
 - **5173**: Vite開発サーバー用
-- **8000**: Serena MCPサーバー用
 - **8888**: ポートフォワード用（用途はプロジェクト次第）
 
 ## 🌟 対応技術スタック
@@ -93,7 +91,7 @@ scripts/apply_template.sh --target /abs/path/to/your-project --safe
 補足:
 - 上書き前に `your-project/.ai-template-backup/<timestamp>/` へバックアップします（`--no-backup` で無効化可能）
 - `--safe`（デフォルト）は既存ファイルを上書きしません。テンプレ側の更新を反映したい場合は `--force`、同期して削除も伴う場合は `--sync` を使用します。
-- [doc/rdd.md](doc/rdd.md) と `ai-task/` は原則 **プロジェクト固有** です。テンプレ更新で上書きしたい場合のみ `--overwrite-rdd` / `--overwrite-ai-task` を明示してください。
+- [doc/rdd.md](doc/rdd.md) は原則 **プロジェクト固有** です。テンプレ更新で上書きしたい場合のみ `--overwrite-rdd` を明示してください。
 
 詳細な運用方法は [doc/manual/ai_template_operation.md](doc/manual/ai_template_operation.md) を参照してください。
 skills一覧（索引）は [doc/manual/skills_catalog.md](doc/manual/skills_catalog.md) を参照してください。
@@ -141,10 +139,10 @@ pnpm install
 
 ### 補助: リポジトリ案内・壁打ち（任意）
 
-- **[/repo-tour](.claude/commands/repo-tour.md)**: 初見向けに「どこに何があるか」を短時間で案内します
+- **[/repo-tour](.claude/skills/repo-tour.md)**: 初見向けに「どこに何があるか」を短時間で案内します
   - **入力**: 任意（例: `全体`, `AI運用`, `design`, `commands`, `skills`）
   - **出力**: 全体像 / コアファイル / よく触る場所 / 次の一手
-- **[/pair](.claude/commands/pair.md)**: 企画/設計/実装/デザインの壁打ちを、短い反復で進めます
+- **[/pair](.claude/skills/pair.md)**: 企画/設計/実装/デザインの壁打ちを、短い反復で進めます
   - **入力**: `plan` | `design` | `arch` | `dev`（必須）＋相談内容（任意）
   - **出力**: 短問（1〜3）→選択肢（2〜3）→推奨→次の一手
 
@@ -166,7 +164,7 @@ pnpm install
 HTMLは**必須ではありません**（必要なときだけオプションで生成します）。
 
 ##### ルートA: 会話起点（まずは叩き台を作る）
-1. **[/design-mock](.claude/commands/design-mock.md)**（会話から叩き台を作成）
+1. **[/design-mock](.claude/skills/design-mock.md)**（会話から叩き台を作成）
     - **入力**: ユーザーとの会話（画面/要素/雰囲気/制約）
     - **出力**:
         - `doc/design/design-tokens.json`
@@ -178,19 +176,19 @@ HTMLは**必須ではありません**（必要なときだけオプションで
     - **反復（推奨）**:
         - `mock.html` を手で調整したら、**差分（diff）または変更点の箇条書きを会話で共有**する（状況で使い分けOK）
         - その内容を元に **`/design-mock` を再実行して、HTMLとSSOT（JSON）を同時に更新**する（HTMLだけ更新してSSOTを放置しない）
-2. **[/design-ui](.claude/commands/design-ui.md)**（SSOT JSON → 静的UI骨格）
+2. **[/design-ui](.claude/skills/design-ui.md)**（SSOT JSON → 静的UI骨格）
     - **入力**: 上記SSOT JSON
     - **出力**: （技術スタック準拠の）静的UI骨格（見た目のみ）
-3. **[/design-components](.claude/commands/design-components.md)**（静的UI骨格 → コンポーネント/レイアウト抽出）
+3. **[/design-components](.claude/skills/design-components.md)**（静的UI骨格 → コンポーネント/レイアウト抽出）
     - **入力**: 静的UI骨格（見た目のみ。ロジック禁止）
     - **出力**: スタック別の標準配置に合わせて分割
-4. **[/design-assemble](.claude/commands/design-assemble.md)**（SSOT variants → 型付きProps/属性へマッピングして結合）
+4. **[/design-assemble](.claude/skills/design-assemble.md)**（SSOT variants → 型付きProps/属性へマッピングして結合）
     - **入力**: `doc/design/components.json`
     - **出力**: 再利用可能なUIコンポーネント（技術スタック準拠）
     - **ゲート**: Story/テスト/Lint がすべて緑（異なるスタック指定時はADR-lite承認）
 
 ##### ルートB: Figma起点（Dev Mode → SSOT）
-1. **[/design-ssot](.claude/commands/design-ssot.md)**（Figma MCPからSSOT JSONを確立）
+1. **[/design-ssot](.claude/skills/design-ssot.md)**（Figma MCPからSSOT JSONを確立）
     - **入力**: Figma（Dev Mode）上の対象（ページ/フレーム等）
     - **出力**:
         - `doc/design/design-tokens.json`
@@ -202,13 +200,13 @@ HTMLは**必須ではありません**（必要なときだけオプションで
         - Figma MCP（Dev Mode）が利用可能であること（未設定だと `/design-ssot` は動きません）
         - 迷ったら `/design-ssot` の「事前チェック（必須）：Figma MCPが使える状態か」を参照
         - DevContainerを使わない場合は、`claude mcp add --transport http figma "<FIGMA_MCP_URL>"` などで **手動登録が必要**（詳細は `/design-ssot` の「DevContainer以外で使う場合」）
-2. **[/design-ui](.claude/commands/design-ui.md)**（SSOT JSON → 静的UI骨格）
-3. **[/design-components](.claude/commands/design-components.md)**（静的UI骨格 → コンポーネント/レイアウト抽出）
-4. **[/design-assemble](.claude/commands/design-assemble.md)**（components.json → 各技術スタック用UIへ結合）
+2. **[/design-ui](.claude/skills/design-ui.md)**（SSOT JSON → 静的UI骨格）
+3. **[/design-components](.claude/skills/design-components.md)**（静的UI骨格 → コンポーネント/レイアウト抽出）
+4. **[/design-assemble](.claude/skills/design-assemble.md)**（components.json → 各技術スタック用UIへ結合）
 
 #### オプション：ドキュメント/共有用に静的HTMLが欲しい場合
-- **[/design-html](.claude/commands/design-html.md)**（SSOT JSON → 静的HTMLを生成して `doc/design/html/` に保存。Figma起点など、SSOTだけ先にある場合に便利）
-- **[/design-split](.claude/commands/design-split.md)**（1枚ペラHTML → ページ単位へ分割。`/design-mock` で `mock.html` を出した場合に有効）
+- **[/design-html](.claude/skills/design-html.md)**（SSOT JSON → 静的HTMLを生成して `doc/design/html/` に保存。Figma起点など、SSOTだけ先にある場合に便利）
+- **[/design-split](.claude/skills/design-split.md)**（1枚ペラHTML → ページ単位へ分割。`/design-mock` で `mock.html` を出した場合に有効）
 
 #### 実行例（会話ルート：最短）
 ```bash
@@ -226,76 +224,85 @@ HTMLは**必須ではありません**（必要なときだけオプションで
 /design-assemble vue
 ```
 
-### 3. AIタスクシステム
+### 3. AIタスクシステム（GitHub Issue/Milestone連携）
+
+タスク管理は **GitHub Issues + Milestones + Projects** で行います。
 
 #### フロー概要
 
-1. **要件定義作成**  
-- 新規: [doc/rdd.md](doc/rdd.md) に記述  
-- 改修: [doc/rdd.md](doc/rdd.md) に追記（差分で更新）  
+1. **要件定義作成**
+- 新規: [doc/rdd.md](doc/rdd.md) に記述
+- 改修: [doc/rdd.md](doc/rdd.md) に追記（差分で更新）
 
-2. **TASK-LIST生成**  
+2. **TASK-LIST生成（GitHub Issue一括作成）**
 ```bash
 /task-list doc/rdd.md
 ```
-- タスク一覧、依存関係、優先度、スプリント計画が生成される  
+- Sprint = GitHub Milestone として作成
+- タスク = GitHub Issue（ラベル: `task`）として作成
+- GitHub Projects にも自動追加（設定されている場合）
 
-3. **TASK生成**  
+3. **TASK詳細化（Issue本文に追記）**
 ```bash
-/task-gen ai-task/task/機能名/TASK-LIST-機能名.md sprint1
+/task-gen sprint-1
 ```
-- Sprintごとの詳細タスクを生成  
+- 指定Milestone配下のIssueに実装詳細を追記
 
-4. **TASK実行**  
+4. **TASK実行（Issue → 実装 → close）**
 ```bash
-/task-run ai-task/task/機能名/TASK_{sprint}_{feature_name}_{short}.md
+/task-run #123
 ```
-- AIが段階的に実装・検証を進める  
-
-
+- 指定IssueのRDD準拠を確認し、実装を実行
+- 進捗はIssueコメントで報告
+- 完了時にIssueをclose
 
 #### スクラム的サイクル
 
 ```
-1.	要件定義やスプリント計画の作成
-→ 2. TASK-LIST生成
-→ 3. Sprint1のTASK生成
-→ 4. Sprint1のTASK実行（ユーザー確認）
-→ 5. Sprint2のTASK生成
-→ 6. Sprint2のTASK実行（ユーザー確認）
+1. 要件定義やスプリント計画の作成
+→ 2. /task-list で GitHub Issue + Milestone 生成
+→ 3. /task-gen で Sprint1 の Issue 詳細化
+→ 4. /task-run で Sprint1 の Issue 実行（ユーザー確認）
+→ 5. /task-gen で Sprint2 の Issue 詳細化
+→ 6. /task-run で Sprint2 の Issue 実行（ユーザー確認）
 → …
 ```
 
-### 4. トラブルシューティングシステム
+### 4. トラブルシューティングシステム（GitHub Issue → PR連携）
+
+バグ対応は **GitHub Issue（調査・議論）→ PR（修正）** で行います。
 
 #### フロー概要
 
-1. **バグ起票（bug-new）**  
+1. **バグ起票（bug-new）**
 ```bash
 /bug-new podmanが起動しない
 ```
-- [ai-task/bug/バグファイル名.md](ai-task/bug/README.md) を生成（実体は `ai-task/bug/` 配下に作成）  
+- GitHub Issue（ラベル: `bug`）を作成
+- 問題の概要、再現手順、仮説を記録
 
-2. **調査（bug-investigate）**  
+2. **調査（bug-investigate）**
 ```bash
-/bug-investigate ai-task/bug/バグファイル名.md
+/bug-investigate #123
 ```
-- 現状調査と仮説を追記  
+- Issue番号を指定して調査を実施
+- 調査結果はIssueコメントに追記
 
-3. **裏付け（bug-propose）**  
+3. **裏付け（bug-propose）**
 ```bash
-/bug-propose ai-task/bug/バグファイル名.md
+/bug-propose #123
 ```
-- Web検索で修正案を確認  
-- ⚠️ 環境構築・既存バグには有効  
-- ⚠️ アプリのロジックバグの場合はスキップ、または新規タスク化推奨  
+- 修正案をIssueコメントに追記
+- ⚠️ 環境構築・既存バグには有効
+- ⚠️ アプリのロジックバグの場合はスキップ、または新規タスク化推奨
 
-4. **修正実行（bug-fix）**  
+4. **修正実行（bug-fix）**
 ```bash
-/bug-fix ai-task/bug/バグファイル名.md
+/bug-fix #123
 ```
-- 修正を実行  
-- 新たなエラーが出た場合は再度起票し、フローを繰り返す  
+- ブランチを作成してPRを作成
+- `Fixes #123` でIssueに紐づけ
+- マージ時にIssueが自動close  
 
 ### 5. マニュアルシステム
 
@@ -341,9 +348,6 @@ ai-template/
 │   ├── commands/              # Claude Codeのコマンド⭐
 │   └── settings.local.json    # AIのコマンド権限
 ├── .devcontainer/             # DevContainer設定
-├── ai-task/                   # AIタスク管理
-│   ├── task/                  # 開発タスク（/task-* の出力先）
-│   └── bug/                   # バグ対応ログ（/bug-* の出力先）
 ├── doc/                       # ドキュメント
 │   ├── _generated/            # AI生成（/docs-reverse の出力先。上書きOK）
 │   ├── index.md               # ドキュメントの入口（読む順番）
@@ -359,7 +363,7 @@ ai-template/
 ```
 
 ### ⭐ このテンプレートの本質
-- **`.claude/commands/`** → 実際の「作業フローを動かすコマンド群」  
+- **`.claude/skills/`** → 実際の「作業フローを動かすコマンド群」  
  - **[CLAUDE.md](CLAUDE.md) / [doc/rdd.md](doc/rdd.md) / [.claude/skills/](.claude/skills/) / [doc/ai_guidelines.md](doc/ai_guidelines.md)** → 判断軸（SSOT/運用）
 
 この2つが中核であり、他の構成要素はそれを支える仕組みになっています。
@@ -395,8 +399,6 @@ Feedback only OSS
 ## 📚 参考資料
 
 - [Claude Code](https://github.com/anthropics/claude-code)
-- [Serena GitHub](https://github.com/oraios/serena)
-- [Serena Documentation](https://github.com/oraios/serena#readme)
 - [MCP Protocol](https://modelcontextprotocol.io/)
 - [Figma MCPサーバーのガイド（公式）](https://help.figma.com/hc/ja/articles/32132100833559-Figma-MCP%E3%82%B5%E3%83%BC%E3%83%90%E3%83%BC%E3%81%AE%E3%82%AC%E3%82%A4%E3%83%89)
 - [Figma MCPカタログ（公式）](https://www.figma.com/ja-jp/mcp-catalog/)
@@ -424,7 +426,6 @@ Feedback only OSS
 このプロジェクトは以下のプロジェクトの恩恵を受けています：
 
 - [Claude Code](https://github.com/anthropics/claude-code) - コード支援AI（CLI/拡張）
-- [Serena AI](https://github.com/oraios/serena) - AI支援開発エージェント
 - [Cursor IDE](https://cursor.com/) - AI統合開発環境
 - [Figma MCPサーバー（公式ガイド）](https://help.figma.com/hc/ja/articles/32132100833559-Figma-MCP%E3%82%B5%E3%83%BC%E3%83%90%E3%83%BC%E3%81%AE%E3%82%AC%E3%82%A4%E3%83%89) - デザイン情報連携（Dev Mode）
 - [DevContainer](https://containers.dev/) - コンテナ化された開発環境

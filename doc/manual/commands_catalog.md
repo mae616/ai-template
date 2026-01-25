@@ -18,9 +18,12 @@
 
 ## 推奨フロー（よく使う順）
 - セットアップ: `/setup`
-- コミット文: `/commit-msg`（ステージ差分から日本語コミットメッセージ生成）
-- タスク: `/task-list` → `/task-gen` → `/task-run`
-- バグ: `/bug-new` → `/bug-investigate` → `/bug-propose` → `/bug-fix`
+- タスク（GitHub連携）: `/task-list` → `/task-gen` → `/task-run`
+  - Sprint = GitHub Milestone、タスク = GitHub Issue として管理
+  - 進捗/完了報告は Issue コメントで記録
+- バグ（GitHub連携）: `/bug-new` → `/bug-investigate` → `/bug-propose` → `/bug-fix`
+  - bug-new〜bug-propose は Issue で管理（調査・議論）
+  - bug-fix は PR を作成し、`Fixes #...` で Issue に紐づけ
 - デザイン（会話起点）: `/design-mock` → `/design-ui` → `/design-components` → `/design-assemble`
   - 補足: `/design-mock` が `mock.html`（1枚ペラ）を出した場合のみ、必要に応じて `/design-split` を使う
 - デザイン（Figma起点）: `/design-ssot` → `/design-ui` → `/design-components` → `/design-assemble`
@@ -36,25 +39,20 @@
 |----------|------|-----------|
 | `/setup` | 前提読み込み（`CLAUDE.md` → `doc/rdd.md` → skills → `doc/ai_guidelines.md`） | - |
 
-### commit
+### task（GitHub Issue/Milestone連携）
 | コマンド | 説明 | 推奨スキル |
 |----------|------|-----------|
-| `/commit-msg` | ステージ差分から日本語コミットメッセージ生成 | `developer-specialist` |
+| `/task-list` | GitHub Issue + Milestone でタスクリスト生成 | `developer-specialist` |
+| `/task-gen` | Issue に実装詳細を追記 | `developer-specialist`, `architecture-expert` |
+| `/task-run` | Issue に従って実装、完了時 close | `developer-specialist` + 技術スタック系 |
 
-### task
+### bug（GitHub Issue → PR連携）
 | コマンド | 説明 | 推奨スキル |
 |----------|------|-----------|
-| `/task-list` | タスクリスト生成 | `developer-specialist` |
-| `/task-gen` | スプリントTASK生成 | `developer-specialist`, `architecture-expert` |
-| `/task-run` | TASK実行 | `developer-specialist` + 技術スタック系 |
-
-### bug
-| コマンド | 説明 | 推奨スキル |
-|----------|------|-----------|
-| `/bug-new` | トラブルシュートログ生成 | `developer-specialist` |
-| `/bug-investigate` | 調査と仮説の絞り込み | `developer-specialist`, `security-expert`（必要時） |
-| `/bug-propose` | 修正案の根拠付き列挙 | `developer-specialist`, `architecture-expert` |
-| `/bug-fix` | 修正実行（恒久対応・段階実施＋無効時ロールバック） | `developer-specialist` + 技術スタック系 |
+| `/bug-new` | GitHub Issue でトラブルシュートログ生成 | `developer-specialist` |
+| `/bug-investigate` | Issue コメントで調査と仮説の絞り込み | `developer-specialist`, `security-expert`（必要時） |
+| `/bug-propose` | Issue コメントで修正案の根拠付き列挙 | `developer-specialist`, `architecture-expert` |
+| `/bug-fix` | PR 作成、`Fixes #...` で Issue 紐づけ | `developer-specialist` + 技術スタック系 |
 
 ### design
 | コマンド | 説明 | 推奨スキル |

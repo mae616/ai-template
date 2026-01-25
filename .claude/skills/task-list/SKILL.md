@@ -7,8 +7,8 @@ description: "[タスク実行] 1. TASKリストの生成"
 
 ## タスク全容: $ARGUMENTS
 
-機能実装のための完全なタスクリストを生成します。
-AIエージェントがスクラムで段階的な最小限の開発を繰り返せるよう、**スプリントごと**にタスクを編成してください。
+機能実装のための完全なタスクリストを **GitHub Issues + Milestone + Project** として生成します。
+AIエージェントがスクラムで段階的な最小限の開発を繰り返せるよう、**Sprint = Milestone** でタスクを編成します。
 本リストは **doc/rdd.md（要件・技術スタック・非機能要件）を唯一の根拠**として作成します。
 
 ## 共通前提（参照）
@@ -18,8 +18,27 @@ AIエージェントがスクラムで段階的な最小限の開発を繰り返
 
 ---
 
+## GitHub連携の前提
+
+### 必要な権限
+以下の `gh` コマンドが実行可能であること：
+- `gh issue create` / `gh issue list` / `gh issue view`
+- `gh project item-add` / `gh project list`
+- `gh api` （Milestone作成用）
+
+### Milestone = Sprint
+- Sprint 1 → Milestone `sprint-1`
+- Sprint 2 → Milestone `sprint-2`
+- 存在しない場合は `gh api` で作成する
+
+### Project連携（任意）
+- GitHub Projects が設定されている場合、作成したIssueを自動追加する
+- Project番号は `gh project list` で確認
+
+---
+
 ## RDD遵守・技術スタックガードレール
-- **必須**: `doc/rdd.md` の以下を読み取り、各スプリント/タスクに**参照セクション**を明記
+- **必須**: `doc/rdd.md` の以下を読み取り、各Issue本文に**参照セクション**を明記
   - 目標/非目標、対象ドメイン、**技術スタック**、非機能要件、制約
 - **禁止**: RDDに記載のない新規スタックを無断採用すること
 - **逸脱が必要な場合**: 「変更要求(ADR-lite)」テンプレでユーザー承認を得るまで着手禁止
@@ -38,43 +57,77 @@ AIエージェントがスクラムで段階的な最小限の開発を繰り返
 ---
 
 ## タスクリスト生成の指針
-- **Sprint単位**で目的/スコープ/タスクを記載
-- 各タスクに**所要時間目安**・**検証ゲート**・ **参照(RDD/コード/設計)** を明示
+- **Sprint = Milestone** 単位で目的/スコープ/タスクを記載
+- 各タスク（Issue）に**検証ゲート**・**参照(RDD/コード/設計)** を明示
 - **MVP優先**。見える成果を早期に届ける
 
 ---
 
-## 出力フォーマット例
-### Sprint 1: {スプリント名}
-- **目的**: ...
-- **スコープ**: ...
-- **RDD参照**: doc/rdd.md §{...}
+## 出力手順
 
-#### タスク一覧
-- [ ] TASK-1: 概要（想定:1h）
-  - ファイル: ...
-  - 検証ゲート:
-        pnpm lint --fix && pnpm type-check
-        pnpm test
-  - 参照: doc/rdd.md §..., doc/Architecture.md §..., path/to/code
-  - 依存: ...
-  - 決定理由: ...
+### 1. Milestone作成（Sprint単位）
+```bash
+# Milestone存在確認
+gh api repos/{owner}/{repo}/milestones --jq '.[] | select(.title=="sprint-1")'
+
+# 存在しなければ作成
+gh api repos/{owner}/{repo}/milestones -f title="sprint-1" -f description="Sprint 1: {スプリント目的}"
+```
+
+### 2. Issue一括作成
+```bash
+gh issue create \
+  --title "TASK-1: {タスク概要}" \
+  --body "$(cat <<'EOF'
+## 目的
+{タスクの目的}
+
+## RDD参照
+- doc/rdd.md §{セクション}
+
+## 検証ゲート
+```bash
+pnpm lint --fix && pnpm type-check
+pnpm test
+```
+
+## 依存
+- #XX（依存Issue番号）
+
+## 決定理由
+{なぜこのタスクが必要か}
+EOF
+)" \
+  --milestone "sprint-1" \
+  --label "task"
+```
+
+### 3. Project追加（設定されている場合）
+```bash
+# Project番号を取得
+gh project list
+
+# Issueを追加
+gh project item-add {PROJECT_NUMBER} --owner {owner} --url {ISSUE_URL}
+```
 
 ---
 
-## 出力
-保存先:
-`ai-task/task/{feature-name}/TASK-LIST-{feature-name}.md`
+## 出力（GitHub）
+- **Milestone**: `sprint-{n}` （Sprint単位）
+- **Issues**: タスクごとに1 Issue（ラベル: `task`）
+- **Project**: 設定されていれば自動追加
 
 ---
 
 ## 品質チェックリスト
 - RDD/Architecture/Design の整合性
-- 逸脱がある場合、**変更要求(ADR-lite)** を付与し承認待ちにしている
+- 逸脱がある場合、**変更要求(ADR-lite)** を Issue本文に付与し承認待ちにしている
 - 検証ゲートが**自動実行可能**
 - 既存パターン参照（重複なし）
 - **決定理由が明記されている**
-- **最小サンプル検証方針が含まれる**
+- **依存関係が Issue番号で明示されている**
+- Milestoneが正しく設定されている
 
 ---
 

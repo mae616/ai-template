@@ -4,7 +4,7 @@
 
 ## 0. 前提（守ること）
 - 反映は必ず **dry-run → 実反映** の順で行う。
-- `doc/rdd.md` と `ai-task/` は原則 **プロジェクト固有**。テンプレ更新で上書きしない（必要なら明示フラグ）。
+- `doc/rdd.md` は原則 **プロジェクト固有**。テンプレ更新で上書きしない（必要なら明示フラグ）。
 - 迷ったら `/setup` を実行し、`CLAUDE.md` → `doc/rdd.md` → `.claude/skills` の順で前提を揃える。
 
 ## 1. 初回導入（新しい開発リポジトリ）
@@ -27,14 +27,6 @@ scripts/apply_template.sh --target /abs/path/to/your-project --force
 ```bash
 scripts/apply_template.sh --target /abs/path/to/your-project --force --overwrite-rdd --dry-run
 scripts/apply_template.sh --target /abs/path/to/your-project --force --overwrite-rdd
-```
-
-### `ai-task/` を上書きしたい場合（注意）
-既存タスクや履歴を壊す可能性があるため、原則は避ける。
-
-```bash
-scripts/apply_template.sh --target /abs/path/to/your-project --force --overwrite-ai-task --dry-run
-scripts/apply_template.sh --target /abs/path/to/your-project --force --overwrite-ai-task
 ```
 
 ### `--sync` について（危険）
