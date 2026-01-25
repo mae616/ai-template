@@ -1,135 +1,141 @@
 ---
 user-invocable: true
-description: "[タスク実行] 1. TASKリストの生成"
+description: "[タスク] 1. Sprint計画（Milestone + Issue一括作成）"
 ---
 
-# [タスク実行] 1. TASKリストの生成 (引数:doc/rdd.mdなどのコンテキストファイル)
+# [タスク] 1. Sprint計画（Milestone + Issue一括作成）
 
-## タスク全容: $ARGUMENTS
+## 入力: $ARGUMENTS
+- コンテキストファイル（例: `doc/rdd.md`）
 
-機能実装のための完全なタスクリストを **GitHub Issues + Milestone + Project** として生成します。
-AIエージェントがスクラムで段階的な最小限の開発を繰り返せるよう、**Sprint = Milestone** でタスクを編成します。
-本リストは **doc/rdd.md（要件・技術スタック・非機能要件）を唯一の根拠**として作成します。
+---
+
+## 🎯 目的
+- **doc/rdd.md** を根拠に、Sprint（Milestone）とタスク（Issue）を一括作成する
+- 組み込みTask（TaskCreate）にも登録し、セッション中の並行・依存管理を可能にする
+- GitHub と 組み込みTask の対応関係を維持する
+
+---
+
+## GitHub との対応関係
+
+```
+Repository = プロダクト
+ └── Project = カンバンボード（任意）
+      └── Milestone = Sprint
+           └── Issue = タスク
+```
+
+---
 
 ## 共通前提（参照）
-- 口調・出力規約・調査方針・TDD・Docコメント等は `CLAUDE.md` に従う。
-- `doc/rdd.md` を読み、該当する `.claude/skills/*` を適用して判断軸を揃える（例: `architecture-expert` / `developer-specialist` / `security-expert`）。
-- 詳細運用（サンプル運用/依存評価補助/ADR-lite）は `doc/ai_guidelines.md` を参照。
+- 口調・出力規約・TDD・Docコメント等は `CLAUDE.md` に従う
+- `doc/rdd.md` を読み、該当する `.claude/skills/*` を適用
+- 詳細運用は `doc/ai_guidelines.md` を参照
 
 ---
 
-## GitHub連携の前提
+## 実行手順
 
-### 必要な権限
-以下の `gh` コマンドが実行可能であること：
-- `gh issue create` / `gh issue list` / `gh issue view`
-- `gh project item-add` / `gh project list`
-- `gh api` （Milestone作成用）
+### 1. RDD読み込み・Sprint計画
+```bash
+# RDDを読み込み、Sprint単位でタスクを設計
+```
+- 目標/非目標、技術スタック、非機能要件を確認
+- MVP優先でSprintを設計（1 Sprint = 1 Milestone）
 
-### Milestone = Sprint
-- Sprint 1 → Milestone `sprint-1`
-- Sprint 2 → Milestone `sprint-2`
-- 存在しない場合は `gh api` で作成する
-
-### Project連携（任意）
-- GitHub Projects が設定されている場合、作成したIssueを自動追加する
-- Project番号は `gh project list` で確認
-
----
-
-## RDD遵守・技術スタックガードレール
-- **必須**: `doc/rdd.md` の以下を読み取り、各Issue本文に**参照セクション**を明記
-  - 目標/非目標、対象ドメイン、**技術スタック**、非機能要件、制約
-- **禁止**: RDDに記載のない新規スタックを無断採用すること
-- **逸脱が必要な場合**: 「変更要求(ADR-lite)」テンプレでユーザー承認を得るまで着手禁止
-
----
-
-## 調査プロセス
-1. **コードベース分析**: 既存の類似機能/パターン/規約の確認（重複防止）
-2. **RDD整合チェック**: RDDの目標/非目標・技術スタック・制約と照合
-3. **ユーザー確認（必要時）**: 仕様の曖昧さや不足の解消。逸脱時は変更要求を提示。
-4. **重複回避と可視化**
-   - 既存コードの抽象化/共通化を優先
-   - 各タスクには**決定理由/背景を1行**で残す
-   - 難所は**最小サンプルで検証**（削除可と注記）
-
----
-
-## タスクリスト生成の指針
-- **Sprint = Milestone** 単位で目的/スコープ/タスクを記載
-- 各タスク（Issue）に**検証ゲート**・**参照(RDD/コード/設計)** を明示
-- **MVP優先**。見える成果を早期に届ける
-
----
-
-## 出力手順
-
-### 1. Milestone作成（Sprint単位）
+### 2. Milestone作成（Sprint単位）
 ```bash
 # Milestone存在確認
 gh api repos/{owner}/{repo}/milestones --jq '.[] | select(.title=="sprint-1")'
 
-# 存在しなければ作成
-gh api repos/{owner}/{repo}/milestones -f title="sprint-1" -f description="Sprint 1: {スプリント目的}"
+# 存在しなければ作成（⚠️ 確認あり）
+gh api repos/{owner}/{repo}/milestones -f title="sprint-1" -f description="Sprint 1: {目的}"
 ```
 
-### 2. Issue一括作成
+### 3. Issue一括作成
 ```bash
+# 各タスクをIssueとして作成（⚠️ 確認あり）
 gh issue create \
   --title "TASK-1: {タスク概要}" \
-  --body "$(cat <<'EOF'
-## 目的
+  --body "## 目的
 {タスクの目的}
 
 ## RDD参照
 - doc/rdd.md §{セクション}
 
 ## 検証ゲート
-```bash
+\`\`\`bash
 pnpm lint --fix && pnpm type-check
 pnpm test
-```
+\`\`\`
 
 ## 依存
-- #XX（依存Issue番号）
+- なし（または #XX）
 
 ## 決定理由
-{なぜこのタスクが必要か}
-EOF
-)" \
+{なぜこのタスクが必要か}" \
   --milestone "sprint-1" \
   --label "task"
 ```
 
-### 3. Project追加（設定されている場合）
-```bash
-# Project番号を取得
-gh project list
+### 4. 組み込みTask登録
+Issue作成後、組み込みTaskにも登録する：
 
-# Issueを追加
-gh project item-add {PROJECT_NUMBER} --owner {owner} --url {ISSUE_URL}
+```
+TaskCreate:
+  subject: "TASK-1: {タスク概要}"
+  description: "{タスクの詳細}"
+  activeForm: "{タスク概要}を実装中"
+  metadata:
+    issueNumber: 123
+    milestone: "sprint-1"
+```
+
+### 5. 一覧表示
+```
+📋 Sprint: sprint-1
+
+┌────┬─────────────────────┬──────────┬─────────────┐
+│ #  │ Title               │ Issue    │ Status      │
+├────┼─────────────────────┼──────────┼─────────────┤
+│ 1  │ ユーザー認証実装     │ #123     │ pending     │
+│ 2  │ ログイン画面作成     │ #124     │ pending     │
+│ 3  │ API設計             │ #125     │ pending     │
+└────┴─────────────────────┴──────────┴─────────────┘
+
+次のステップ: /task-detail sprint-1
 ```
 
 ---
 
-## 出力（GitHub）
-- **Milestone**: `sprint-{n}` （Sprint単位）
+## 出力
+
+### GitHub
+- **Milestone**: `sprint-{n}`
 - **Issues**: タスクごとに1 Issue（ラベル: `task`）
-- **Project**: 設定されていれば自動追加
+
+### 組み込みTask
+- **TaskCreate**: 各Issueに対応するTask（metadata.issueNumber で紐づけ）
 
 ---
 
 ## 品質チェックリスト
-- RDD/Architecture/Design の整合性
-- 逸脱がある場合、**変更要求(ADR-lite)** を Issue本文に付与し承認待ちにしている
-- 検証ゲートが**自動実行可能**
-- 既存パターン参照（重複なし）
-- **決定理由が明記されている**
-- **依存関係が Issue番号で明示されている**
-- Milestoneが正しく設定されている
+- [ ] RDD/Architecture の整合性
+- [ ] Milestone が正しく作成されている
+- [ ] Issue に RDD参照・検証ゲートが含まれている
+- [ ] 組み込みTask に issueNumber が設定されている
+- [ ] 一覧表示で対応関係が確認できる
 
 ---
 
 ## 自己評価
-成功自信度 (1-10) ＋ 一言理由
+- **成功自信度**: (1-10)
+- **一言理由**: {短く理由を記載}
+
+---
+
+## 次のステップ
+```bash
+/task-detail sprint-1  # Issue詳細化 + 依存関係設定
+```

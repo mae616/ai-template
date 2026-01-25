@@ -18,9 +18,9 @@
 
 ## 推奨フロー（よく使う順）
 - セットアップ: `/setup`
-- タスク（GitHub連携）: `/task-list` → `/task-gen` → `/task-run`
-  - Sprint = GitHub Milestone、タスク = GitHub Issue として管理
-  - 進捗/完了報告は Issue コメントで記録
+- タスク（GitHub + 組み込みTask連携）: `/task-list` → `/task-detail` → `/task-run`
+  - Sprint = Milestone、タスク = Issue + 組み込みTask（並行・依存管理）
+  - 進捗は組み込みTaskとIssueの両方に同期
 - バグ（GitHub連携）: `/bug-new` → `/bug-investigate` → `/bug-propose` → `/bug-fix`
   - bug-new〜bug-propose は Issue で管理（調査・議論）
   - bug-fix は PR を作成し、`Fixes #...` で Issue に紐づけ
@@ -39,12 +39,12 @@
 |----------|------|-----------|
 | `/setup` | 前提読み込み（`CLAUDE.md` → `doc/rdd.md` → skills → `doc/ai_guidelines.md`） | - |
 
-### task（GitHub Issue/Milestone連携）
+### task（GitHub Issue/Milestone + 組み込みTask連携）
 | コマンド | 説明 | 推奨スキル |
 |----------|------|-----------|
-| `/task-list` | GitHub Issue + Milestone でタスクリスト生成 | `developer-specialist` |
-| `/task-gen` | Issue に実装詳細を追記 | `developer-specialist`, `architecture-expert` |
-| `/task-run` | Issue に従って実装、完了時 close | `developer-specialist` + 技術スタック系 |
+| `/task-list` | Sprint計画（Milestone + Issue一括作成 + 組み込みTask登録） | `developer-specialist` |
+| `/task-detail` | Issue詳細化 + 依存関係設定（blocks/blockedBy） | `developer-specialist`, `architecture-expert` |
+| `/task-run` | Issue実行 + 進捗同期（組み込みTask ↔ GitHub Issue） | `developer-specialist` + 技術スタック系 |
 
 ### bug（GitHub Issue → PR連携）
 | コマンド | 説明 | 推奨スキル |
