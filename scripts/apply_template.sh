@@ -125,6 +125,7 @@ INCLUDES=(
   "doc/index.md"
   "doc/ai_guidelines.md"
   "doc/Architecture.md"
+  "doc/git_workflow.md"
   "doc/manual/"
   "doc/design/"
   "doc/_generated/README.md"

@@ -61,10 +61,42 @@ rsync -av ".ai-template-backup/$ts/.claude/" "./.claude/"
 rsync -av ".ai-template-backup/$ts/doc/ai_guidelines.md" "./doc/ai_guidelines.md"
 ```
 
-## 4. どこを編集するか（カスタマイズの指針）
+## 4. グローバル適用（~/.claude への反映）
+
+判断軸スキル（`user-invocable: false`）やグローバル設定を `~/.claude` に適用する。
+
+```bash
+cd /path/to/ai-template
+
+# dry-run で確認
+scripts/apply_global.sh --dry-run
+
+# 実行
+scripts/apply_global.sh
+```
+
+### 適用対象
+| 対象 | 説明 |
+|------|------|
+| `~/.claude/skills/` | 判断軸スキル（user-invocable: false） |
+| `~/.claude/settings.local.json` | permissions のマージ（追加のみ） |
+| `~/.claude/CLAUDE.md` | グローバル設定（全プロジェクト共通） |
+
+### オプション
+- `--skip-skills` : スキルの適用をスキップ
+- `--skip-settings` : settings.local.json の適用をスキップ
+- `--skip-claude-md` : CLAUDE.md の適用をスキップ
+- `--no-backup` : バックアップを作成しない（非推奨）
+
+### 注意
+- **手順系スキル**（`user-invocable: true`）はプロジェクト単位で管理推奨
+- 適用後は **Claude Code を再起動** してスキルを反映
+
+---
+
+## 5. どこを編集するか（カスタマイズの指針）
 - 不変の憲法: `CLAUDE.md`
 - 事実（プロジェクト固有）: `doc/rdd.md`（先頭の「AI用：事実ブロック」を更新）
 - 思考モジュール: `.claude/skills/*/SKILL.md`
-- 手順（I/Oのみ）: `.claude/commands/*.md`
 - 詳細運用: `doc/ai_guidelines.md`
 
