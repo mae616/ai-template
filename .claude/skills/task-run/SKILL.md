@@ -131,7 +131,54 @@ gh issue comment {ISSUE_NUMBER} --body "📝 進捗報告
 "
 ```
 
-### 7. 完了（組み込みTask + Issue同期）
+### 7. コミット + PR作成
+
+**コミット（⚠️ 確認あり）:**
+```bash
+git add -A
+git commit -m "feat: {変更概要} (#${ISSUE_NUMBER})
+
+- {主要変更1}
+- {主要変更2}
+
+Refs #${ISSUE_NUMBER}"
+```
+
+**リモートにプッシュ:**
+```bash
+git push -u origin task/{ISSUE_NUMBER}-{short-description}
+```
+
+**PR作成（⚠️ 確認あり）:**
+```bash
+gh pr create \
+  --title "feat: {変更概要}" \
+  --body "## 概要
+{このPRで何を実現するか}
+
+## 変更内容
+- {主要変更1}
+- {主要変更2}
+
+## RDD整合
+- **準拠**: OK（根拠: doc/input/rdd.md §...）
+- **変更要求**: 無し / 有（承認済み）
+
+## 検証結果
+- [x] lint/type-check PASS
+- [x] test PASS
+
+## テスト手順
+1. {確認手順1}
+2. {確認手順2}
+
+Closes #${ISSUE_NUMBER}" \
+  --base main
+```
+
+> **Note**: `Closes #${ISSUE_NUMBER}` により、PRマージ時にIssueが自動closeされるにゃ。
+
+### 8. 完了（組み込みTask更新）
 
 **組み込みTask更新:**
 ```
@@ -140,25 +187,12 @@ TaskUpdate:
   status: "completed"
 ```
 
-**Issueコメント + close（⚠️ 確認あり）:**
-```bash
-gh issue comment {ISSUE_NUMBER} --body "✅ TASK完了
+**完了報告:**
+```
+✅ TASK-{ISSUE_NUMBER} 完了
 
-## 結果サマリ
-- **RDD整合**: OK（根拠: doc/input/rdd.md §...）
-- **変更要求**: 無し / 有（承認済み）
-- **検証結果**: lint/type/test すべてPASS
-
-## 差分要約
-- {主要変更1}
-- {主要変更2}
-
-## 次の一手
-- {フォローアップ1}
-- {フォローアップ2}
-"
-
-gh issue close {ISSUE_NUMBER}
+- PR: #{PR_NUMBER}
+- マージ後に Issue #{ISSUE_NUMBER} が自動close
 ```
 
 ---
@@ -206,9 +240,9 @@ gh issue comment {ISSUE_NUMBER} --body "🚫 実現不能
 - [ ] 検証ゲート（lint/type/test）がPASS
 - [ ] 必要なら最小サンプルで検証済み（削除可注記）
 - [ ] 技術的負債が記録され、次スプリントに回されている
+- [ ] **コミットメッセージに Issue番号を含めている**
+- [ ] **PRを作成し、`Closes #Issue番号` を本文に含めている**
 - [ ] **組み込みTask が completed に更新済み**
-- [ ] **Issueに完了コメントを投稿済み**
-- [ ] **Issueをclose済み**
 
 ---
 
