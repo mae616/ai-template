@@ -20,24 +20,28 @@ Claude Code / Cursor 向けの開発プロンプトテンプレート。
 |-----------|--------|------|----------|------|
 | **必須** | Claude Code | コア | `claude --version` | [GitHub](https://github.com/anthropics/claude-code) |
 | **必須** | GitHub CLI | task/bug管理 | `gh auth status` | [公式](https://cli.github.com/) |
-| 任意 | Agent Browser | UI確認/デバッグ | `agent-browser --version` | [GitHub](https://github.com/vercel-labs/agent-browser) |
+| 任意 | Agent Browser | UI確認/デバッグ | - | [GitHub](https://github.com/anthropics/agent-browser)（開発中） |
 | 任意 | Figma MCP | /design-ssot | `/mcp` で確認 | [公式ガイド](https://help.figma.com/hc/en-us/articles/32132100833559-Guide-to-the-Figma-MCP-server) |
 | 任意 | mise | ツール管理 | `mise --version` | [公式](https://mise.jdx.dev/) |
 | 任意 | Cursor | IDE | - | [公式](https://cursor.com/) |
 
-### 公式プラグイン/スキルの設定
+### MCP サーバーの設定
 
-各ツールに公式プラグインやスキルがある場合は、それを導入することで連携が強化されます。
+Claude Code は MCP（Model Context Protocol）でツール連携を拡張できます。
 
 ```bash
-# Agent Browser（Vercel）: ブラウザ自動化でUI確認・デバッグを自律実行
-npm install -g agent-browser && agent-browser install
+# Figma MCP（Dev Mode）: デザイン情報を取得して /design-ssot で活用
+# 1. Figma の Dev Mode で MCP URL を取得
+# 2. Claude Code に登録
+claude mcp add figma --transport http "<YOUR_FIGMA_MCP_URL>"
 
-# Figma: 公式プラグイン（MCP + Agent Skills）
-claude plugin install figma@claude-plugins-official
+# 登録確認
+claude mcp list
 ```
 
-※ Figma以外のデザインツール（[Pencil](https://www.pencil.dev/) など）は公式MCP/Skillsが未提供の場合があります。その場合も判断軸スキル（ui-designer, frontend-implementation, creative-coder 等）は利用可能です。
+> **Note**: Figma MCP の詳細な設定手順は [公式ガイド](https://help.figma.com/hc/en-us/articles/32132100833559-Guide-to-the-Figma-MCP-server) を参照してください。
+
+※ Figma以外のデザインツール（[Pencil](https://www.pencil.dev/) など）は公式MCP が未提供の場合があります。その場合も判断軸スキル（ui-designer, frontend-implementation, creative-coder 等）は利用可能です。
 
 ## 使い方
 

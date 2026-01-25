@@ -1,6 +1,7 @@
 ---
 name: creative-coder
 category: role
+user-invocable: false
 description: 体験品質（動き/触感/視線誘導）を「実装可能な制約」に落とし、アクセシビリティとパフォーマンスを犠牲にせずに表現を実現する。UIの表現・アニメーション・インタラクション設計/実装の相談で使う。
 ---
 

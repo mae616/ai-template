@@ -1,6 +1,7 @@
 ---
 name: astro
 category: tech
+user-invocable: false
 description: Astroプロジェクトの設計・実装・レビューを、HTML中心/Islands/JS最小化の思想で整理する。doc/input/rdd.md に「技術スタック Astro」があるリポジトリ、またはAstro/Islands/SSG/SSR/パフォーマンス最適化の相談で使う。
 ---
 

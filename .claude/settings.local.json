@@ -67,6 +67,9 @@
             "Bash(brew :*)",
             "Bash(docker :*)",
 
+            "Bash(git push :*)",
+            "Bash(git branch -D :*)",
+
             "Bash(gh issue create :*)",
             "Bash(gh issue edit :*)",
             "Bash(gh issue comment :*)",

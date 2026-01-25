@@ -1,6 +1,7 @@
 ---
 name: svelte
 category: tech
+user-invocable: false
 description: Svelte/SvelteKitプロジェクトにおいて、UI=状態の直接的な反映という思想を軸に、コンパイル時最適化・状態管理・レンダリング・配信量の設計を整理する。doc/input/rdd.md に「技術スタック Svelte」または「技術スタック SvelteKit」がある場合や、Svelteの設計・パフォーマンス・構造理解の相談で使う。
 ---
 

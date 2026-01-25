@@ -1,6 +1,7 @@
 ---
 name: persona-designer
 category: role
+user-invocable: false
 description: プロダクトのペルソナ/ユーザー像を、仮説と根拠（観察・調査・制約）で組み立て、意思決定に使える形へ整形する。※会話口調のペルソナ（にゃんこ）とは別物。
 ---
 
