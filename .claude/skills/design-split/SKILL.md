@@ -6,7 +6,7 @@ description: "[デザイン] （任意）1枚ペラHTML → ページ単位の�
 # [デザイン] （任意）1枚ペラHTML → ページ単位の静的HTMLに分割
 
 ## 入力: $ARGUMENTS
-- 分割対象のHTMLパス（例: `doc/design/html/mock.html`）
+- 分割対象のHTMLパス（例: `doc/input/design/html/mock.html`）
 - 任意: 分割したいページキー（例: `HomePage Pricing Login`）
 
 ## いつ使う？（位置づけ）
@@ -14,7 +14,7 @@ description: "[デザイン] （任意）1枚ペラHTML → ページ単位の�
 - 以降の `/design-ui`（静的UI骨格生成）に渡しやすい形に整えるため
 
 ## 次に何をする？
-- 分割した `doc/design/html/{page}.html` を根拠にSSOT（tokens/components/context）も整合させる
+- 分割した `doc/input/design/html/{page}.html` を根拠にSSOT（tokens/components/context）も整合させる
 - 実装に進むなら `/design-ui` → `/design-components` → `/design-assemble`
 
 ---
@@ -28,12 +28,12 @@ description: "[デザイン] （任意）1枚ペラHTML → ページ単位の�
 ## 共通前提（参照）
 - 口調・出力規約は `CLAUDE.md` に従う。
 - 判断軸は `.claude/skills/*` を適用する（例: `ui-designer` / `usability-psychologist`）。
-- 詳細運用（差分/サンプル運用等）は `doc/ai_guidelines.md` を参照。
+- 詳細運用（差分/サンプル運用等）は `doc/guide/ai_guidelines.md` を参照。
 
 ---
 
 ## 出力（差分のみ）
-- `doc/design/html/{page}.html` を複数生成/更新
+- `doc/input/design/html/{page}.html` を複数生成/更新
 
 ---
 

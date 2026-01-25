@@ -37,11 +37,11 @@ description: "[デザイン] 1.（会話起点）SSOT + 静的HTML（叩き台�
 
 ## 共通前提（参照）
 - 口調・出力規約は `CLAUDE.md` に従う。
-- プロジェクト固有の事実は `doc/rdd.md`（先頭のAI用事実ブロック）を参照する。
+- プロジェクト固有の事実は `doc/input/rdd.md`（先頭のAI用事実ブロック）を参照する。
 - 判断軸は `.claude/skills/*` を適用する（例: `ui-designer` / `usability-psychologist` / `tailwind` / `creative-coder`）。
 
 ## 見た目の基準（ビューポート）について
-- まず `doc/rdd.md` の「ターゲット表示環境（事実）」を参照し、**そのビューポートを基準**に叩き台（HTML/SSOT）を作る
+- まず `doc/input/rdd.md` の「ターゲット表示環境（事実）」を参照し、**そのビューポートを基準**に叩き台（HTML/SSOT）を作る
 - 未記入の場合は、以下を **推奨デフォルト**として仮置きし、出力やレビューの前提に明記する：
   - desktop: 1440x900
   - mobile: 390x844
@@ -51,17 +51,17 @@ description: "[デザイン] 1.（会話起点）SSOT + 静的HTML（叩き台�
 
 ## 仕様
 - 出力は **静的HTML**（外部依存なしが基本）
-- `doc/design/html/` に保存
-  - 単一ページ: `doc/design/html/mock.html` を生成（叩き台）
-  - 複数ページ: `doc/design/html/{page}.html` をページ数分生成（既定）
+- `doc/input/design/html/` に保存
+  - 単一ページ: `doc/input/design/html/mock.html` を生成（叩き台）
+  - 複数ページ: `doc/input/design/html/{page}.html` をページ数分生成（既定）
 - 併せて、以下のSSOTを生成/更新する（Figmaルートと同じ合流点。**複数ページ対応**）
-  - `doc/design/design_context.json`
-  - `doc/design/design-tokens.json`
-  - `doc/design/components.json`
-  - `doc/design/copy.json`（文言のSSOT。一字一句固定。言い換え禁止）
-  - `doc/design/assets/assets.json`（画像/動画等のアセットmanifest。取得できない場合は `status:"failed"` を記録して停止）
-- 技術スタックは **`doc/rdd.md`** をSSOTとして扱う（ここで勝手に変えない）
-- `doc/design/components.json` の variants 命名規約は `doc/design/ssot_schema.md` を参照し、プロジェクト横断で揃える
+  - `doc/input/design/design_context.json`
+  - `doc/input/design/design-tokens.json`
+  - `doc/input/design/components.json`
+  - `doc/input/design/copy.json`（文言のSSOT。一字一句固定。言い換え禁止）
+  - `doc/input/design/assets/assets.json`（画像/動画等のアセットmanifest。取得できない場合は `status:"failed"` を記録して停止）
+- 技術スタックは **`doc/input/rdd.md`** をSSOTとして扱う（ここで勝手に変えない）
+- `doc/input/design/components.json` の variants 命名規約は `doc/input/design/ssot_schema.md` を参照し、プロジェクト横断で揃える
 - ここで停止（次工程は `/design-ui`。単一ページで `mock.html` の場合は必要に応じて `/design-split`）
 
 ### 複数ページ時のSSOT規約（固定）
@@ -73,7 +73,7 @@ description: "[デザイン] 1.（会話起点）SSOT + 静的HTML（叩き台�
 ---
 
 ## 反復（重要）
-- ユーザーが `doc/design/html/*.html` を手で編集して調整した場合は、**差分（diff）または変更点の箇条書き**を入力として受け取る（状況で使い分けOK）
+- ユーザーが `doc/input/design/html/*.html` を手で編集して調整した場合は、**差分（diff）または変更点の箇条書き**を入力として受け取る（状況で使い分けOK）
 - その調整内容を根拠に、**HTMLだけでなくSSOT（`design-tokens.json` / `components.json` / `design_context.json`）も同時に更新**する
 - 文言の調整が入った場合は、**必ず `copy.json` も同時に更新**する（後続で一字一句の再現を担保するため）
 - SSOTが古いままだと、後続（`/design-ui` / `/design-components` / `/design-assemble`）で不整合が出るため、**HTML単独修正で終わらせない**
@@ -86,5 +86,5 @@ description: "[デザイン] 1.（会話起点）SSOT + 静的HTML（叩き台�
 - SSOT（tokens/components/context）が矛盾なく、`/design-ui` が実行できる状態になっている
 - `copy.json` に未定義文言なし（参照される `copyKey` の不足0件）
 - CSSで指定できる見た目（background/border/gradient/blur/blend/strokeAlign）が、SSOT（tokens/componentsのstyles参照）に落ちている（取りこぼし0）
-- 画像アセットが必要な箇所（ロゴ/アイコン/イラスト/写真）が `doc/design/assets/assets.json` に定義され、`baseDir` 配下に配置されている（取りこぼし0）
+- 画像アセットが必要な箇所（ロゴ/アイコン/イラスト/写真）が `doc/input/design/assets/assets.json` に定義され、`baseDir` 配下に配置されている（取りこぼし0）
   - `assets.json` に `status: "failed"` が1件でもある場合は、**必ずユーザーに失敗理由と次アクション**（手元提供/代替ファイル/Export設定）を明示して停止する

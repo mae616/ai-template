@@ -1,7 +1,7 @@
 ---
 name: react
 category: tech
-description: React/Next.jsのプロジェクトで、UI=計算モデル（コンポーネント/状態/レンダリング）を軸に、設計・実装・レビュー・性能改善の判断を整理する。doc/rdd.md に「技術スタック React」または「技術スタック Next.js」があるリポジトリ、あるいはReactの状態管理/レンダリング/Server Components/SSR/Streaming/バンドル/パフォーマンス相談で使う。
+description: React/Next.jsのプロジェクトで、UI=計算モデル（コンポーネント/状態/レンダリング）を軸に、設計・実装・レビュー・性能改善の判断を整理する。doc/input/rdd.md に「技術スタック React」または「技術スタック Next.js」があるリポジトリ、あるいはReactの状態管理/レンダリング/Server Components/SSR/Streaming/バンドル/パフォーマンス相談で使う。
 ---
 
 # React UI Computation Skill
@@ -13,7 +13,7 @@ description: React/Next.jsのプロジェクトで、UI=計算モデル（コン
 - [Next.js Docs](https://nextjs.org/docs)
 
 ## 発火条件（リポジトリ判定）
-- まず `doc/rdd.md` を確認し、`技術スタック React` または `技術スタック Next.js` があれば、このSkillの方針をデフォルト採用する。
+- まず `doc/input/rdd.md` を確認し、`技術スタック React` または `技術スタック Next.js` があれば、このSkillの方針をデフォルト採用する。
 - 記載がなくても、依頼がReact/Next/コンポーネント設計/状態管理/レンダリング/SSR/パフォーマンス最適化なら適用する。
 
 ## このSkillの基本方針（まえちゃん向けの“整理軸”）

@@ -19,7 +19,7 @@ description: "[ドキュメント] リバースエンジニアリングによる
 ---
 
 ## 前提/参照（SSOT）
-- **SSOT**: `doc/rdd.md`, `doc/Architecture.md`, `doc/design/*`（存在すれば）
+- **SSOT**: `doc/input/rdd.md`, `doc/Architecture.md`, `doc/input/design/*`（存在すれば）
 - **生成物の出力先**: `doc/_generated/`（上書き更新してよい。履歴はGitで追跡）
 
 ---
@@ -31,7 +31,7 @@ description: "[ドキュメント] リバースエンジニアリングによる
    - 既存テストとカバレッジ対象を検出（あればリンク）
 
 2. **SSOT整合チェック**
-   - `doc/rdd.md`, `doc/Architecture.md`（＋デザインがあれば `doc/design/*`）と差分比較
+   - `doc/input/rdd.md`, `doc/Architecture.md`（＋デザインがあれば `doc/input/design/*`）と差分比較
    - 不一致/未記載は **差分提案** として記録
    - 技術スタック逸脱が必要な場合は **変更要求（ADR-lite）** を起票（テンプレは下記）
 
@@ -45,7 +45,7 @@ description: "[ドキュメント] リバースエンジニアリングによる
 
 ## 変更要求（ADR-lite）テンプレ（必要時のみ）
     Change Request: {タイトル}
-    - RDD参照: doc/rdd.md §{該当セクション}
+    - RDD参照: doc/input/rdd.md §{該当セクション}
     - 現状の制約: {なぜRDD準拠だと難しいか}
     - 提案差分: {スタック/設計の変更内容（最小）}
     - 影響: {テスト/運用/セキュリティ/コスト}
@@ -82,7 +82,7 @@ description: "[ドキュメント] リバースエンジニアリングによる
 > すべて **Markdown**。図は **Mermaid（＋必要ならASCIIフォールバック）**。重複は避け**相互参照**で結ぶ。
 
 ### 1) SSOTへの反映（原則: 提案まで）
-- `doc/rdd.md` / `doc/Architecture.md` は人間が育てるSSOT。
+- `doc/input/rdd.md` / `doc/Architecture.md` は人間が育てるSSOT。
 - 変更が必要そうな場合は **差分提案** として `doc/_generated/ssot_diff.md` に記録し、勝手に上書きしない。
 
 ### 2) `doc/_generated/index.md`（入口）

@@ -20,8 +20,8 @@ description: "[タスク] 3. Issue実行 + 進捗同期"
 
 ## 共通前提（参照）
 - 実装規約・口調・TDD・Docコメント等は `CLAUDE.md` に従う
-- `doc/rdd.md` を読み、該当する `.claude/skills/*` を適用
-- 詳細運用は `doc/ai_guidelines.md` を参照
+- `doc/input/rdd.md` を読み、該当する `.claude/skills/*` を適用
+- 詳細運用は `doc/guide/ai_guidelines.md` を参照
 
 ---
 
@@ -113,7 +113,7 @@ TaskUpdate:
 gh issue comment {ISSUE_NUMBER} --body "✅ TASK完了
 
 ## 結果サマリ
-- **RDD整合**: OK（根拠: doc/rdd.md §...）
+- **RDD整合**: OK（根拠: doc/input/rdd.md §...）
 - **変更要求**: 無し / 有（承認済み）
 - **検証結果**: lint/type/test すべてPASS
 

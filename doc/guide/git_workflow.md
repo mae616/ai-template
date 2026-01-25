@@ -265,6 +265,6 @@ jobs:
 
 ## 関連ドキュメント
 
-- `doc/manual/commands_catalog.md` - タスク/バグ系コマンド
+- `doc/guide/commands_catalog.md` - タスク/バグ系コマンド
 - `.claude/skills/task-*/SKILL.md` - タスク実行スキル
 - `.claude/skills/bug-*/SKILL.md` - バグ対応スキル

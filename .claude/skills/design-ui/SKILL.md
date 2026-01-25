@@ -7,7 +7,7 @@ description: "[デザイン] 2. SSOT → 静的UI骨格（見た目のみ）を�
 
 ## コマンド: /design-ui [$TARGET] [$PAGE_KEY]
 設計JSON（tokens/components/design_context）を参照し、**静的UI骨格**のみ生成。
-ロジック/状態/データ取得は入れない。ターゲットは **doc/rdd.md** の技術スタックを既定とし、引数で上書きする場合は **ADR-lite承認必須**。
+ロジック/状態/データ取得は入れない。ターゲットは **doc/input/rdd.md** の技術スタックを既定とし、引数で上書きする場合は **ADR-lite承認必須**。
 
 ## いつ使う？（位置づけ）
 - `/design-ssot` または `/design-mock` で **SSOT（tokens/components/context）** が揃ったあと
@@ -19,13 +19,13 @@ description: "[デザイン] 2. SSOT → 静的UI骨格（見た目のみ）を�
 
 ## 共通前提（参照）
 - 口調・出力規約・差分出力の方針は `CLAUDE.md` に従う。
-- `doc/rdd.md` を読み、該当する `.claude/skills/*` を適用して判断軸を揃える。
+- `doc/input/rdd.md` を読み、該当する `.claude/skills/*` を適用して判断軸を揃える。
   - 例（ロール）: `frontend-implementation` / `accessibility-engineer`
   - 例（tech）: `react` / `astro` / `svelte` / `tailwind`（※テンプレートでは固定せず、RDDのスタックに合わせて選ぶ）
-- 詳細運用（サンプル運用/依存評価補助/ADR-lite）は `doc/ai_guidelines.md` を参照。
+- 詳細運用（サンプル運用/依存評価補助/ADR-lite）は `doc/guide/ai_guidelines.md` を参照。
 
 ## 見た目の基準（ビューポート）について
-- まず `doc/rdd.md` の「ターゲット表示環境（事実）」を参照し、プレビュー/Story等の確認は **そのビューポートを基準**に行う
+- まず `doc/input/rdd.md` の「ターゲット表示環境（事実）」を参照し、プレビュー/Story等の確認は **そのビューポートを基準**に行う
 - 未記入の場合は、以下を **推奨デフォルト**として仮置きする：
   - desktop: 1440x900
   - mobile: 390x844
@@ -33,7 +33,7 @@ description: "[デザイン] 2. SSOT → 静的UI骨格（見た目のみ）を�
 
 ### 入力
 - $TARGET（任意）: react | vue | svelte | swiftui | flutter | web-components | plain-html など
-- $PAGE_KEY（任意）: 画面キー（`doc/design/design_context.json` の `pages[].key`）
+- $PAGE_KEY（任意）: 画面キー（`doc/input/design/design_context.json` の `pages[].key`）
   - 省略時: **全ページ**を対象に生成する（複数ページ対応の既定）
 
 ### 出力（差分のみ）
@@ -44,15 +44,15 @@ description: "[デザイン] 2. SSOT → 静的UI骨格（見た目のみ）を�
 - Storybook/プレビュー（対応スタックのみ）
 
 ### 前提（入力ファイル）
-- `doc/design/design-tokens.json`
-- `doc/design/components.json`
-- `doc/design/design_context.json`
-- `doc/design/copy.json`（文言のSSOT。一字一句固定）
- - `doc/design/assets/assets.json`（任意。存在する場合は必ず参照して画像を配置する）
+- `doc/input/design/design-tokens.json`
+- `doc/input/design/components.json`
+- `doc/input/design/design_context.json`
+- `doc/input/design/copy.json`（文言のSSOT。一字一句固定）
+ - `doc/input/design/assets/assets.json`（任意。存在する場合は必ず参照して画像を配置する）
 （通常は `/design-ssot` の成果物）
 
 ### 参照（スキーマ）
-- constraints/resizing/autoLayout の解釈とレスポンシブ対応表は `doc/design/ssot_schema.md` を参照する
+- constraints/resizing/autoLayout の解釈とレスポンシブ対応表は `doc/input/design/ssot_schema.md` を参照する
 
 ### レスポンシブ適用規則（Figma→CSS/スタイル）
 - Auto Layout → `flex` 等 + tokens の `gap/padding`
@@ -61,7 +61,7 @@ description: "[デザイン] 2. SSOT → 静的UI骨格（見た目のみ）を�
   - vertical: TOP_BOTTOM → `h-full`（文脈でcol）
   - resizing: FILL → `flex-1` / `w-full`
   - resizing: HUG → `inline-size: max-content` / `inline-block`
-- breakpoints → `doc/design/design-tokens.json` の `primitives.breakpoints` 準拠
+- breakpoints → `doc/input/design/design-tokens.json` の `primitives.breakpoints` 準拠
 - **tokens外の値禁止 / magic number禁止**
 
 ### 禁止
@@ -71,13 +71,13 @@ description: "[デザイン] 2. SSOT → 静的UI骨格（見た目のみ）を�
  - `div` クリック等でボタン/リンク相当を作ること（セマンティック要素を優先し、必要最小限のWAI-ARIAに限定する）
 
 ### 文言（copy）の適用ルール
-- `design_context.json` の text ノードは `copyKey` を持つ前提で、対応する文言を `doc/design/copy.json` から参照して埋め込む
+- `design_context.json` の text ノードは `copyKey` を持つ前提で、対応する文言を `doc/input/design/copy.json` から参照して埋め込む
 - `copyKey` が未定義/不足している場合は、**推測で生成しない**。ユーザーに以下を依頼して停止する：
   - `FIGMA_REF` を再提示して `/design-ssot` をやり直す
   - または `copy.json` の差分（追加すべきキーと文言）を提供してもらう
 
 ### 画像アセット（assets.json）の適用ルール
-- `doc/design/assets/assets.json` が存在する場合は、`baseDir` 配下にある画像を参照してUI骨格に反映する
+- `doc/input/design/assets/assets.json` が存在する場合は、`baseDir` 配下にある画像を参照してUI骨格に反映する
   - 例: Next/Astro/React → `public/design-assets/*`
   - 例: SvelteKit → `static/design-assets/*`
 - `components.json` の `slots` や `usedBy` 情報と照合し、画像が必要な箇所（ロゴ/アイコン/イラスト/写真）の取りこぼしを防ぐ

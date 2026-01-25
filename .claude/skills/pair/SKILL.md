@@ -25,8 +25,8 @@ description: "[ペアモード] 壁打ち（企画/設計/実装/デザイン）
 
 ## 共通前提（参照）
 - 口調・出力規約は `CLAUDE.md` に従う。
-- プロジェクト固有の事実は `doc/rdd.md`（先頭のAI用事実ブロック）を参照する。
-- 詳細運用（ADR-lite等）は `doc/ai_guidelines.md` を参照。
+- プロジェクト固有の事実は `doc/input/rdd.md`（先頭のAI用事実ブロック）を参照する。
+- 詳細運用（ADR-lite等）は `doc/guide/ai_guidelines.md` を参照。
 
 ---
 

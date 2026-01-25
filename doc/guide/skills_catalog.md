@@ -1,9 +1,9 @@
 # Claude Code skills カタログ（判断軸系）
 
 このページは `.claude/skills/*/SKILL.md`（判断軸系 = AIが状況に応じて自動適用）の一覧です。
-プロジェクトの事実は `doc/rdd.md`（先頭のAI用事実ブロック）に書き、適用すべきskillを選びます。
+プロジェクトの事実は `doc/input/rdd.md`（先頭のAI用事実ブロック）に書き、適用すべきskillを選びます。
 
-> **手順系スキル**（`/setup`, `/commit-msg` など）は `doc/manual/commands_catalog.md` を参照してください。
+> **手順系スキル**（`/setup`, `/commit-msg` など）は `doc/guide/commands_catalog.md` を参照してください。
 
 ## 命名と分類（重要）
 このリポジトリのskillは、**ディレクトリ名（slug）**で識別する。  

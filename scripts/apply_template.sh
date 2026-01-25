@@ -32,7 +32,7 @@ usage() {
   --safe           既存ファイルは上書きしない（デフォルト）
   --force          テンプレ対象ファイルを上書きする（バックアップ推奨）
   --sync           テンプレ対象ファイルを同期（上書き＋削除）。危険：テンプレ配下で削除が発生しうる
-  --overwrite-rdd  `doc/rdd.md` を上書きする（非推奨：通常は各プロジェクト固有）
+  --overwrite-rdd  `doc/input/rdd.md` を上書きする（非推奨：通常は各プロジェクト固有）
   --dry-run        実際には書き込まず、差分だけ表示
   --no-backup      上書き前バックアップを作成しない（非推奨）
   -h, --help       ヘルプ
@@ -123,15 +123,10 @@ INCLUDES=(
   ".devcontainer/"
   ".mise.toml"
   "doc/index.md"
-  "doc/ai_guidelines.md"
-  "doc/Architecture.md"
-  "doc/git_workflow.md"
-  "doc/manual/"
-  "doc/design/"
-  "doc/_generated/README.md"
+  "doc/input/"
+  "doc/guide/"
+  "doc/generated/"
   "doc/devlog/README.md"
-  # RDDは基本的に各プロジェクト固有。初回導入（未存在）だけ反映する。
-  "doc/rdd.md"
 )
 
 timestamp="$(date +%Y%m%d-%H%M%S)"
@@ -179,10 +174,11 @@ echo "対象:         ${INCLUDES[*]}"
 echo
 
 for p in "${INCLUDES[@]}"; do
-  # doc/rdd.md は「プロジェクト所有」の色が強いので、
+  # doc/input/rdd.md は「プロジェクト所有」の色が強いので、
   # デフォルトでは上書きしない（安全側）。必要な場合だけ明示フラグで上書きする。
   EXTRA_FLAGS=()
-  if [ "$p" = "doc/rdd.md" ] && [ "$OVERWRITE_RDD" != "true" ]; then
+  if [ "$p" = "doc/input/" ] && [ "$OVERWRITE_RDD" != "true" ]; then
+    # input/ ディレクトリ全体を対象に、rdd.md だけ上書き回避
     EXTRA_FLAGS+=("--ignore-existing")
   fi
 

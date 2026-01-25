@@ -8,13 +8,13 @@
 ## 命名ルール（重要）
 - **カテゴリ接頭辞 + 動詞** に統一する（例: `task-list`, `bug-new`）。
 - 手順系スキルは **`user-invocable: true`** を設定し、スラッシュコマンドとして呼び出し可能にする。
-- 判断軸は `CLAUDE.md` / `doc/rdd.md` / `.claude/skills/*`（判断軸系） / `doc/ai_guidelines.md` を参照する。
+- 判断軸は `CLAUDE.md` / `doc/input/rdd.md` / `.claude/skills/*`（判断軸系） / `doc/guide/ai_guidelines.md` を参照する。
 
 ## 参照の優先順位（SSOT）
 1. `CLAUDE.md`（憲法）
-2. `doc/rdd.md`（プロジェクト固有の事実）
+2. `doc/input/rdd.md`（プロジェクト固有の事実）
 3. `.claude/skills/*/SKILL.md`（判断軸）
-4. `doc/ai_guidelines.md`（詳細運用）
+4. `doc/guide/ai_guidelines.md`（詳細運用）
 
 ## 推奨フロー（よく使う順）
 - セットアップ: `/setup`
@@ -37,7 +37,7 @@
 ### setup
 | コマンド | 説明 | 推奨スキル |
 |----------|------|-----------|
-| `/setup` | 前提読み込み（`CLAUDE.md` → `doc/rdd.md` → skills → `doc/ai_guidelines.md`） | - |
+| `/setup` | 前提読み込み（`CLAUDE.md` → `doc/input/rdd.md` → skills → `doc/guide/ai_guidelines.md`） | - |
 
 ### task（GitHub Issue/Milestone + 組み込みTask連携）
 | コマンド | 説明 | 推奨スキル |
@@ -83,7 +83,7 @@
 | `/repo-tour` | リポジトリ内容の説明（初見向け） | `architecture-expert` |
 
 ### 技術スタック系スキルの適用条件
-`doc/rdd.md` の技術スタックに応じて以下を自動適用する：
+`doc/input/rdd.md` の技術スタックに応じて以下を自動適用する：
 - React / Next.js → `react`
 - Svelte / SvelteKit → `svelte`
 - Astro → `astro`

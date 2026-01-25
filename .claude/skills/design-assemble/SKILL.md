@@ -6,8 +6,8 @@ description: "[デザイン] 4. variants → 型付きProps/属性にマッピ�
 # [デザイン] 4. variants → 型付きProps/属性にマッピングして結合（再利用UI）
 
 ## コマンド: /design-assemble [$TARGET]
-`doc/design/components.json` の variants を **型付きProps/属性** にマッピングし、選択スタックへ**結合（再利用可能UI）**するアダプタ層。
-既定は doc/rdd.md の技術スタック。引数で変更する際は **ADR-lite承認必須**。
+`doc/input/design/components.json` の variants を **型付きProps/属性** にマッピングし、選択スタックへ**結合（再利用可能UI）**するアダプタ層。
+既定は doc/input/rdd.md の技術スタック。引数で変更する際は **ADR-lite承認必須**。
 
 ## いつ使う？（位置づけ）
 - `/design-ui` → `/design-components` が終わって、見た目の部品が分離できたあと
@@ -18,11 +18,11 @@ description: "[デザイン] 4. variants → 型付きProps/属性にマッピ�
 
 ## 共通前提（参照）
 - 口調・出力規約・差分出力の方針は `CLAUDE.md` に従う。
-- `doc/rdd.md` を読み、該当する `.claude/skills/*` を適用して判断軸を揃える。
+- `doc/input/rdd.md` を読み、該当する `.claude/skills/*` を適用して判断軸を揃える。
   - 例（ロール）: `frontend-implementation` / `accessibility-engineer`
   - 例（tech）: `react` / `astro` / `svelte` / `tailwind`（※テンプレートでは固定せず、RDDのスタックに合わせて選ぶ）
-- 詳細運用（ADR-lite/差分/サンプル運用等）は `doc/ai_guidelines.md` を参照。
-- SSOT JSON のスキーマ（variants命名/props/slots）は `doc/design/ssot_schema.md` を参照。
+- 詳細運用（ADR-lite/差分/サンプル運用等）は `doc/guide/ai_guidelines.md` を参照。
+- SSOT JSON のスキーマ（variants命名/props/slots）は `doc/input/design/ssot_schema.md` を参照。
 
 ### 入力
 - $TARGET（任意）: react | vue | svelte | swiftui | flutter | web-components | plain-html …

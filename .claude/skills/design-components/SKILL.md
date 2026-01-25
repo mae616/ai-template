@@ -29,9 +29,9 @@ description: "[デザイン] 3. 静的UI骨格 → Layout/Component を抽出し
 
 ## 共通前提（参照）
 - 口調・出力規約は `CLAUDE.md` に従う。
-- プロジェクト固有の事実は `doc/rdd.md`（先頭のAI用事実ブロック）を参照する。
+- プロジェクト固有の事実は `doc/input/rdd.md`（先頭のAI用事実ブロック）を参照する。
 - 判断軸は `.claude/skills/*` を適用する（例: `ui-designer` / `tailwind` / `creative-coder` / `usability-psychologist`）。
-- 詳細運用（差分/サンプル運用等）は `doc/ai_guidelines.md` を参照。
+- 詳細運用（差分/サンプル運用等）は `doc/guide/ai_guidelines.md` を参照。
 
 ---
 

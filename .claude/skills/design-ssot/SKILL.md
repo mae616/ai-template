@@ -18,11 +18,11 @@ Figma MCPから設計情報を抽出し、AI/人間が参照するSSOTを作る�
 
 ## 共通前提（参照）
 - 口調・出力規約・差分出力の方針は `CLAUDE.md` に従う。
-- `doc/rdd.md` を読み、該当する `.claude/skills/*` を適用して判断軸を揃える（例: `ui-designer` / `usability-psychologist`）。
-- 詳細運用（サンプル運用/依存評価補助/ADR-lite）は `doc/ai_guidelines.md` を参照。
+- `doc/input/rdd.md` を読み、該当する `.claude/skills/*` を適用して判断軸を揃える（例: `ui-designer` / `usability-psychologist`）。
+- 詳細運用（サンプル運用/依存評価補助/ADR-lite）は `doc/guide/ai_guidelines.md` を参照。
 
 ## 見た目の基準（ビューポート）について
-- まず `doc/rdd.md` の「ターゲット表示環境（事実）」を参照し、**そのビューポートを基準**にSSOTを作る
+- まず `doc/input/rdd.md` の「ターゲット表示環境（事実）」を参照し、**そのビューポートを基準**にSSOTを作る
 - 未記入の場合は、以下を **推奨デフォルト**として仮置きし、出力やレビューの前提に明記する：
   - desktop: 1440x900
   - mobile: 390x844
@@ -78,7 +78,7 @@ DevContainerを使わない場合は「自動登録」が効かないため、�
 
 #### PageKeyのルール（固定）
 - `PascalCase` 推奨（例: `HomePage`, `PricingPage`, `LoginPage`）
-- 既存の `doc/design/design_context.json` に同名 `pages[].key` がある場合は「追記/更新」扱い
+- 既存の `doc/input/design/design_context.json` に同名 `pages[].key` がある場合は「追記/更新」扱い
 - 同名キーで別画面を指す場合は **衝突**として停止（推測でマージしない）
 
 #### 例
@@ -88,18 +88,18 @@ DevContainerを使わない場合は「自動登録」が効かないため、�
   - `/design-ssot HomePage=https://... PricingPage=https://... LoginPage=https://...`
 
 ### 出力（差分のみ）
-- doc/design/design_context.json   # 画面/レイアウト/constraints/resizing
-- doc/design/design-tokens.json    # 色/タイポ/spacing/半径/影/枠線/不透明度/breakpoints（単位明記）
-- doc/design/components.json       # 主要コンポーネント + variants（例: size/tone/state）
-- doc/design/copy.json             # 文字の文言（copyKey→文言）。一字一句固定（言い換え禁止）
+- doc/input/design/design_context.json   # 画面/レイアウト/constraints/resizing
+- doc/input/design/design-tokens.json    # 色/タイポ/spacing/半径/影/枠線/不透明度/breakpoints（単位明記）
+- doc/input/design/components.json       # 主要コンポーネント + variants（例: size/tone/state）
+- doc/input/design/copy.json             # 文字の文言（copyKey→文言）。一字一句固定（言い換え禁止）
 - (スタック既定の置き場)/design-assets/  # 画像アセット（Figmaからexportして保存）
-- doc/design/assets/assets.json          # 画像アセットのmanifest（どの要素がどのファイルに対応するか）
+- doc/input/design/assets/assets.json          # 画像アセットのmanifest（どの要素がどのファイルに対応するか）
 
 ### ルール
 - JSONは**単位明記**（px/%/unitless）
 - tokens は「物理値」と「semantic（意味）」を混ぜない（例: `color.gray.900` と `color.text.primary` を分け、semanticは物理へ参照する）
 - variants は **props/属性に落とせる粒度**（例: { size:["sm","md","lg"] }）
-- **文字の文言は必ずSSOT化**する（`doc/design/copy.json`）
+- **文字の文言は必ずSSOT化**する（`doc/input/design/copy.json`）
   - `design_context.json` の text ノードは **必ず `copyKey` で `copy.json` を参照**する（文言の直書き禁止）
   - `copy.json` に無い `copyKey` を参照してはいけない（不足時は生成を止め、ユーザーに `FIGMA_REF` 再提示 or 文言提供を依頼する）
 - **CSSで指定できる見た目は可能な限りSSOT化する**（後続の再現性を上げる）
@@ -107,10 +107,10 @@ DevContainerを使わない場合は「自動登録」が効かないため、�
   - blur は **filter（要素自体）** と **backdrop-filter（背景）** を区別してSSOTに残す
   - 取りこぼしやすい: 「枠線だけある」「背景だけある」「hoverだけ変わる」など
 - `components.json` には、可能な限り `styles`（background/border/radius/shadow/textColor など）を tokens 参照で残す（値の直書き禁止）
-- **RDD遵守**（doc/rdd.md のスタック/制約に反しない）
-- 技術スタックの既定は `doc/rdd.md`。このコマンドの出力（SSOT JSON）は可能な限りスタック非依存に保ち、後続（`/design-ui` / `/design-assemble`）が `doc/rdd.md` を参照して生成する。
-- SSOTの最低限スキーマは `doc/design/ssot_schema.md` を参照。
-- `doc/design/components.json` の variants 命名規約は `doc/design/ssot_schema.md` に従い、プロジェクト横断で揃える。
+- **RDD遵守**（doc/input/rdd.md のスタック/制約に反しない）
+- 技術スタックの既定は `doc/input/rdd.md`。このコマンドの出力（SSOT JSON）は可能な限りスタック非依存に保ち、後続（`/design-ui` / `/design-assemble`）が `doc/input/rdd.md` を参照して生成する。
+- SSOTの最低限スキーマは `doc/input/design/ssot_schema.md` を参照。
+- `doc/input/design/components.json` の variants 命名規約は `doc/input/design/ssot_schema.md` に従い、プロジェクト横断で揃える。
 - 画像（アイコン/ロゴ/イラスト/写真など）で **CSSだけでは再現できないもの**は、可能な限りFigmaからexportして「スタック既定の置き場」に保存し、`assets.json` に対応関係を残す
 - 動画/アニメ（MP4/GIF/Lottie等）も同様に **assetsとしてmanifest化**する（取得できなければ `status: failed` + `error` を必ず記録し、ユーザーに手順を依頼する）
 - **複数入力のマージ規約（固定）**
@@ -130,18 +130,18 @@ DevContainerを使わない場合は「自動登録」が効かないため、�
 - components.json のvariantsが「実装の分岐」に落とせる粒度になっている
 - `copy.json` に未定義文言なし（参照される `copyKey` の不足0件）
 - border/background/gradient/blur/blend/strokeAlign が存在する要素について、tokens と components の `styles` 参照に落ちている（取りこぼし0）
-- 画像アセットが必要な箇所（ロゴ/アイコン/イラスト/写真）が「スタック既定の置き場」 と `doc/design/assets/assets.json` に落ちている（取りこぼし0）
+- 画像アセットが必要な箇所（ロゴ/アイコン/イラスト/写真）が「スタック既定の置き場」 と `doc/input/design/assets/assets.json` に落ちている（取りこぼし0）
   - `assets.json` に `status: "failed"` が1件でもある場合は、**必ずユーザーに失敗理由と次アクション**（Figma Export設定/権限/再提示/手元提供）を明示して停止する
 
 ### 再現性（会話コンテキストがクリアでも再現するためのルール）
-- 後続のdesign系コマンドは、`doc/design/*` のSSOT（tokens/components/context/copy/assets）だけで再現できる状態を目標にする
+- 後続のdesign系コマンドは、`doc/input/design/*` のSSOT（tokens/components/context/copy/assets）だけで再現できる状態を目標にする
 - もしSSOTが不足/破損している場合は、**推測で補わない**。次のどちらかをユーザーに依頼する：
   - `FIGMA_REF`（Figma URL等）を再提示して、`/design-ssot` を再実行する
   - 不足しているSSOT（例: `copy.json` / `assets.json`）の差分をユーザーに提供してもらう
 
 ### 画像アセットの扱い（重要）
 #### アセットの保存先（スタック既定）
-`doc/rdd.md` の技術スタックに合わせて、アセット実体は以下へ保存する（SSOTのmanifestは `doc/` に残す）：
+`doc/input/rdd.md` の技術スタックに合わせて、アセット実体は以下へ保存する（SSOTのmanifestは `doc/` に残す）：
 - Next.js / React / Astro: `public/design-assets/`
 - SvelteKit: `static/design-assets/`
 - （判定できない場合）: まず `public/` があれば `public/design-assets/`、なければ `static/design-assets/`
@@ -162,4 +162,4 @@ Figma側の状態によっては、MCPが画像を取り出せないことがあ
 2. **権限の確認**
    - そのFigmaファイルにアクセス権があるか（閲覧のみでexportが制限されていないか）
 3. **画像の代替入力**
-   - どうしてもMCPで取得できない場合は、ユーザーに「SVG/PNG/WebPを手元からアップロード」または「アセットの配布方法（zip等）を提示」してもらい、`doc/design/assets/` に配置してもらう
+   - どうしてもMCPで取得できない場合は、ユーザーに「SVG/PNG/WebPを手元からアップロード」または「アセットの配布方法（zip等）を提示」してもらい、`doc/input/design/assets/` に配置してもらう

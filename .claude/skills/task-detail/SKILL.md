@@ -20,8 +20,8 @@ description: "[タスク] 2. Issue詳細化 + 依存関係設定"
 
 ## 共通前提（参照）
 - 口調・出力規約・TDD・Docコメント等は `CLAUDE.md` に従う
-- `doc/rdd.md` を読み、該当する `.claude/skills/*` を適用
-- 詳細運用は `doc/ai_guidelines.md` を参照
+- `doc/input/rdd.md` を読み、該当する `.claude/skills/*` を適用
+- 詳細運用は `doc/guide/ai_guidelines.md` を参照
 
 ---
 

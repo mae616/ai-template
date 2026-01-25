@@ -13,7 +13,7 @@ description: "[バグ対応] 3. トラブルシューティング修正策で仮
 
 ## 🎯 目的
 - 既存Issue内の **「考えられる原因（仮説）」** を起点に、**実行前の修正策候補一覧** を作成する
-- 出典ポリシーは `CLAUDE.md` の原則、および `doc/ai_guidelines.md` の「情報源・引用（出典）ポリシー（詳細）」に従い、**根拠を伴う対応策** を整理する
+- 出典ポリシーは `CLAUDE.md` の原則、および `doc/guide/ai_guidelines.md` の「情報源・引用（出典）ポリシー（詳細）」に従い、**根拠を伴う対応策** を整理する
 - 修正はまだ行わず、**合理性・現実性・影響範囲・検証手順** を明記した計画としてIssueコメントに追記する
 
 ---
@@ -38,7 +38,7 @@ gh issue view {ISSUE_NUMBER} --json title,body,labels
 
 ### 2. 各仮説ごとに修正方針を探索
 - 優先度：①公式Doc → ②公式GitHub（issue/PR） → ③英語圏Stack Overflow
-- 詳細は `doc/ai_guidelines.md` を参照
+- 詳細は `doc/guide/ai_guidelines.md` を参照
 
 ### 3. 修正策をIssueコメントで提案
 ```bash
@@ -96,7 +96,7 @@ gh issue edit {ISSUE_NUMBER} --body "{解決状況を🟠対応中に更新し�
 ---
 
 ## 検索・評価ポリシー（参照）
-詳細は `doc/ai_guidelines.md` の「情報源・引用（出典）ポリシー（詳細）」に従う（= `CLAUDE.md` の原則を具体化）。
+詳細は `doc/guide/ai_guidelines.md` の「情報源・引用（出典）ポリシー（詳細）」に従う（= `CLAUDE.md` の原則を具体化）。
 
 ---
 
