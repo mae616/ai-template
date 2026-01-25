@@ -70,6 +70,7 @@ scripts/apply_template.sh --target /abs/path/to/your-project --safe
 - 上書き前に `your-project/.ai-template-backup/<timestamp>/` へバックアップします（`--no-backup` で無効化可能）
 - `--safe`（デフォルト）は既存ファイルを上書きしません。テンプレ側の更新を反映したい場合は `--force`、同期して削除も伴う場合は `--sync` を使用します。
 - [doc/input/rdd.md](doc/input/rdd.md) は原則 **プロジェクト固有** です。テンプレ更新で上書きしたい場合のみ `--overwrite-rdd` を明示してください。
+- **グローバル適用済みの場合**: `--no-skills` で `.claude/` のコピーをスキップできます（スキルは `~/.claude/` のものを使用）
 
 #### グローバル適用（~/.claude への反映）
 スキルや設定をグローバル（全プロジェクト共通）に適用する場合:
@@ -145,7 +146,7 @@ main
 ```
 - このリポジトリを使用する場合、各コマンド実行時に `/clear` → `/setup` が走ることを前提としています。
 
-### 補助: リポジトリ案内・壁打ち（任意）
+### 補助: リポジトリ案内・壁打ち・スキル作成（任意）
 
 - **[/repo-tour](.claude/skills/repo-tour/SKILL.md)**: 初見向けに「どこに何があるか」を短時間で案内します
   - **入力**: 任意（例: `全体`, `AI運用`, `design`, `commands`, `skills`）
@@ -153,12 +154,16 @@ main
 - **[/pair](.claude/skills/pair/SKILL.md)**: 企画/設計/実装/デザインの壁打ちを、短い反復で進めます
   - **入力**: `plan` | `design` | `arch` | `dev`（必須）＋相談内容（任意）
   - **出力**: 短問（1〜3）→選択肢（2〜3）→推奨→次の一手
+- **[/skill-create](.claude/skills/skill-create/SKILL.md)**: 新しいスキルを壁打ち→テンプレ生成→登録確認まで
+  - **入力**: スキルの目的や名前（任意）
+  - **出力**: 要件整理 → SKILL.md生成 → 認識確認
 
 使用例:
 
 ```bash
 /repo-tour design
 /pair design 設定画面の情報設計を壁打ちしたい
+/skill-create react-query の判断軸が欲しい
 ```
 
 
@@ -279,6 +284,22 @@ HTMLは**必須ではありません**（必要なときだけオプションで
 → 5. Sprint1 完了 → main へマージ
 → 6. 次のSprintへ
 ```
+
+#### 並行作業（git worktree）
+
+複数のタスクやバグ修正を同時に進める場合、**git worktree** を使用できます。
+
+```bash
+# 別のworktreeでタスクを並行実行
+git worktree add ../project-task-123 -b task/123-api-design
+cd ../project-task-123
+# 別ターミナルでClaude Codeを起動して作業
+
+# 完了後はworktreeを削除
+git worktree remove ../project-task-123
+```
+
+> `/task-run` と `/bug-fix` には worktree モードの手順が含まれています。
 
 ### 4. トラブルシューティングシステム（GitHub Issue → PR連携）
 
