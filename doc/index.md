@@ -10,7 +10,8 @@
 ## まず読む（新人/初見）
 1. `doc/rdd.md`（要件・制約・技術スタック：先頭のAI用事実ブロック）
 2. `doc/Architecture.md`（全体構造・境界・依存方向）
-3. `doc/manual/ai_template_operation.md`（テンプレ運用）
+3. `doc/git_workflow.md`（Gitブランチ運用：main ← sprint ← task）
+4. `doc/manual/ai_template_operation.md`（テンプレ運用）
 
 ## デザイン（SSOT）
 - `doc/design/ssot_schema.md`（SSOT JSONの契約）
