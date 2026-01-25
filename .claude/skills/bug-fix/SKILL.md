@@ -48,10 +48,25 @@ gh issue view {ISSUE_NUMBER} --json title,body,labels
 - **修正策（候補一覧）**（仮説ごとの案）
 - 参考資料（出典）
 
-### 2. 作業ブランチ作成
+### 2. 作業ブランチ作成（通常 or worktree）
+
+**通常モード（単一修正）:**
 ```bash
 git checkout -b fix/{ISSUE_NUMBER}-{short-description}
 ```
+
+**並行モード（git worktree）:**
+複数のバグ修正を同時に進める場合は worktree を使用:
+```bash
+# 親ディレクトリにworktreeを作成
+git worktree add ../$(basename $(pwd))-fix-{ISSUE_NUMBER} -b fix/{ISSUE_NUMBER}-{short-description}
+
+# worktreeに移動して作業
+cd ../$(basename $(pwd))-fix-{ISSUE_NUMBER}
+```
+
+> **Tips**: 別ターミナルで別のClaude Codeセッションを起動し、異なるworktreeで並行作業が可能。
+> 完了後は `git worktree remove ../project-fix-{ISSUE_NUMBER}` で削除。
 
 ### 3. 着手コメント（Issueに）
 ```bash

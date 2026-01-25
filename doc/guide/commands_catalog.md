@@ -25,12 +25,38 @@
   - bug-new〜bug-propose は Issue で管理（調査・議論）
   - bug-fix は PR を作成し、`Fixes #...` で Issue に紐づけ
 - デザイン（会話起点）: `/design-mock` → `/design-ui` → `/design-components` → `/design-assemble`
-  - 補足: `/design-mock` が `mock.html`（1枚ペラ）を出した場合のみ、必要に応じて `/design-split` を使う
 - デザイン（Figma起点）: `/design-ssot` → `/design-ui` → `/design-components` → `/design-assemble`
-  - 補足: 静的HTMLが欲しい場合のみ `/design-html`（任意）
-  - 補足: 1枚ペラHTMLをページ分割したい場合のみ `/design-split`（任意）
 - 壁打ち: `/pair plan|design|arch|dev`
 - 初見: `/repo-tour`
+
+### デザインフロー詳細（design-html / design-split の使い分け）
+
+```
+【会話起点】                              【Figma起点】
+    │                                        │
+    ▼                                        ▼
+/design-mock ──→ mock.html（1枚ペラ）   /design-ssot ──→ JSON（SSOT）
+    │               │                        │              │
+    │               ▼                        │              ▼
+    │         /design-split（任意）          │        /design-html（任意）
+    │               │                        │              │
+    │               ▼                        │              ▼
+    │         {page}.html 複数               │        {page}.html 複数
+    │                                        │
+    └──────→ JSON（SSOT）も同時生成 ─────────┘
+                        │
+                        ▼
+              /design-ui → /design-components → /design-assemble
+```
+
+| コマンド | 入力 | 出力 | いつ使う |
+|----------|------|------|----------|
+| `/design-html` | JSON（SSOT） | `{page}.html` | SSOT JSONから静的HTMLを生成したいとき（レビュー/共有用） |
+| `/design-split` | 1枚ペラHTML | `{page}.html` | `/design-mock` の1枚ペラをページ単位に分割したいとき |
+
+> **ポイント**: どちらも最終出力は `doc/input/design/html/{page}.html` だが、**入力が違う**。
+> - `/design-html` は JSON → HTML（Figma起点で静的確認が欲しいとき）
+> - `/design-split` は HTML → HTML（会話起点で1枚ペラを分割したいとき）
 
 ## コマンド一覧
 
@@ -75,6 +101,11 @@
 | コマンド | 説明 | 推奨スキル |
 |----------|------|-----------|
 | `/docs-reverse` | 逆生成ドキュメント作成（実装から俯瞰/引き継ぎ用ドキュメント） | `architecture-expert` |
+
+### skill
+| コマンド | 説明 | 推奨スキル |
+|----------|------|-----------|
+| `/skill-create` | 新しいスキルを壁打ち→テンプレ生成→登録確認まで | - |
 
 ### pair
 | コマンド | 説明 | 推奨スキル |

@@ -101,6 +101,13 @@ skills一覧（索引）は [doc/guide/skills_catalog.md](doc/guide/skills_catal
 本テンプレートは **Claude Codeをホスト環境で運用することを想定** しています。
 コンテナ化（DevContainer等）での運用は各プロジェクトの判断にお任せします。
 
+> **Note**: 以前は `.devcontainer/` を同梱していましたが、以下の理由で削除しました。
+> - Claude Code のホスト環境運用が安定し、DevContainer の必要性が低下
+> - DevContainer の保守コスト（Dockerfile/docker-compose.yml の更新）がテンプレート本体の保守を圧迫
+> - プロジェクト固有の環境構築は各リポジトリで行う方が柔軟
+>
+> DevContainer が必要な場合は、各プロジェクトで独自に設定してください。
+
 ## Gitブランチ運用
 
 このテンプレートでは **3層ブランチ構造** を推奨しています。

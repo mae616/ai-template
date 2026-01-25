@@ -52,6 +52,26 @@ gh issue view {ISSUE_NUMBER}
 - 変更要求がある場合は **承認済み** か確認
 - 組み込みTaskの blockedBy が空か確認
 
+### 2.5. 作業ブランチ作成（通常 or worktree）
+
+**通常モード（単一タスク）:**
+```bash
+git checkout -b task/{ISSUE_NUMBER}-{short-description}
+```
+
+**並行モード（git worktree）:**
+複数タスクを同時に進める場合は worktree を使用:
+```bash
+# 親ディレクトリにworktreeを作成
+git worktree add ../$(basename $(pwd))-task-{ISSUE_NUMBER} -b task/{ISSUE_NUMBER}-{short-description}
+
+# worktreeに移動して作業
+cd ../$(basename $(pwd))-task-{ISSUE_NUMBER}
+```
+
+> **Tips**: 別ターミナルで別のClaude Codeセッションを起動し、異なるworktreeで並行作業が可能。
+> 完了後は `git worktree remove ../project-task-{ISSUE_NUMBER}` で削除。
+
 ### 3. 着手（組み込みTask + Issue同期）
 
 **組み込みTask更新:**
