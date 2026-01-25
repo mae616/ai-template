@@ -78,18 +78,20 @@ scripts/apply_global.sh
 ### 適用対象
 | 対象 | 説明 |
 |------|------|
-| `~/.claude/skills/` | 判断軸スキル（user-invocable: false） |
+| `~/.claude/skills/` | スキル（デフォルト: 判断軸のみ、`--all-skills`: 全て） |
 | `~/.claude/settings.local.json` | permissions のマージ（追加のみ） |
 | `~/.claude/CLAUDE.md` | グローバル設定（全プロジェクト共通） |
 
 ### オプション
+- `--all-skills` : 全スキルを適用（手順系含む）
 - `--skip-skills` : スキルの適用をスキップ
 - `--skip-settings` : settings.local.json の適用をスキップ
 - `--skip-claude-md` : CLAUDE.md の適用をスキップ
 - `--no-backup` : バックアップを作成しない（非推奨）
 
 ### 注意
-- **手順系スキル**（`user-invocable: true`）はプロジェクト単位で管理推奨
+- デフォルトは **判断軸スキル**（`user-invocable: false`）のみ
+- `--all-skills` で **手順系スキル**（`user-invocable: true`）も含む
 - 適用後は **Claude Code を再起動** してスキルを反映
 
 ---

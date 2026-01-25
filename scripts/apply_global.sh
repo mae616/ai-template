@@ -22,6 +22,7 @@ BACKUP="true"
 SKIP_SKILLS="false"
 SKIP_SETTINGS="false"
 SKIP_CLAUDE_MD="false"
+ALL_SKILLS="false"
 
 usage() {
   cat <<'USAGE'
@@ -31,18 +32,20 @@ usage() {
 オプション:
   --dry-run         実際には書き込まず、差分だけ表示
   --no-backup       上書き前バックアップを作成しない（非推奨）
+  --all-skills      全スキルを適用（手順系含む）
   --skip-skills     スキルの適用をスキップ
   --skip-settings   settings.local.json の適用をスキップ
   --skip-claude-md  CLAUDE.md の適用をスキップ
   -h, --help        ヘルプ
 
 適用対象:
-  1. ~/.claude/skills/     判断軸スキル（user-invocable: false）
+  1. ~/.claude/skills/     スキル（デフォルト: 判断軸のみ、--all-skills: 全て）
   2. ~/.claude/settings.local.json  permissions のマージ
   3. ~/.claude/CLAUDE.md   グローバル設定（全プロジェクト共通）
 
 注意:
-  - user-invocable: true のスキル（手順系）はプロジェクト単位で管理推奨
+  - デフォルトは判断軸スキル（user-invocable: false）のみ
+  - --all-skills で手順系（user-invocable: true）も含む
   - settings.local.json の permissions は追加のみ（既存は削除しない）
 USAGE
 }
@@ -67,6 +70,10 @@ while [ "$#" -gt 0 ]; do
       ;;
     --skip-claude-md)
       SKIP_CLAUDE_MD="true"
+      shift
+      ;;
+    --all-skills)
+      ALL_SKILLS="true"
       shift
       ;;
     -h|--help)
@@ -107,28 +114,41 @@ echo
 if [ "$SKIP_SKILLS" = "false" ]; then
   echo "--- スキルの適用 ---"
 
-  # 判断軸スキルのみを抽出（user-invocable: false または未指定）
-  JUDGMENT_SKILLS=()
+  # スキルを抽出（--all-skills: 全て、デフォルト: 判断軸のみ）
+  TARGET_SKILLS=()
   for skill_dir in "$TEMPLATE_ROOT/.claude/skills/"*/; do
     skill_name=$(basename "$skill_dir")
     skill_md="$skill_dir/SKILL.md"
 
     if [ -f "$skill_md" ]; then
       # user-invocable: true があるかチェック
-      if grep -q "user-invocable: true" "$skill_md" 2>/dev/null; then
-        echo "  [SKIP] $skill_name (user-invocable: true → プロジェクト単位推奨)"
+      is_procedure=$(grep -q "user-invocable: true" "$skill_md" 2>/dev/null && echo "true" || echo "false")
+
+      if [ "$ALL_SKILLS" = "true" ]; then
+        # 全スキル適用
+        TARGET_SKILLS+=("$skill_name")
+        if [ "$is_procedure" = "true" ]; then
+          echo "  [ADD]  $skill_name (手順系)"
+        else
+          echo "  [ADD]  $skill_name (判断軸)"
+        fi
       else
-        JUDGMENT_SKILLS+=("$skill_name")
-        echo "  [ADD]  $skill_name"
+        # 判断軸のみ
+        if [ "$is_procedure" = "true" ]; then
+          echo "  [SKIP] $skill_name (手順系 → --all-skills で適用可)"
+        else
+          TARGET_SKILLS+=("$skill_name")
+          echo "  [ADD]  $skill_name (判断軸)"
+        fi
       fi
     fi
   done
 
-  if [ ${#JUDGMENT_SKILLS[@]} -gt 0 ]; then
+  if [ ${#TARGET_SKILLS[@]} -gt 0 ]; then
     if [ "$DRY_RUN" = "false" ]; then
       # バックアップ
       if [ "$BACKUP" = "true" ]; then
-        for skill_name in "${JUDGMENT_SKILLS[@]}"; do
+        for skill_name in "${TARGET_SKILLS[@]}"; do
           if [ -d "$GLOBAL_DIR/skills/$skill_name" ]; then
             mkdir -p "$backup_dir/skills"
             cp -r "$GLOBAL_DIR/skills/$skill_name" "$backup_dir/skills/" 2>/dev/null || true
@@ -138,7 +158,7 @@ if [ "$SKIP_SKILLS" = "false" ]; then
 
       # 適用
       mkdir -p "$GLOBAL_DIR/skills"
-      for skill_name in "${JUDGMENT_SKILLS[@]}"; do
+      for skill_name in "${TARGET_SKILLS[@]}"; do
         rsync -a --delete \
           "$TEMPLATE_ROOT/.claude/skills/$skill_name/" \
           "$GLOBAL_DIR/skills/$skill_name/"
