@@ -18,9 +18,9 @@ Claude Code / Cursor 向けの開発プロンプトテンプレート。
 
 | 必須/任意 | ツール | 用途 | 確認方法 | 公式 |
 |-----------|--------|------|----------|------|
-| **必須** | Claude Code | コア | `claude --version` | [GitHub](https://github.com/anthropics/claude-code) |
+| **必須** | Claude Code | コア | `claude --version` | [公式](https://www.anthropic.com/claude-code) |
 | **必須** | GitHub CLI | task/bug管理 | `gh auth status` | [公式](https://cli.github.com/) |
-| 任意 | Agent Browser | UI確認/デバッグ | - | [GitHub](https://github.com/anthropics/agent-browser)（開発中） |
+| 任意 | Agent Browser | UI確認/デバッグ | - | [公式](https://agentbrowser.vercel.app/)（開発中） |
 | 任意 | Figma MCP | /design-ssot | `/mcp` で確認 | [公式ガイド](https://help.figma.com/hc/en-us/articles/32132100833559-Guide-to-the-Figma-MCP-server) |
 | 任意 | mise | ツール管理 | `mise --version` | [公式](https://mise.jdx.dev/) |
 | 任意 | Cursor | IDE | - | [公式](https://cursor.com/) |
@@ -468,7 +468,7 @@ Feedback only OSS
 
 このプロジェクトは以下のプロジェクトの恩恵を受けています：
 
-- [Claude Code](https://github.com/anthropics/claude-code) - コード支援AI（CLI/拡張）
+- [Claude Code](https://www.anthropic.com/claude-code) - コード支援AI（CLI/拡張）
 - [Cursor IDE](https://cursor.com/) - AI統合開発環境
 - [Figma MCPサーバー（公式ガイド）](https://help.figma.com/hc/ja/articles/32132100833559-Figma-MCP%E3%82%B5%E3%83%BC%E3%83%90%E3%83%BC%E3%81%AE%E3%82%AC%E3%82%A4%E3%83%89) - デザイン情報連携（Dev Mode）
 - [mise](https://mise.jdx.dev/) - ツール管理
