@@ -20,7 +20,7 @@ Claude Code / Cursor 向けの開発プロンプトテンプレート。
 |-----------|--------|------|----------|------|
 | **必須** | Claude Code | コア | `claude --version` | [公式](https://www.anthropic.com/claude-code) |
 | **必須** | GitHub CLI | task/bug管理 | `gh auth status` | [公式](https://cli.github.com/) |
-| 任意 | Agent Browser | UI確認/デバッグ | - | [公式](https://agentbrowser.vercel.app/)（開発中） |
+| 任意 | Agent Browser | UI確認/デバッグ | - | [GitHub](https://github.com/vercel-labs/agent-browser)（開発中） |
 | 任意 | Figma MCP | /design-ssot | `/mcp` で確認 | [公式ガイド](https://help.figma.com/hc/en-us/articles/32132100833559-Guide-to-the-Figma-MCP-server) |
 | 任意 | mise | ツール管理 | `mise --version` | [公式](https://mise.jdx.dev/) |
 | 任意 | Cursor | IDE | - | [公式](https://cursor.com/) |
