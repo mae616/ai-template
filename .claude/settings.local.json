@@ -53,14 +53,33 @@
 
             "WebFetch(domain:tailwindcss.com)",
 
+            "Bash(gh issue list :*)",
             "Bash(gh issue view :*)",
-            "mcp__serena"
+            "Bash(gh pr list :*)",
+            "Bash(gh pr view :*)",
+            "Bash(gh project list :*)",
+            "Bash(gh project view :*)",
+            "Bash(gh api :* --method GET :*)"
         ],
         "ask": [
             "Bash(npm i -g :*)",
             "Bash(pnpm add -g :*)",
             "Bash(brew :*)",
-            "Bash(docker :*)"
+            "Bash(docker :*)",
+
+            "Bash(git push :*)",
+            "Bash(git branch -D :*)",
+
+            "Bash(gh issue create :*)",
+            "Bash(gh issue edit :*)",
+            "Bash(gh issue comment :*)",
+            "Bash(gh issue close :*)",
+            "Bash(gh issue reopen :*)",
+            "Bash(gh pr create :*)",
+            "Bash(gh pr merge :*)",
+            "Bash(gh pr close :*)",
+            "Bash(gh project item-add :*)",
+            "Bash(gh api :*)"
         ]
     }
 }

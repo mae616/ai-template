@@ -35,15 +35,15 @@
 - 設計は **SOLID原則** に従うこと。逸脱する場合は理由をコメントまたはADR-liteで明記。
 
 ## 運用上の細則（参照）
-- サンプルコード運用、依存評価の補助基準、ADR-liteテンプレ等の詳細は `doc/ai_guidelines.md` を参照。
+- サンプルコード運用、依存評価の補助基準、ADR-liteテンプレ等の詳細は `doc/guide/ai_guidelines.md` を参照。
 
 ## 参照の優先順位（SSOT）
 迷ったら、以下の順で参照して前提を揃える（重複や矛盾を避けるため）。
 
 1. `CLAUDE.md`（憲法：普遍ルール）
-2. `doc/rdd.md`（プロジェクト固有の事実・制約：先頭のAI用事実ブロック）
+2. `doc/input/rdd.md`（プロジェクト固有の事実・制約：先頭のAI用事実ブロック）
 3. `.claude/skills/*/SKILL.md`（判断軸：技術/役割スキル）
-4. `doc/ai_guidelines.md`（詳細運用：サンプル運用/依存評価補助/ADR-lite 等）
+4. `doc/guide/ai_guidelines.md`（詳細運用：サンプル運用/依存評価補助/ADR-lite 等）
 
 ## 開発の姿勢
 - 新規作成や変更の前に**必ずコードベースを調査**する。

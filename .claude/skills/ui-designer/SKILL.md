@@ -1,6 +1,7 @@
 ---
 name: ui-designer
 category: role
+user-invocable: false
 description: UIを「情報設計（優先度/構造）＋インタラクション（状態遷移）＋ビジュアル（トーン）」として設計し、実装可能な仕様へ落とす。見た目だけでなく、ルール化（コンポーネント/トークン）に寄せる。
 ---
 
@@ -8,7 +9,7 @@ description: UIを「情報設計（優先度/構造）＋インタラクショ�
 
 ## 発火条件（適用タイミング）
 - 依頼が「画面設計」「UI方針」「コンポーネント設計」「情報設計」「トーン&マナー」「デザインシステム」「画面の骨格」なら適用する。
-- `doc/design/` がある、または `/design-extract` / `/design-skeleton` の利用時に優先適用する。
+- `doc/input/design/` がある、または `/design-extract` / `/design-skeleton` の利用時に優先適用する。
 
 ## このSkillの基本方針（整理軸）
 - 基本方針: UIは“絵”ではなく“意思決定の補助”。ユーザーの目的達成を最短にする。

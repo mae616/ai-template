@@ -1,7 +1,8 @@
 ---
 name: tailwind
 category: tech
-description: Tailwind CSSを、utility-first（早すぎる抽象化を避ける）という思想で運用し、UI実装の認知負荷を下げながら一貫性と保守性を保つための設計・レビュー・リファクタ判断を整理する。doc/rdd.md に「技術スタック Tailwind」または「技術スタック Tailwind CSS」がある場合や、CSS設計/命名/デザインシステム/クラス肥大化の相談で使う。
+user-invocable: false
+description: Tailwind CSSを、utility-first（早すぎる抽象化を避ける）という思想で運用し、UI実装の認知負荷を下げながら一貫性と保守性を保つための設計・レビュー・リファクタ判断を整理する。doc/input/rdd.md に「技術スタック Tailwind」または「技術スタック Tailwind CSS」がある場合や、CSS設計/命名/デザインシステム/クラス肥大化の相談で使う。
 ---
 
 # Tailwind Cognitive Flow Skill
@@ -11,7 +12,7 @@ description: Tailwind CSSを、utility-first（早すぎる抽象化を避ける
 - [Docs](https://tailwindcss.com/docs)
 
 ## 発火条件（リポジトリ判定）
-- `doc/rdd.md` に `技術スタック Tailwind` または `技術スタック Tailwind CSS` がある場合、このSkillを優先適用する。
+- `doc/input/rdd.md` に `技術スタック Tailwind` または `技術スタック Tailwind CSS` がある場合、このSkillを優先適用する。
 - 記載がなくても、依頼が Tailwind / utility-first / CSS設計 / クラスの増殖 / コンポーネント化の境界 / デザインシステム に該当するなら適用する。
 
 ## このSkillの基本方針（整理軸）

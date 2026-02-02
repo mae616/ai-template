@@ -21,20 +21,20 @@ DRY_RUN="false"
 BACKUP="true"
 MODE="safe" # safe(default): 既存を上書きしない / force: 上書きする / sync: 上書き＋削除で同期（危険）
 OVERWRITE_RDD="false"
-OVERWRITE_AI_TASK="false"
+NO_SKILLS="false"
 
 usage() {
   cat <<'USAGE'
 使い方:
-  scripts/apply_template.sh --target /abs/path/to/project [--safe|--force|--sync] [--dry-run] [--no-backup]
+  scripts/apply_template.sh --target /abs/path/to/project [--safe|--force|--sync] [--dry-run] [--no-backup] [--no-skills]
 
 オプション:
   --target <dir>   反映先（必須）
   --safe           既存ファイルは上書きしない（デフォルト）
   --force          テンプレ対象ファイルを上書きする（バックアップ推奨）
   --sync           テンプレ対象ファイルを同期（上書き＋削除）。危険：テンプレ配下で削除が発生しうる
-  --overwrite-rdd  `doc/rdd.md` を上書きする（非推奨：通常は各プロジェクト固有）
-  --overwrite-ai-task  `ai-task/`（テンプレ）を上書きする（注意：既存タスクを壊す可能性）
+  --overwrite-rdd  `doc/input/rdd.md` を上書きする（非推奨：通常は各プロジェクト固有）
+  --no-skills      `.claude/` をコピーしない（グローバル適用済みの場合に使用）
   --dry-run        実際には書き込まず、差分だけ表示
   --no-backup      上書き前バックアップを作成しない（非推奨）
   -h, --help       ヘルプ
@@ -67,12 +67,12 @@ while [ "$#" -gt 0 ]; do
       OVERWRITE_RDD="true"
       shift
       ;;
-    --overwrite-ai-task)
-      OVERWRITE_AI_TASK="true"
-      shift
-      ;;
     --no-backup)
       BACKUP="false"
+      shift
+      ;;
+    --no-skills)
+      NO_SKILLS="true"
       shift
       ;;
     -h|--help)
@@ -125,21 +125,18 @@ ensure_target_parent_dir() {
 INCLUDES=(
   "CLAUDE.md"
   "AGENTS.md"
-  ".claude/"
-  ".devcontainer/"
   ".mise.toml"
   "doc/index.md"
-  "doc/ai_guidelines.md"
-  "doc/Architecture.md"
-  "doc/manual/"
-  "doc/design/"
-  "doc/_generated/README.md"
+  "doc/input/"
+  "doc/guide/"
+  "doc/generated/"
   "doc/devlog/README.md"
-  # RDDは基本的に各プロジェクト固有。初回導入（未存在）だけ反映する。
-  "doc/rdd.md"
-  # ai-task は運用中に中身が増えるため、基本は初回導入（未存在）だけ反映する。
-  "ai-task/"
 )
+
+# --no-skills が指定されていない場合のみ .claude/ を含める
+if [ "$NO_SKILLS" = "false" ]; then
+  INCLUDES+=(".claude/")
+fi
 
 timestamp="$(date +%Y%m%d-%H%M%S)"
 backup_dir="$TARGET_DIR/.ai-template-backup/$timestamp"
@@ -182,18 +179,16 @@ echo "テンプレート: $TEMPLATE_ROOT"
 echo "反映先:       $TARGET_DIR"
 echo "モード:       $MODE"
 echo "overwrite-rdd: $OVERWRITE_RDD"
-echo "overwrite-ai-task: $OVERWRITE_AI_TASK"
+echo "no-skills:    $NO_SKILLS"
 echo "対象:         ${INCLUDES[*]}"
 echo
 
 for p in "${INCLUDES[@]}"; do
-  # doc/rdd.md と ai-task/ は「プロジェクト所有」の色が強いので、
+  # doc/input/rdd.md は「プロジェクト所有」の色が強いので、
   # デフォルトでは上書きしない（安全側）。必要な場合だけ明示フラグで上書きする。
   EXTRA_FLAGS=()
-  if [ "$p" = "doc/rdd.md" ] && [ "$OVERWRITE_RDD" != "true" ]; then
-    EXTRA_FLAGS+=("--ignore-existing")
-  fi
-  if [ "$p" = "ai-task/" ] && [ "$OVERWRITE_AI_TASK" != "true" ]; then
+  if [ "$p" = "doc/input/" ] && [ "$OVERWRITE_RDD" != "true" ]; then
+    # input/ ディレクトリ全体を対象に、rdd.md だけ上書き回避
     EXTRA_FLAGS+=("--ignore-existing")
   fi
 

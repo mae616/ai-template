@@ -20,7 +20,7 @@
 - それでも英語になる場合は、`/commit-msg`（ステージ差分から日本語コミット文を生成）を使う
 
 例:
-- `fix: DevContainerでFigma MCPが未起動時に迷わないようREADMEを追記`
-- `refactor: setup.shのログ出力で途中終了しないようにする`
+- `fix: Figma MCPが未起動時に迷わないようREADMEを追記`
+- `refactor: apply_template.shのログ出力で途中終了しないようにする`
 
 

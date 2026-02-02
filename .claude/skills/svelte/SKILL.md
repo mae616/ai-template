@@ -1,7 +1,8 @@
 ---
 name: svelte
 category: tech
-description: Svelte/SvelteKitプロジェクトにおいて、UI=状態の直接的な反映という思想を軸に、コンパイル時最適化・状態管理・レンダリング・配信量の設計を整理する。doc/rdd.md に「技術スタック Svelte」または「技術スタック SvelteKit」がある場合や、Svelteの設計・パフォーマンス・構造理解の相談で使う。
+user-invocable: false
+description: Svelte/SvelteKitプロジェクトにおいて、UI=状態の直接的な反映という思想を軸に、コンパイル時最適化・状態管理・レンダリング・配信量の設計を整理する。doc/input/rdd.md に「技術スタック Svelte」または「技術スタック SvelteKit」がある場合や、Svelteの設計・パフォーマンス・構造理解の相談で使う。
 ---
 
 # Svelte UI Compiler Skill
@@ -13,7 +14,7 @@ description: Svelte/SvelteKitプロジェクトにおいて、UI=状態の直接
 - [SvelteKit Docs](https://kit.svelte.dev/docs)
 
 ## 発火条件（リポジトリ判定）
-- `doc/rdd.md` に `技術スタック Svelte` または `技術スタック SvelteKit` が記載されている場合、このSkillを優先適用する。
+- `doc/input/rdd.md` に `技術スタック Svelte` または `技術スタック SvelteKit` が記載されている場合、このSkillを優先適用する。
 - 記載がなくても、依頼内容が Svelte / SvelteKit / コンパイラ最適化 / 軽量UI / 状態管理 / 配信量削減 に関係する場合は適用する。
 
 ## このSkillの基本方針（整理軸）
