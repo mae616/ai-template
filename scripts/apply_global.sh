@@ -193,16 +193,19 @@ if [ "$SKIP_SETTINGS" = "false" ]; then
       if [ -f "$GLOBAL_SETTINGS" ]; then
         # 既存がある場合はマージ（jq使用）
         if command -v jq >/dev/null 2>&1; then
-          # permissions.allow と permissions.ask をマージ（重複排除）
+          # 既存設定を保持しつつ、permissions.allow と permissions.ask をマージ（重複排除）
           MERGED=$(jq -s '
-            .[0].permissions.allow as $old_allow |
-            .[0].permissions.ask as $old_ask |
-            .[1].permissions.allow as $new_allow |
-            .[1].permissions.ask as $new_ask |
-            {
+            .[0] as $old |
+            .[1] as $new |
+            ($old.permissions.allow // []) as $old_allow |
+            ($old.permissions.ask // []) as $old_ask |
+            ($new.permissions.allow // []) as $new_allow |
+            ($new.permissions.ask // []) as $new_ask |
+            # 既存設定をベースに、テンプレートの設定をマージ（permissionsは特別扱い）
+            ($old * $new) * {
               permissions: {
-                allow: (($old_allow // []) + ($new_allow // []) | unique),
-                ask: (($old_ask // []) + ($new_ask // []) | unique)
+                allow: (($old_allow + $new_allow) | unique),
+                ask: (($old_ask + $new_ask) | unique)
               }
             }
           ' "$GLOBAL_SETTINGS" "$TEMPLATE_SETTINGS")

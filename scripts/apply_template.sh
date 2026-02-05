@@ -188,8 +188,8 @@ for p in "${INCLUDES[@]}"; do
   # デフォルトでは上書きしない（安全側）。必要な場合だけ明示フラグで上書きする。
   EXTRA_FLAGS=()
   if [ "$p" = "doc/input/" ] && [ "$OVERWRITE_RDD" != "true" ]; then
-    # input/ ディレクトリ全体を対象に、rdd.md だけ上書き回避
-    EXTRA_FLAGS+=("--ignore-existing")
+    # rdd.md だけ上書き回避（他のファイルは通常通り処理）
+    EXTRA_FLAGS+=("--exclude" "rdd.md")
   fi
 
   # 実反映時のみ、出力先ディレクトリを事前作成して rsync エラーを防ぐ。
