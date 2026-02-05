@@ -20,6 +20,8 @@ GLOBAL_DIR="$HOME/.claude"
 DRY_RUN="false"
 BACKUP="true"
 SKIP_SKILLS="false"
+SKIP_HOOKS="false"
+SKIP_BASE_SETTINGS="false"
 SKIP_SETTINGS="false"
 SKIP_CLAUDE_MD="false"
 ALL_SKILLS="false"
@@ -30,23 +32,28 @@ usage() {
   scripts/apply_global.sh [オプション]
 
 オプション:
-  --dry-run         実際には書き込まず、差分だけ表示
-  --no-backup       上書き前バックアップを作成しない（非推奨）
-  --all-skills      全スキルを適用（手順系含む）
-  --skip-skills     スキルの適用をスキップ
-  --skip-settings   settings.local.json の適用をスキップ
-  --skip-claude-md  CLAUDE.md の適用をスキップ
-  -h, --help        ヘルプ
+  --dry-run           実際には書き込まず、差分だけ表示
+  --no-backup         上書き前バックアップを作成しない（非推奨）
+  --all-skills        全スキルを適用（手順系含む）
+  --skip-skills       スキルの適用をスキップ
+  --skip-hooks        hooks/ の適用をスキップ
+  --skip-base-settings settings.json の適用をスキップ
+  --skip-settings     settings.local.json の適用をスキップ
+  --skip-claude-md    CLAUDE.md の適用をスキップ
+  -h, --help          ヘルプ
 
 適用対象:
-  1. ~/.claude/skills/     スキル（デフォルト: 判断軸のみ、--all-skills: 全て）
-  2. ~/.claude/settings.local.json  permissions のマージ
-  3. ~/.claude/CLAUDE.md   グローバル設定（全プロジェクト共通）
+  1. ~/.claude/skills/             スキル（デフォルト: 判断軸のみ、--all-skills: 全て）
+  2. ~/.claude/hooks/              フック（シェルスクリプト）
+  3. ~/.claude/settings.json       permissions + hooks のマージ
+  4. ~/.claude/settings.local.json permissions のマージ
+  5. ~/.claude/CLAUDE.md           グローバル設定（全プロジェクト共通）
 
 注意:
   - デフォルトは判断軸スキル（user-invocable: false）のみ
   - --all-skills で手順系（user-invocable: true）も含む
-  - settings.local.json の permissions は追加のみ（既存は削除しない）
+  - settings.json / settings.local.json の permissions は追加のみ（既存は削除しない）
+  - settings.json の hooks は上書き（hooks構造はマージが複雑なため）
 USAGE
 }
 
@@ -62,6 +69,14 @@ while [ "$#" -gt 0 ]; do
       ;;
     --skip-skills)
       SKIP_SKILLS="true"
+      shift
+      ;;
+    --skip-hooks)
+      SKIP_HOOKS="true"
+      shift
+      ;;
+    --skip-base-settings)
+      SKIP_BASE_SETTINGS="true"
       shift
       ;;
     --skip-settings)
@@ -174,7 +189,102 @@ if [ "$SKIP_SKILLS" = "false" ]; then
 fi
 
 # ------------------------------
-# 2. settings.local.json の permissions マージ
+# 2. hooks/ の適用
+# ------------------------------
+if [ "$SKIP_HOOKS" = "false" ]; then
+  echo "--- hooks/ の適用 ---"
+
+  TEMPLATE_HOOKS="$TEMPLATE_ROOT/.claude/hooks"
+  GLOBAL_HOOKS="$GLOBAL_DIR/hooks"
+
+  if [ -d "$TEMPLATE_HOOKS" ]; then
+    # フック一覧を表示
+    for hook_file in "$TEMPLATE_HOOKS"/*; do
+      if [ -f "$hook_file" ]; then
+        echo "  [ADD] $(basename "$hook_file")"
+      fi
+    done
+
+    if [ "$DRY_RUN" = "false" ]; then
+      # バックアップ
+      if [ "$BACKUP" = "true" ] && [ -d "$GLOBAL_HOOKS" ]; then
+        mkdir -p "$backup_dir"
+        cp -r "$GLOBAL_HOOKS" "$backup_dir/hooks" 2>/dev/null || true
+      fi
+
+      # 適用（rsync で同期）
+      mkdir -p "$GLOBAL_HOOKS"
+      rsync -a --delete "$TEMPLATE_HOOKS/" "$GLOBAL_HOOKS/"
+      echo "  → 適用完了"
+    else
+      echo "  → [dry-run] 実際には適用しません"
+    fi
+  else
+    echo "  テンプレートに hooks/ がありません"
+  fi
+  echo
+fi
+
+# ------------------------------
+# 3. settings.json の permissions + hooks マージ
+# ------------------------------
+if [ "$SKIP_BASE_SETTINGS" = "false" ]; then
+  echo "--- settings.json の適用 ---"
+
+  TEMPLATE_BASE_SETTINGS="$TEMPLATE_ROOT/.claude/settings.json"
+  GLOBAL_BASE_SETTINGS="$GLOBAL_DIR/settings.json"
+
+  if [ -f "$TEMPLATE_BASE_SETTINGS" ]; then
+    if [ "$DRY_RUN" = "false" ]; then
+      # バックアップ
+      if [ "$BACKUP" = "true" ] && [ -f "$GLOBAL_BASE_SETTINGS" ]; then
+        mkdir -p "$backup_dir"
+        cp "$GLOBAL_BASE_SETTINGS" "$backup_dir/settings.json" 2>/dev/null || true
+      fi
+
+      if [ -f "$GLOBAL_BASE_SETTINGS" ]; then
+        # 既存がある場合はマージ（jq使用）
+        if command -v jq >/dev/null 2>&1; then
+          # permissions.allow をマージ、hooks はテンプレートで上書き
+          MERGED=$(jq -s '
+            .[0] as $old |
+            .[1] as $new |
+            ($old.permissions.allow // []) as $old_allow |
+            ($new.permissions.allow // []) as $new_allow |
+            # 既存設定をベースに、テンプレートの設定をマージ
+            # hooks はテンプレートで上書き（構造が複雑なため）
+            ($old * $new) * {
+              permissions: {
+                allow: (($old_allow + $new_allow) | unique)
+              }
+            }
+          ' "$GLOBAL_BASE_SETTINGS" "$TEMPLATE_BASE_SETTINGS")
+          echo "$MERGED" > "$GLOBAL_BASE_SETTINGS"
+          echo "  → マージ完了（jq使用）"
+        else
+          # jqがない場合は上書き（警告付き）
+          echo "  [WARN] jq がインストールされていないため、上書きします"
+          cp "$TEMPLATE_BASE_SETTINGS" "$GLOBAL_BASE_SETTINGS"
+          echo "  → 上書き完了"
+        fi
+      else
+        # 新規作成
+        cp "$TEMPLATE_BASE_SETTINGS" "$GLOBAL_BASE_SETTINGS"
+        echo "  → 新規作成完了"
+      fi
+    else
+      echo "  テンプレート: $TEMPLATE_BASE_SETTINGS"
+      echo "  適用先:       $GLOBAL_BASE_SETTINGS"
+      echo "  → [dry-run] 実際には適用しません"
+    fi
+  else
+    echo "  テンプレートに settings.json がありません"
+  fi
+  echo
+fi
+
+# ------------------------------
+# 4. settings.local.json の permissions マージ
 # ------------------------------
 if [ "$SKIP_SETTINGS" = "false" ]; then
   echo "--- settings.local.json の適用 ---"
@@ -234,7 +344,7 @@ if [ "$SKIP_SETTINGS" = "false" ]; then
 fi
 
 # ------------------------------
-# 3. CLAUDE.md の適用
+# 5. CLAUDE.md の適用
 # ------------------------------
 if [ "$SKIP_CLAUDE_MD" = "false" ]; then
   echo "--- CLAUDE.md の適用 ---"
