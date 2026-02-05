@@ -88,3 +88,8 @@ description: "[デザイン] 1.（会話起点）SSOT + 静的HTML（叩き台�
 - CSSで指定できる見た目（background/border/gradient/blur/blend/strokeAlign）が、SSOT（tokens/componentsのstyles参照）に落ちている（取りこぼし0）
 - 画像アセットが必要な箇所（ロゴ/アイコン/イラスト/写真）が `doc/input/design/assets/assets.json` に定義され、`baseDir` 配下に配置されている（取りこぼし0）
   - `assets.json` に `status: "failed"` が1件でもある場合は、**必ずユーザーに失敗理由と次アクション**（手元提供/代替ファイル/Export設定）を明示して停止する
+
+---
+
+## 次に推奨
+→ `/design-ui` でSSOT → 静的UI骨格を生成

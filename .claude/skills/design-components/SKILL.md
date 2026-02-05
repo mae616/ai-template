@@ -66,3 +66,8 @@ description: "[デザイン] 3. 静的UI骨格 → Layout/Component を抽出し
 - 見た目が維持されている（主要ページ/主要コンポーネント）
 - 重複UIが減っている（同じ構造が3回以上なら抽出を検討）
 - ここで停止
+
+---
+
+## 次に推奨
+→ `/design-assemble` でvariants → 型付きProps結合

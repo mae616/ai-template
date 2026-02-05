@@ -105,3 +105,8 @@ agent-browser snapshot -i
 - レスポンシブ崩れがないか確認
 
 - ここで停止
+
+---
+
+## 次に推奨
+→ `/design-components` でLayout/Component抽出
