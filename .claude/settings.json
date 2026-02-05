@@ -1,6 +1,10 @@
 {
   "permissions": {
     "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Task",
       "WebSearch",
       "WebFetch",
       "Bash(npm run lint*)",
