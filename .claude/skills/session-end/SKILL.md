@@ -97,7 +97,35 @@ git log --oneline -5
 
 ---
 
-### 5. 終了確認
+### 5. 再開用コンテキストをファイルに保存
+
+```bash
+# .claude/session-context.md に保存
+cat > .claude/session-context.md << 'EOF'
+# セッションコンテキスト
+
+## 前回の作業
+- **日時**: {timestamp}
+- **ブランチ**: {current_branch}
+- **最後のコミット**: {last_commit_hash} - {last_commit_message}
+
+## 進捗
+- 完了: {completed_tasks}
+- 未完了: {remaining_tasks}
+
+## 再開用プロンプト
+{resume_prompt}
+
+## 次にやること
+{next_actions}
+EOF
+```
+
+> 💡 次のセッション開始時に自動で読み込まれる
+
+---
+
+### 6. 終了確認
 
 ```markdown
 ---
@@ -105,7 +133,8 @@ git log --oneline -5
 ## ✅ セッション終了
 
 **進捗**: {completed}/{total} タスク完了
-**次回再開**: 上記プロンプトをコピーして使用
+**コンテキスト保存**: .claude/session-context.md
+**次回再開**: 自動で読み込まれます
 
 お疲れ様でした！
 
