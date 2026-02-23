@@ -41,6 +41,7 @@
 ## よく使うワークフロー（スキルチェーン）
 | 目的 | フロー |
 |------|--------|
+| **新規プロジェクト** | `/project-init`（壁打ち → rdd.md → ボイラーテンプレート → AIテンプレート適用） |
 | **タスク実行** | `/task-list` → `/task-detail` → `/task-run` → `/basic-review` |
 | **バグ対応** | `/bug-new` → `/bug-investigate` → `/bug-propose` → `/bug-fix` |
 | **デザイン** | `/design-mock` or `/design-ssot` → (`/design-html`) → `/design-ui` → `/design-components` → `/design-assemble` |
@@ -77,6 +78,7 @@ AIが会話の文脈から起点を判断し、適切なスキルを提案する
 | PRにレビューコメントが来た | `/pr-respond` |
 | 設定手順/操作手順の整備が必要 | `/manual-gen` → `/manual-guide` |
 | 企画/事業仮説/ペルソナの議論が始まった | `/biz-researcher` → `/persona-designer` → `/proposition-reviewer` |
+| 新しいプロジェクトを始めたい/ボイラーテンプレートを作りたい | `/project-init` |
 | リポジトリの説明を求められた | `/repo-tour` |
 | 複数レイヤーにまたがる大きな実装タスク | `/team-start`（tmuxモードで起動時のみ） |
 | 作業の最初 | `/session-start` |

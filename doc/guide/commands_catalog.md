@@ -17,6 +17,7 @@
 4. `doc/guide/ai_guidelines.md`（詳細運用）
 
 ## 推奨フロー（よく使う順）
+- **新規プロジェクト**: `/project-init`（壁打ち → 要件定義 → ボイラーテンプレート → AIテンプレート適用）
 - セットアップ: `/setup`
 - タスク（GitHub + 組み込みTask連携）: `/task-list` → `/task-detail` → `/task-run`
   - Sprint = Milestone、タスク = Issue + 組み込みTask（並行・依存管理）
@@ -59,6 +60,11 @@
 > - `/design-split` は HTML → HTML（会話起点で1枚ペラを分割したいとき）
 
 ## コマンド一覧
+
+### project（プロジェクト初期化）
+| コマンド | 説明 | 推奨スキル |
+|----------|------|-----------|
+| `/project-init` | 壁打ち→要件定義→ボイラーテンプレート作成→AIテンプレート適用を一気通貫 | `architecture-expert`, `developer-specialist` |
 
 ### setup
 | コマンド | 説明 | 推奨スキル |
