@@ -48,6 +48,7 @@
 | **PR対応** | `/pr-respond` → 1件ずつ対応＆コミット → push |
 | **ドキュメント** | `/manual-gen` → `/manual-guide` |
 | **ビジネス** | `/biz-researcher` → `/persona-designer` → `/proposition-reviewer` |
+| **チーム並列開発** | `/team-start` → (並列実装) → クロスレビュー → 統合 |
 | **セッション管理** | `/session-start` → (作業) → `/session-end` |
 
 ## 手順系スキルの自動提案ルール
@@ -65,6 +66,7 @@ AIが会話の文脈から適切なタイミングで「〜を実行しましょ
 | 設定手順/操作手順の整備が必要 | `/manual-gen` → `/manual-guide` |
 | 企画/事業仮説/ペルソナの議論が始まった | `/biz-researcher` → `/persona-designer` → `/proposition-reviewer` |
 | リポジトリの説明を求められた | `/repo-tour` |
+| 複数レイヤーにまたがる大きな実装タスク | `/team-start`（tmuxモードで起動時のみ） |
 | 作業の最初 | `/session-start` |
 | 作業を終える雰囲気になった | `/session-end` |
 
