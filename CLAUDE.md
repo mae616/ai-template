@@ -43,7 +43,7 @@
 |------|--------|
 | **タスク実行** | `/task-list` → `/task-detail` → `/task-run` → `/basic-review` |
 | **バグ対応** | `/bug-new` → `/bug-investigate` → `/bug-propose` → `/bug-fix` |
-| **デザイン** | `/design-mock` or `/design-ssot` → `/design-ui` → `/design-components` → `/design-assemble` |
+| **デザイン** | `/design-mock` or `/design-ssot` → (`/design-html`) → `/design-ui` → `/design-components` → `/design-assemble` |
 | **レビュー** | `/basic-review`（表面）→ `/deep-review`（深掘り） |
 | **PR対応** | `/pr-respond` → 1件ずつ対応＆コミット → push |
 | **ドキュメント** | `/manual-gen` → `/manual-guide` |
@@ -60,8 +60,20 @@ AIが会話の文脈から適切なタイミングで「〜を実行しましょ
 |------|--------------|
 | タスクの計画・要件の話が出た | `/task-list` → チェーン自動提案 |
 | バグ/問題/エラーの報告を受けた | `/bug-new` → チェーン自動提案 |
-| デザイン/UI/画面の相談が始まった | Figma URLあり → `/design-ssot`、なし → `/design-mock` → チェーン自動提案 |
+| デザイン/UI/画面の相談が始まった | AIが起点を自動判断（下記）→ チェーン自動提案 |
 | 実装が完了した | `/basic-review` → 必要なら `/deep-review` |
+
+#### デザイン起点の自動判断ルール
+AIが会話の文脈から起点を判断し、適切なスキルを提案する。ユーザーは起点スキルを覚える必要はない。
+
+| 手がかり | 起点スキル | 備考 |
+|---------|-----------|------|
+| Figma URLが会話に含まれる | `/design-ssot` | Figma MCPでSSOT抽出 |
+| `.pen` ファイルがある / Pencil指定 | Pencil MCP | Pencilエディタで直接デザイン |
+| どちらもない | `/design-mock` | 会話からSSOT + HTML叩き台を生成 |
+
+起点完了後の共通チェーン: (`/design-html`) → `/design-ui` → `/design-components` → `/design-assemble`
+- `/design-html` はページ単位のイメージ確認が必要な場合に自動提案（任意）
 | PRにレビューコメントが来た | `/pr-respond` |
 | 設定手順/操作手順の整備が必要 | `/manual-gen` → `/manual-guide` |
 | 企画/事業仮説/ペルソナの議論が始まった | `/biz-researcher` → `/persona-designer` → `/proposition-reviewer` |
