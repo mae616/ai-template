@@ -99,6 +99,16 @@ skills一覧（索引）は [doc/guide/skills_catalog.md](doc/guide/skills_catal
 ドキュメント全体の入口は [doc/index.md](doc/index.md) です。
 
 #### 開発プロジェクトの作成
+
+**推奨: `/project-init` で一気通貫**
+
+```bash
+/project-init
+```
+
+壁打ち（要件定義・技術スタック選定）→ ボイラーテンプレート作成 → AIテンプレート自動適用 → rdd.md 反映までを対話形式で実行します。`/pair plan` と同じ壁打ちスタイル（短問確認→選択肢+トレードオフ→推奨案→次の一手）で進みます。
+
+**手動で行う場合:**
 ボイラーテンプレートなどでReactなどの開発プロジェクトを作成してください。
 その後、`scripts/apply_template.sh` でテンプレートを反映してください。
 
@@ -151,7 +161,7 @@ main
 ```
 - このリポジトリを使用する場合、各コマンド実行時に `/clear` → `/setup` が走ることを前提としています。
 
-### 補助: リポジトリ案内・壁打ち・スキル作成（任意）
+### 補助: リポジトリ案内・壁打ち・プロジェクト作成・スキル作成（任意）
 
 - **[/repo-tour](.claude/skills/repo-tour/SKILL.md)**: 初見向けに「どこに何があるか」を短時間で案内します
   - **入力**: 任意（例: `全体`, `AI運用`, `design`, `commands`, `skills`）
@@ -159,6 +169,9 @@ main
 - **[/pair](.claude/skills/pair/SKILL.md)**: 企画/設計/実装/デザインの壁打ちを、短い反復で進めます
   - **入力**: `plan` | `design` | `arch` | `dev`（必須）＋相談内容（任意）
   - **出力**: 短問（1〜3）→選択肢（2〜3）→推奨→次の一手
+- **[/project-init](.claude/skills/project-init/SKILL.md)**: 新規プロジェクトを壁打ちから一気通貫で作成
+  - **入力**: プロジェクトの概要（任意）
+  - **出力**: 壁打ち → rdd.md → ボイラーテンプレート → AIテンプレート適用
 - **[/skill-create](.claude/skills/skill-create/SKILL.md)**: 新しいスキルを壁打ち→テンプレ生成→登録確認まで
   - **入力**: スキルの目的や名前（任意）
   - **出力**: 要件整理 → SKILL.md生成 → 認識確認
@@ -168,6 +181,7 @@ main
 ```bash
 /repo-tour design
 /pair design 設定画面の情報設計を壁打ちしたい
+/project-init SaaSダッシュボードを始めたい
 /skill-create react-query の判断軸が欲しい
 ```
 
@@ -418,6 +432,34 @@ ai-template/
 - **[CLAUDE.md](CLAUDE.md) / [doc/input/rdd.md](doc/input/rdd.md) / [.claude/skills/](.claude/skills/) / [doc/guide/ai_guidelines.md](doc/guide/ai_guidelines.md)** → 判断軸（SSOT/運用）
 
 この2つが中核であり、他の構成要素はそれを支える仕組みになっています。
+
+### 判断軸スキル一覧（AIが状況に応じて自動適用）
+
+| カテゴリ | スキル | 概要 |
+|---------|--------|------|
+| **事業** | `biz-researcher` | 市場/競合/仮説検証の調査整理 |
+| | `persona-designer` | ペルソナ/想定ユーザー像の設計 |
+| | `proposition-reviewer` | 価値提案レビューとMVP焦点化 |
+| **デザイン** | `ui-designer` | 情報設計→コンポーネント/トークン設計 |
+| | `usability-psychologist` | 認知負荷/ユーザビリティ/a11yの統合レビュー |
+| | `sensory-design` | サウンド/ハプティクス/空間知覚の感覚デザイン |
+| **開発** | `architecture-expert` | 境界/依存/非機能をトレードオフで設計 |
+| | `developer-specialist` | TDD/差分最小で設計&実装 |
+| | `testing` | テストピラミッド・テスト設計・品質戦略 |
+| | `security-expert` | OWASP基本のデフォルト安全設計 |
+| | `frontend-implementation` | デザイン→実装の構造翻訳 |
+| | `accessibility-engineer` | セマンティックHTML/ARIA/キーボード操作 |
+| **クリエイティブ** | `creative-coder` | 動き/触感をa11y/性能を守って実装 |
+| | `animation-principles` | ディズニー12原則+ジブリ的自然運動のUI適用 |
+| | `gsap` | GSAP Tween/Timeline/ScrollTriggerの最適化 |
+| | `p5js` | P5.jsクリエイティブコーディング |
+| | `threejs` | Three.js WebGL/3D表現の設計・最適化 |
+| | `blender` | Blender MCPでの3Dモデリング |
+| **フレームワーク** | `astro` / `react` / `svelte` / `tailwind` | 各技術スタック固有の判断軸 |
+| **ツール** | `playwright` | E2Eテストのベストプラクティス |
+| | `agent-browser` | Headlessブラウザ自動化のUI検証 |
+
+> 詳細は [doc/guide/skills_catalog.md](doc/guide/skills_catalog.md) を参照
 
 
 ## 🤝 コントリビューション
