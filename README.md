@@ -23,6 +23,7 @@ Claude Code / Cursor 向けの開発プロンプトテンプレート。
 | 任意 | Agent Browser | UI確認/デバッグ | - | [GitHub](https://github.com/vercel-labs/agent-browser)（開発中） |
 | 任意 | Figma MCP | /design-ssot | `/mcp` で確認 | [公式ガイド](https://help.figma.com/hc/en-us/articles/32132100833559-Guide-to-the-Figma-MCP-server) |
 | 任意 | mise | ツール管理 | `mise --version` | [公式](https://mise.jdx.dev/) |
+| 任意 | mermaid-cli | Mermaid構文検証（hook） | `mmdc --version` | [公式](https://github.com/mermaid-js/mermaid-cli) |
 | 任意 | Cursor | IDE | - | [公式](https://cursor.com/) |
 
 ### MCP サーバーの設定

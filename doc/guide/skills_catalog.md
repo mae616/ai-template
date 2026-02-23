@@ -24,14 +24,19 @@
 ## 開発
 - `architecture-expert`: 境界/依存/非機能/運用をトレードオフで設計（ADR-lite）
 - `developer-specialist`: 設計&実装をTDD/差分最小で進める
+- `testing`: t_wada流TDD（RED→GREEN→REFACTOR）を軸にテストピラミッド・テスト設計・品質戦略を整理
 - `security-expert`: OWASP基本を前提にデフォルト安全で設計・実装・レビュー
 - `frontend-implementation`: Figma/UI要件を「比率・構造・制約・状態」で実装へ翻訳（px写経を避ける）
 - `accessibility-engineer`: セマンティックHTML/JSXとWAI-ARIAを最小で正しく適用し、キーボード/スクリーンリーダを満たす実装規約
 - `creative-coder`: 体験品質（動き/触感）をa11y/性能を守って実装
 
-## フレームワーク（既存）
+## フレームワーク
 - `astro`
 - `react`
 - `svelte`
 - `tailwind`
+- `playwright`: Playwright E2Eテストのロケーター選択・自動待機・テスト分離・CI最適化
+
+## ツール・UI検証
+- `agent-browser`: Agent Browser（Headlessブラウザ自動化CLI）によるUI検証・E2Eテスト・スクリーンショット取得
 

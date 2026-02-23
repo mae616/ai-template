@@ -70,7 +70,7 @@
 |----------|------|-----------|
 | `/task-list` | Sprint計画（Milestone + Issue一括作成 + 組み込みTask登録） | `developer-specialist` |
 | `/task-detail` | Issue詳細化 + 依存関係設定（blocks/blockedBy） | `developer-specialist`, `architecture-expert` |
-| `/task-run` | Issue実行 + 進捗同期（組み込みTask ↔ GitHub Issue） | `developer-specialist` + 技術スタック系 |
+| `/task-run` | Issue実行 + 進捗同期（組み込みTask ↔ GitHub Issue） | `developer-specialist`, `testing` + 技術スタック系 |
 
 ### bug（GitHub Issue → PR連携）
 | コマンド | 説明 | 推奨スキル |
@@ -124,6 +124,11 @@
 - Svelte / SvelteKit → `svelte`
 - Astro → `astro`
 - Tailwind CSS → `tailwind`
+- Playwright / E2Eテスト → `playwright`
+
+### ツール・UI検証スキルの適用条件
+`doc/input/rdd.md` に以下が記載されている場合、またはブラウザ自動化/UI検証/E2Eテストの文脈で自動適用する：
+- Agent Browser / E2Eテスト / UI検証 → `agent-browser`
 
 ## 旧コマンド（deprecated）
 旧名は削除済み。今後はこのページを「現行コマンドのみ」の索引として運用する。

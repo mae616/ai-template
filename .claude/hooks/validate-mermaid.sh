@@ -24,7 +24,7 @@ fi
 echo "🔍 Mermaid構文チェック: $FILE_PATH"
 
 # mmdc（mermaid-cli）が利用可能か確認
-if command -v mmdc &> /dev/null || npx -y @mermaid-js/mermaid-cli --version &> /dev/null 2>&1; then
+if command -v mmdc &> /dev/null; then
   # 一時ファイルにMermaidブロックを抽出して検証
   TEMP_DIR=$(mktemp -d)
   BLOCK_NUM=0
@@ -40,7 +40,7 @@ if command -v mmdc &> /dev/null || npx -y @mermaid-js/mermaid-cli --version &> /
     if [[ "$line" == '```' ]]; then
       # 検証実行
       if [[ -f "$TEMP_FILE" ]]; then
-        if ! npx -y @mermaid-js/mermaid-cli -i "$TEMP_FILE" -o /dev/null 2>/dev/null; then
+        if ! mmdc -i "$TEMP_FILE" -o /dev/null 2>/dev/null; then
           echo "⚠️  構文エラー: Mermaidブロック #$BLOCK_NUM"
           HAS_ERROR=1
         fi
