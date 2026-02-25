@@ -31,7 +31,8 @@ if command -v mmdc &> /dev/null; then
   HAS_ERROR=0
 
   # awkでMermaidブロックを抽出
-  awk '/```mermaid/,/```/' "$FILE_PATH" | while read -r line; do
+  # プロセス置換を使い、サブシェル問題を回避（HAS_ERROR が親シェルに伝播する）
+  while read -r line; do
     if [[ "$line" == '```mermaid' ]]; then
       BLOCK_NUM=$((BLOCK_NUM + 1))
       TEMP_FILE="$TEMP_DIR/block_$BLOCK_NUM.mmd"
@@ -50,7 +51,7 @@ if command -v mmdc &> /dev/null; then
     if [[ -n "$TEMP_FILE" ]]; then
       echo "$line" >> "$TEMP_FILE"
     fi
-  done
+  done < <(awk '/```mermaid/,/```/' "$FILE_PATH")
 
   rm -rf "$TEMP_DIR"
 
