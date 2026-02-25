@@ -9,6 +9,7 @@ Claude Code / Cursor 向けの開発プロンプトテンプレート。
 - **スキルベースの作業フロー**: タスク管理、バグ対応、デザイン連携などを `/command` 形式で実行
 - **判断軸の明文化**: CLAUDE.md とスキル定義で、AIの思考・判断基準を共有
 - **差分ベースの反復**: 小さな変更を積み重ねる前提の設計（TDD・アジャイル寄り）
+- **チーム並列開発**: tmux + エージェントチームで複数レイヤーを並行実装・クロスレビュー
 
 参考: [Cole Medin氏 context-engineering-intro](https://github.com/coleam00/context-engineering-intro)
 
@@ -161,7 +162,7 @@ main
 ```
 - このリポジトリを使用する場合、各コマンド実行時に `/clear` → `/setup` が走ることを前提としています。
 
-### 補助: リポジトリ案内・壁打ち・プロジェクト作成・スキル作成（任意）
+### 補助: リポジトリ案内・壁打ち・プロジェクト作成・スキル管理（任意）
 
 - **[/repo-tour](.claude/skills/repo-tour/SKILL.md)**: 初見向けに「どこに何があるか」を短時間で案内します
   - **入力**: 任意（例: `全体`, `AI運用`, `design`, `commands`, `skills`）
@@ -175,6 +176,8 @@ main
 - **[/skill-create](.claude/skills/skill-create/SKILL.md)**: 新しいスキルを壁打ち→テンプレ生成→登録確認まで
   - **入力**: スキルの目的や名前（任意）
   - **出力**: 要件整理 → SKILL.md生成 → 認識確認
+- **[/skill-audit](.claude/skills/skill-audit/SKILL.md)**: スキル一覧の分析・重複検出・改善提案
+- **[/commit-msg](.claude/skills/commit-msg/SKILL.md)**: ステージ差分から日本語コミットメッセージを生成
 
 使用例:
 
@@ -356,7 +359,89 @@ git worktree remove ../project-task-123
 - `Fixes #123` でIssueに紐づけ
 - マージ時にIssueが自動close
 
-### 5. マニュアルシステム
+### 5. レビュー・PR対応
+
+#### レビューフロー
+
+```bash
+/basic-review     # typo/命名/フォーマットの表面チェック
+/deep-review      # 設計/セキュリティ/RDD整合の深掘りチェック
+```
+
+- **[/basic-review](.claude/skills/basic-review/SKILL.md)**: 表面的なコード品質チェック（typo、命名、フォーマット）
+- **[/deep-review](.claude/skills/deep-review/SKILL.md)**: 設計整合性、セキュリティ、RDD準拠の深掘りレビュー
+- 修正がある場合は basic-review + deep-review を再実行
+
+#### PR対応
+
+```bash
+/pr-respond #45
+```
+
+- **[/pr-respond](.claude/skills/pr-respond/SKILL.md)**: PRのレビューコメントに1件ずつ対応＆コミット
+  - fetch → コメント一覧 → 順次対応 → コミット → push
+
+### 6. セッション管理
+
+```bash
+/session-start    # ゴール・完了条件・タイムボックスを設定
+# ... 作業 ...
+/session-end      # 進捗サマリー・再開用プロンプト生成
+```
+
+- **[/session-start](.claude/skills/session-start/SKILL.md)**: セッション開始時にゴール・完了条件・チェックポイントを明確化
+- **[/session-end](.claude/skills/session-end/SKILL.md)**: 進捗を `.claude/session-context.md` に保存し、次回再開を容易にする
+- `/session-end` は作業完了時やコンテキスト圧縮が近い時にAIが自動提案
+
+### 7. チーム並列開発
+
+複数レイヤー（フロント + バック + インフラ/テスト）にまたがるタスクを、エージェントチームで並列に実装できます。
+
+#### チーム構成
+
+| ロール | 担当 | モデル |
+|--------|------|--------|
+| リーダーにゃんこ 👑 | 調整・タスク分割・統合判断 | Opus |
+| フロントエンドにゃんこ 🎨 | フロントエンド実装 | Sonnet |
+| バックエンドにゃんこ ⚙️ | バックエンド/API実装 | Sonnet |
+| インフラにゃんこ 🏗️ | インフラ/テスト/CI | Sonnet |
+
+全メンバーがフルスタック理解を持ち、クロスレビューが可能です。
+
+#### 起動
+
+```bash
+# tmux分割モードでClaude Codeを起動
+claude --teammate-mode tmux
+
+# チーム起動
+/team-start ログイン機能の実装（フロント + API + テスト）
+```
+
+- **[/team-start](.claude/skills/team-start/SKILL.md)**: tmux分割でエージェントチームを起動
+- **チーム運用規約**: [doc/guide/team_protocol.md](doc/guide/team_protocol.md) を参照
+
+#### チームワークフロー
+
+```
+リーダー: /task-list でSprint計画
+  ↓
+各メンバー: /task-detail → /task-run で並列実装
+  ↓
+Sonnet クロスレビュー: FE→BE、BE→Infra、Infra→FE
+  ↓
+Opus: Sprint統合レビュー（/deep-review）
+  ↓
+ユーザー: 動作確認 → マージ
+```
+
+#### 注意事項
+
+- **トークンコスト**: チームモードは通常の3〜4倍以上消費
+- **ファイルコンフリクト**: 同じファイルを複数メンバーが編集しないよう分割
+- **使い分け**: 単一モジュールの変更や順序依存のある作業は通常モード（subagent）で十分
+
+### 8. マニュアルシステム
 
 #### フロー概要
 
@@ -375,7 +460,7 @@ git worktree remove ../project-task-123
 ```
 - 生成された手順書をステップごとに案内
 
-### 6. ドキュメント生成（/docs-reverse）
+### 9. ドキュメント生成（/docs-reverse）
 
 このプロジェクトは、**SSOT（人間が維持する設計情報）**と、**AIが生成して更新するドキュメント**を分離します。
 
@@ -399,7 +484,10 @@ git worktree remove ../project-task-123
 ai-template/
 ├── .claude/                   # Claude Code設定
 │   ├── skills/                # スキル（判断軸 + 手順系）⭐
-│   └── settings.local.json    # AIのコマンド権限
+│   ├── hooks/                 # フック（Mermaid構文検証等）
+│   ├── settings.local.json    # AIのコマンド権限
+│   ├── session-context.md     # セッション状態（.gitignore対象）
+│   └── team-board.md          # チームホワイトボード（.gitignore対象）
 ├── doc/                       # ドキュメント
 │   ├── index.md               # 総合入口
 │   ├── input/                 # 【人間が書く】SSOT
@@ -408,9 +496,11 @@ ai-template/
 │   │   └── design/            # デザインSSOT
 │   ├── guide/                 # 【テンプレ提供】運用ガイド
 │   │   ├── git_workflow.md    # Gitブランチ運用
-│   │   ├── commands_catalog.md
-│   │   ├── skills_catalog.md
-│   │   └── ai_guidelines.md
+│   │   ├── team_protocol.md   # チーム連携プロトコル
+│   │   ├── design_workflow.md # デザインワークフロー
+│   │   ├── ai_guidelines.md   # AI運用ガイドライン
+│   │   ├── commands_catalog.md # 手順系スキルカタログ
+│   │   └── skills_catalog.md  # 判断軸スキルカタログ
 │   ├── generated/             # 【AI生成】上書きOK
 │   │   ├── manual/            # /manual-gen 出力先
 │   │   └── reverse/           # /docs-reverse 出力先
@@ -428,10 +518,25 @@ ai-template/
 ```
 
 ### ⭐ このテンプレートの本質
-- **`.claude/skills/`** → 実際の「作業フローを動かすスキル群」
-- **[CLAUDE.md](CLAUDE.md) / [doc/input/rdd.md](doc/input/rdd.md) / [.claude/skills/](.claude/skills/) / [doc/guide/ai_guidelines.md](doc/guide/ai_guidelines.md)** → 判断軸（SSOT/運用）
+- **`.claude/skills/`** → 実際の「作業フローを動かすスキル群」（53スキル: 手順系29 + 判断軸24）
+- **[CLAUDE.md](CLAUDE.md) / [doc/input/rdd.md](doc/input/rdd.md) / [.claude/skills/](.claude/skills/) / [doc/guide/](doc/guide/)** → 判断軸（SSOT/運用）
 
 この2つが中核であり、他の構成要素はそれを支える仕組みになっています。
+
+### スキルチェーン（自動提案フロー）
+
+ユーザーが起点コマンドを実行すると、AIが後続ステップを自動提案します。
+
+| 目的 | フロー |
+|------|--------|
+| **新規プロジェクト** | `/project-init`（壁打ち → rdd.md → ボイラーテンプレート → AIテンプレート適用） |
+| **タスク実行** | `/task-list` → `/task-detail` → `/task-run` → `/basic-review` |
+| **バグ対応** | `/bug-new` → `/bug-investigate` → `/bug-propose` → `/bug-fix` |
+| **デザイン** | `/design-mock` or `/design-ssot` → (`/design-html`) → `/design-ui` → `/design-components` → `/design-assemble` |
+| **レビュー** | `/basic-review`（表面）→ `/deep-review`（深掘り） |
+| **PR対応** | `/pr-respond` → 1件ずつ対応＆コミット → push |
+| **チーム並列** | `/team-start` → 並列実装 → クロスレビュー → 統合 |
+| **セッション** | `/session-start` → (作業) → `/session-end` |
 
 ### 判断軸スキル一覧（AIが状況に応じて自動適用）
 
