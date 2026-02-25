@@ -29,6 +29,10 @@ description: "[バグ対応] 4. 修正実行を恒久対応・段階実施＋無
 
 ---
 
+## 共通前提（参照）
+- **Gitブランチ運用は `doc/guide/git_workflow.md` に従う**（ブランチ命名・base先・CI要件）
+- **チーム運用時は `doc/guide/team_protocol.md` も参照**
+
 ## 前提ポリシー（安全運用）
 - **安全第一**：本番影響のある操作は別環境で実施、シークレット露出禁止、最小権限
 - **検証必須**：修正ごとに再現テスト／自動テスト／メトリクスで効果判定
@@ -50,16 +54,33 @@ gh issue view {ISSUE_NUMBER} --json title,body,labels
 
 ### 2. 作業ブランチ作成（通常 or worktree）
 
+> **ブランチ命名**: `doc/guide/git_workflow.md` に従う。
+> - Sprint統合後のバグ → `feature_fix/{short-description}`（base: sprint/*）
+> - 本番緊急バグ → `hotfix/{short-description}`（base: main）
+> - Sprint外のバグ → `fix/{ISSUE_NUMBER}-{short-description}`（base: sprint/* or main）
+
+**ベースブランチの決定:**
+```bash
+# sprint/* ブランチの存在を確認
+SPRINT_BRANCH=$(git branch -r --list 'origin/sprint/*' --sort=-committerdate | head -1 | xargs)
+if [ -z "$SPRINT_BRANCH" ]; then
+  BASE_BRANCH="main"
+else
+  BASE_BRANCH="${SPRINT_BRANCH#origin/}"
+fi
+git switch "$BASE_BRANCH" && git pull
+```
+
 **通常モード（単一修正）:**
 ```bash
-git checkout -b fix/{ISSUE_NUMBER}-{short-description}
+git checkout -b feature_fix/{ISSUE_NUMBER}-{short-description}
 ```
 
 **並行モード（git worktree）:**
 複数のバグ修正を同時に進める場合は worktree を使用:
 ```bash
 # 親ディレクトリにworktreeを作成
-git worktree add ../$(basename $(pwd))-fix-{ISSUE_NUMBER} -b fix/{ISSUE_NUMBER}-{short-description}
+git worktree add ../$(basename $(pwd))-fix-{ISSUE_NUMBER} -b feature_fix/{ISSUE_NUMBER}-{short-description}
 
 # worktreeに移動して作業
 cd ../$(basename $(pwd))-fix-{ISSUE_NUMBER}
@@ -109,8 +130,13 @@ c. **判定**
 - **効果なし** → `git revert` でロールバック、次の修正案へ
 
 ### 5. PR作成
+
+> **base先**: `doc/guide/git_workflow.md` に従う。sprint/* があれば sprint/* へ、なければ main へ。
+
 ```bash
+# base先を動的に決定（ステップ2で取得済みの $BASE_BRANCH を使用）
 gh pr create \
+  --base "$BASE_BRANCH" \
   --title "fix: {問題の要約}" \
   --body "$(cat <<'EOF'
 ## Summary

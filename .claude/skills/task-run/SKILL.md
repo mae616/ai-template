@@ -22,6 +22,8 @@ description: "[タスク] 3. Issue実行 + 進捗同期"
 - 実装規約・口調・TDD・Docコメント等は `CLAUDE.md` に従う
 - `doc/input/rdd.md` を読み、該当する `.claude/skills/*` を適用
 - 詳細運用は `doc/guide/ai_guidelines.md` を参照
+- **Gitブランチ運用は `doc/guide/git_workflow.md` に従う**（ブランチ命名・base先・CI要件）
+- **チーム運用時は `doc/guide/team_protocol.md` も参照**
 
 ---
 
@@ -53,6 +55,21 @@ gh issue view {ISSUE_NUMBER}
 - 組み込みTaskの blockedBy が空か確認
 
 ### 2.5. 作業ブランチ作成（通常 or worktree）
+
+> **ブランチ戦略**: `doc/guide/git_workflow.md` に従う。
+> task/* ブランチは **最新の sprint/* から作成** する。sprint/* が存在しない場合は main から作成。
+
+**ベースブランチの決定:**
+```bash
+# sprint/* ブランチの存在を確認
+SPRINT_BRANCH=$(git branch -r --list 'origin/sprint/*' --sort=-committerdate | head -1 | xargs)
+if [ -z "$SPRINT_BRANCH" ]; then
+  BASE_BRANCH="main"
+else
+  BASE_BRANCH="${SPRINT_BRANCH#origin/}"
+fi
+git switch "$BASE_BRANCH" && git pull
+```
 
 **通常モード（単一タスク）:**
 ```bash
@@ -172,7 +189,20 @@ git push -u origin task/{ISSUE_NUMBER}-{short-description}
 ```
 
 **PR作成（⚠️ 確認あり）:**
+
+> **base先の決定**: `doc/guide/git_workflow.md` に従う。
+> - sprint/* ブランチが存在する → `--base sprint/*`（task → sprint へマージ）
+> - sprint/* が存在しない → `--base main`
+
 ```bash
+# base先を動的に決定
+SPRINT_BRANCH=$(git branch -r --list 'origin/sprint/*' --sort=-committerdate | head -1 | xargs)
+if [ -z "$SPRINT_BRANCH" ]; then
+  PR_BASE="main"
+else
+  PR_BASE="${SPRINT_BRANCH#origin/}"
+fi
+
 gh pr create \
   --title "feat: {変更概要}" \
   --body "## 概要
@@ -195,7 +225,7 @@ gh pr create \
 2. {確認手順2}
 
 Closes #${ISSUE_NUMBER}" \
-  --base main
+  --base "$PR_BASE"
 ```
 
 > **Note**: `Closes #${ISSUE_NUMBER}` により、PRマージ時にIssueが自動closeされるにゃ。
