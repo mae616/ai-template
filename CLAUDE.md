@@ -63,6 +63,14 @@ AIが会話の文脈から適切なタイミングで「〜を実行しましょ
 | バグ/問題/エラーの報告を受けた | `/bug-new` → チェーン自動提案 |
 | デザイン/UI/画面の相談が始まった | AIが起点を自動判断（下記）→ チェーン自動提案 |
 | 実装が完了した | `/basic-review` → 必要なら `/deep-review` |
+| PRにレビューコメントが来た | `/pr-respond` |
+| 設定手順/操作手順の整備が必要 | `/manual-gen` → `/manual-guide` |
+| 企画/事業仮説/ペルソナの議論が始まった | `/biz-researcher` → `/persona-designer` → `/proposition-reviewer` |
+| 新しいプロジェクトを始めたい/ボイラーテンプレートを作りたい | `/project-init` |
+| リポジトリの説明を求められた | `/repo-tour` |
+| 複数レイヤーにまたがる大きな実装タスク | `/team-start`（tmuxモードで起動時のみ） |
+| 作業の最初 | `/session-start` |
+| 作業を終える雰囲気になった | `/session-end` |
 
 #### デザイン起点の自動判断ルール
 AIが会話の文脈から起点を判断し、適切なスキルを提案する。ユーザーは起点スキルを覚える必要はない。
@@ -75,14 +83,6 @@ AIが会話の文脈から起点を判断し、適切なスキルを提案する
 
 起点完了後の共通チェーン: (`/design-html`) → `/design-ui` → `/design-components` → `/design-assemble`
 - `/design-html` はページ単位のイメージ確認が必要な場合に自動提案（任意）
-| PRにレビューコメントが来た | `/pr-respond` |
-| 設定手順/操作手順の整備が必要 | `/manual-gen` → `/manual-guide` |
-| 企画/事業仮説/ペルソナの議論が始まった | `/biz-researcher` → `/persona-designer` → `/proposition-reviewer` |
-| 新しいプロジェクトを始めたい/ボイラーテンプレートを作りたい | `/project-init` |
-| リポジトリの説明を求められた | `/repo-tour` |
-| 複数レイヤーにまたがる大きな実装タスク | `/team-start`（tmuxモードで起動時のみ） |
-| 作業の最初 | `/session-start` |
-| 作業を終える雰囲気になった | `/session-end` |
 
 ### 提案ルール
 - チェーンの**次ステップは自動提案**する（前段階の完了を検知して次を提案）
@@ -132,7 +132,7 @@ AIが会話の文脈から起点を判断し、適切なスキルを提案する
 1. `CLAUDE.md`（憲法：普遍ルール）
 2. `doc/input/rdd.md`（プロジェクト固有の事実・制約：先頭のAI用事実ブロック）
 3. `.claude/skills/*/SKILL.md`（判断軸：技術/役割スキル）
-4. `doc/guide/ai_guidelines.md`（詳細運用：サンプル運用/依存評価補助/ADR-lite 等）
+4. `doc/guide/*.md`（運用ガイド：ai_guidelines / git_workflow / team_protocol / design_workflow 等）
 
 ## 開発の姿勢
 - 新規作成や変更の前に**必ずコードベースを調査**する。

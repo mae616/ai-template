@@ -15,7 +15,7 @@ description: "[バグ対応] 4. 修正実行を恒久対応・段階実施＋無
 - `$ARGUMENTS` のIssueに記載された **「修正策（候補一覧）」** を上から順に実行する
 - **恒久対応のみ** を実施（暫定対応はスキップ、または恒久案に置換）
 - 各修正の効果を検証し、**効果なしの場合は修正前の状態へロールバック**
-- 修正完了後は **Pull Request** を作成し、`Fixes #{ISSUE_NUMBER}` でIssueに紐づける
+- 修正完了後は **Pull Request** を作成し、`Closes #{ISSUE_NUMBER}` でIssueに紐づける
 - マージ時にIssueが自動closeされる
 
 ---
@@ -57,7 +57,7 @@ gh issue view {ISSUE_NUMBER} --json title,body,labels
 > **ブランチ命名**: `doc/guide/git_workflow.md` に従う。
 > - Sprint統合後のバグ → `feature_fix/{short-description}`（base: sprint/*）
 > - 本番緊急バグ → `hotfix/{short-description}`（base: main）
-> - Sprint外のバグ → `fix/{ISSUE_NUMBER}-{short-description}`（base: sprint/* or main）
+> - Sprint外のバグ → `feature_fix/{ISSUE_NUMBER}-{short-description}`（base: sprint/* or main）
 
 **ベースブランチの決定:**
 ```bash
@@ -93,7 +93,7 @@ cd ../$(basename $(pwd))-fix-{ISSUE_NUMBER}
 ```bash
 gh issue comment {ISSUE_NUMBER} --body "🚀 修正着手
 
-ブランチ: \`fix/{ISSUE_NUMBER}-{short-description}\`
+ブランチ: \`feature_fix/{ISSUE_NUMBER}-{short-description}\`
 
 ## 実行計画
 - [ ] 修正案1を適用
@@ -143,7 +143,7 @@ gh pr create \
 - {修正内容の要約}
 
 ## Related Issue
-Fixes #{ISSUE_NUMBER}
+Closes #{ISSUE_NUMBER}
 
 ## Changes
 - {変更点1}
@@ -180,7 +180,7 @@ gh issue comment {ISSUE_NUMBER} --body "✅ 修正完了
 ---
 
 ## 出力（GitHub）
-- **Pull Request**: `Fixes #{ISSUE_NUMBER}` でIssueに紐づけ
+- **Pull Request**: `Closes #{ISSUE_NUMBER}` でIssueに紐づけ
 - **Issueコメント**: 修正完了報告とPRリンク
 - **Issue**: PRマージ時に自動close
 
@@ -201,7 +201,7 @@ gh issue comment {ISSUE_NUMBER} --body "✅ 修正完了
 - [ ] **検証条件**（再現ケース・成功基準・メトリクス）が明確
 - [ ] 効果なしの修正は **即ロールバック**
 - [ ] 暫定対応を避け、**恒久対応のみ** 実施している
-- [ ] **PRが作成され、Issueに紐づいている**（`Fixes #...`）
+- [ ] **PRが作成され、Issueに紐づいている**（`Closes #...`）
 - [ ] Issueに完了コメントを投稿済み
 
 ---

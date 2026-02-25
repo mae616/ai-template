@@ -240,8 +240,7 @@ HTMLは**必須ではありません**（必要なときだけオプションで
 4. **[/design-assemble](.claude/skills/design-assemble/SKILL.md)**（components.json → 各技術スタック用UIへ結合）
 
 #### オプション：ドキュメント/共有用に静的HTMLが欲しい場合
-- **[/design-html](.claude/skills/design-html/SKILL.md)**（SSOT JSON → 静的HTMLを生成して `doc/input/design/html/` に保存。Figma起点など、SSOTだけ先にある場合に便利）
-- **[/design-split](.claude/skills/design-split/SKILL.md)**（1枚ペラHTML → ページ単位へ分割。`/design-mock` で `mock.html` を出した場合に有効）
+- **[/design-html](.claude/skills/design-html/SKILL.md)**（SSOT JSON → 静的HTMLを生成して `doc/input/design/html/` に保存。Figma起点など、SSOTだけ先にある場合に便利。旧 `/design-split` の役割も統合済み）
 
 #### 実行例（会話ルート：最短）
 ```bash
