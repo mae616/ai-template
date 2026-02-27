@@ -517,7 +517,7 @@ ai-template/
 ```
 
 ### ⭐ このテンプレートの本質
-- **`.claude/skills/`** → 実際の「作業フローを動かすスキル群」（53スキル: 手順系29 + 判断軸24）
+- **`.claude/skills/`** → 実際の「作業フローを動かすスキル群」（54スキル: 手順系29 + 判断軸25）
 - **[CLAUDE.md](CLAUDE.md) / [doc/input/rdd.md](doc/input/rdd.md) / [.claude/skills/](.claude/skills/) / [doc/guide/](doc/guide/)** → 判断軸（SSOT/運用）
 
 この2つが中核であり、他の構成要素はそれを支える仕組みになっています。
@@ -553,6 +553,7 @@ ai-template/
 | | `security-expert` | OWASP基本のデフォルト安全設計 |
 | | `frontend-implementation` | デザイン→実装の構造翻訳 |
 | | `accessibility-engineer` | セマンティックHTML/ARIA/キーボード操作 |
+| | `keyboard-shortcuts` | W3C APG/WCAG準拠のキーボードショートカット設計 |
 | **クリエイティブ** | `creative-coder` | 動き/触感をa11y/性能を守って実装 |
 | | `animation-principles` | ディズニー12原則+ジブリ的自然運動のUI適用 |
 | | `gsap` | GSAP Tween/Timeline/ScrollTriggerの最適化 |

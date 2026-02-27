@@ -15,6 +15,9 @@
 | [commands_catalog.md](./commands_catalog.md) | スキル（手順系）カタログ | AI/開発者 |
 | [skills_catalog.md](./skills_catalog.md) | スキル（判断軸系）カタログ | AI/開発者 |
 | [ai_guidelines.md](./ai_guidelines.md) | AI運用の詳細規約 | AI |
+| [design_workflow.md](./design_workflow.md) | デザインワークフロー（起点判断・UI/UXスキル使い分け） | AI/デザイナー |
+| [development_flow.md](./development_flow.md) | 開発ライフサイクル全体フロー（要件〜デプロイ） | 全員 |
+| [team_protocol.md](./team_protocol.md) | AIエージェントチーム運用規約 | AI/チーム |
 
 ---
 

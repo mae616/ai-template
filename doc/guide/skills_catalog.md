@@ -13,9 +13,11 @@
 - `category: tech` … 技術スタック（React/Astroなど）に紐づくskill
 
 ## 事業
-- `persona-designer`: ペルソナ/想定ユーザー像の設計（※会話口調のペルソナとは別）
 - `biz-researcher`: 市場/競合/仮説検証のための調査整理
+- `persona-designer`: ペルソナ/想定ユーザー像の設計（※会話口調のペルソナとは別）
 - `proposition-reviewer`: 価値提案（誰に/何を/なぜ）レビューとMVP焦点化
+
+> **Note**: この3スキルは判断軸としてAIが自動参照するほか、`/biz-researcher` → `/persona-designer` → `/proposition-reviewer` の手順チェーンとしても呼び出せる（`doc/guide/commands_catalog.md` にも記載）。
 
 ## デザイン
 - `ui-designer`: 画面目的→情報設計→コンポーネント/トークンへ落とす
@@ -29,6 +31,8 @@
 - `security-expert`: OWASP基本を前提にデフォルト安全で設計・実装・レビュー
 - `frontend-implementation`: Figma/UI要件を「比率・構造・制約・状態」で実装へ翻訳（px写経を避ける）
 - `accessibility-engineer`: セマンティックHTML/JSXとWAI-ARIAを最小で正しく適用し、キーボード/スクリーンリーダを満たす実装規約
+- `keyboard-shortcuts`: W3C APG/WCAG＋プラットフォーム規約＋デファクトスタンダードに沿ったキーボードショートカット設計
+
 ## フレームワーク
 - `astro`
 - `react`

@@ -14,7 +14,7 @@
 1. `CLAUDE.md`（憲法）
 2. `doc/input/rdd.md`（プロジェクト固有の事実）
 3. `.claude/skills/*/SKILL.md`（判断軸）
-4. `doc/guide/ai_guidelines.md`（詳細運用）
+4. `doc/guide/*.md`（運用ガイド：ai_guidelines / git_workflow / team_protocol / design_workflow 等）
 
 ## 推奨フロー（よく使う順）
 - **新規プロジェクト**: `/project-init`（壁打ち → 要件定義 → ボイラーテンプレート → AIテンプレート適用）
@@ -25,39 +25,33 @@
 - バグ（GitHub連携）: `/bug-new` → `/bug-investigate` → `/bug-propose` → `/bug-fix`
   - bug-new〜bug-propose は Issue で管理（調査・議論）
   - bug-fix は PR を作成し、`Fixes #...` で Issue に紐づけ
-- デザイン（会話起点）: `/design-mock` → `/design-ui` → `/design-components` → `/design-assemble`
-- デザイン（Figma起点）: `/design-ssot` → `/design-ui` → `/design-components` → `/design-assemble`
+- デザイン（会話起点）: `/design-mock` → (`/design-html`) → `/design-ui` → `/design-components` → `/design-assemble`
+- デザイン（Figma起点）: `/design-ssot` → (`/design-html`) → `/design-ui` → `/design-components` → `/design-assemble`
 - 壁打ち: `/pair plan|design|arch|dev`
 - 初見: `/repo-tour`
 
-### デザインフロー詳細（design-html / design-split の使い分け）
+### デザインフロー詳細
 
 ```
 【会話起点】                              【Figma起点】
     │                                        │
     ▼                                        ▼
-/design-mock ──→ mock.html（1枚ペラ）   /design-ssot ──→ JSON（SSOT）
-    │               │                        │              │
-    │               ▼                        │              ▼
-    │         /design-split（任意）          │        /design-html（任意）
-    │               │                        │              │
-    │               ▼                        │              ▼
-    │         {page}.html 複数               │        {page}.html 複数
+/design-mock ──→ SSOT JSON + HTML叩き台  /design-ssot ──→ JSON（SSOT）
     │                                        │
-    └──────→ JSON（SSOT）も同時生成 ─────────┘
-                        │
-                        ▼
-              /design-ui → /design-components → /design-assemble
+    └──────────────┬─────────────────────────┘
+                   │
+                   ▼
+         /design-html（任意: ページ単位HTML生成）
+                   │
+                   ▼
+         /design-ui → /design-components → /design-assemble
 ```
 
 | コマンド | 入力 | 出力 | いつ使う |
 |----------|------|------|----------|
-| `/design-html` | JSON（SSOT） | `{page}.html` | SSOT JSONから静的HTMLを生成したいとき（レビュー/共有用） |
-| `/design-split` | 1枚ペラHTML | `{page}.html` | `/design-mock` の1枚ペラをページ単位に分割したいとき |
+| `/design-html` | JSON（SSOT） | `{page}.html` | SSOT JSONからページ単位の静的HTMLを生成したいとき（レビュー/共有用） |
 
-> **ポイント**: どちらも最終出力は `doc/input/design/html/{page}.html` だが、**入力が違う**。
-> - `/design-html` は JSON → HTML（Figma起点で静的確認が欲しいとき）
-> - `/design-split` は HTML → HTML（会話起点で1枚ペラを分割したいとき）
+> **Note**: 旧 `/design-split`（1枚ペラHTML → ページ分割）の役割は `/design-html` に統合済み。
 
 ## コマンド一覧
 
@@ -92,7 +86,6 @@
 | `/design-ssot` | SSOT（tokens/components/context）を生成（Figmaルート） | `ui-designer`, `frontend-implementation` |
 | `/design-html` | SSOT JSONから静的HTML生成 | `ui-designer`, `tailwind`（使用時） |
 | `/design-mock` | 会話から1枚ペラの静的HTML生成（SSOT JSONも同時に用意） | `ui-designer`, `usability-psychologist`, `tailwind`（使用時） |
-| `/design-split` | 1枚ペラHTMLをページ単位に分割 | `ui-designer` |
 | `/design-ui` | JSONから静的UI骨格生成 | `ui-designer`, `frontend-implementation`, `accessibility-engineer` |
 | `/design-components` | 静的UI骨格をコンポーネント化して分離 | `frontend-implementation`, `accessibility-engineer`, 技術スタック系 |
 | `/design-assemble` | variantsを型付きPropsへマッピングして結合 | `frontend-implementation`, `developer-specialist`, 技術スタック系 |
@@ -117,6 +110,38 @@
 | コマンド | 説明 | 推奨スキル |
 |----------|------|-----------|
 | `/skill-create` | 新しいスキルを壁打ち→テンプレ生成→登録確認まで | - |
+| `/skill-audit` | スキル一覧の分析・重複検出・改善提案 | - |
+
+### review
+| コマンド | 説明 | 推奨スキル |
+|----------|------|-----------|
+| `/basic-review` | typo/命名/フォーマットの表面チェック | `developer-specialist` |
+| `/deep-review` | 設計/セキュリティ/RDD整合の深掘りチェック | `architecture-expert`, `security-expert` |
+
+### pr
+| コマンド | 説明 | 推奨スキル |
+|----------|------|-----------|
+| `/pr-respond` | PRレビューコメントに順次対応（fetch→リスト→対応→コミット） | `developer-specialist` |
+
+### session
+| コマンド | 説明 | 推奨スキル |
+|----------|------|-----------|
+| `/session-start` | 開始時のゴール・完了条件・タイムボックス明確化 | - |
+| `/session-end` | 終了時の進捗サマリー・再開用プロンプト生成 | - |
+
+### team
+| コマンド | 説明 | 推奨スキル |
+|----------|------|-----------|
+| `/team-start` | エージェントチーム起動（tmux分割で並列開発） | `architecture-expert` |
+
+### business
+| コマンド | 説明 | 推奨スキル |
+|----------|------|-----------|
+| `/biz-researcher` | 市場/競合/仮説検証の調査整理 | - |
+| `/persona-designer` | ペルソナ/想定ユーザー像の設計 | - |
+| `/proposition-reviewer` | 価値提案レビューとMVP焦点化 | - |
+
+> **Note**: ビジネス系3スキルは判断軸としてもAIが自動参照する（`doc/guide/skills_catalog.md` にも記載）。
 
 ### pair
 | コマンド | 説明 | 推奨スキル |

@@ -24,6 +24,7 @@ description: "[タスク] 3. Issue実行 + 進捗同期"
 - 詳細運用は `doc/guide/ai_guidelines.md` を参照
 - **Gitブランチ運用は `doc/guide/git_workflow.md` に従う**（ブランチ命名・base先・CI要件）
 - **チーム運用時は `doc/guide/team_protocol.md` も参照**
+- **開発フローは `doc/guide/development_flow.md` に従う**
 
 ---
 

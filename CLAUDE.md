@@ -29,6 +29,7 @@
 - **コメントは日本語**で、**ドメイン意図を説明**（なぜ/何を守るためのコードか）。
 - **Docコメント（JSDoc/Docstring等）は必須**。関数・クラス単位で仕様・意図を明記。
 - 依存採用条件：**デファクトスタンダード**、更新が継続、ライセンス健全。バージョンを明記。
+- **プロジェクト作成は公式推奨方法を使う**: 技術スタックの公式が推奨するプロジェクト作成方法（`npm create`、`npx create-*-app`等のボイラーテンプレート）がある場合はそれを使う。
 - **依存のダウングレードは最終手段**：フレームワーク/ライブラリのバージョンを下げる提案・実施は、セキュリティ/保守性/互換性への影響が大きい。原則として回避し、実施が必要な場合は **代替案（アップグレード/パッチ/置換/設定変更/回避策）を先に検討**する。  
   - 実施する場合は、**必ず事前にユーザーへ理由・影響・ロールバック手順**を提示し、明示的な同意を得てから行う（推測で進めない）。
 - セキュリティは**デフォルト安全**：Secretsは.env（管理外）、OWASPの基本（入力検証、認可、ログ/監査、SSR/CSRF等）を守る。API KeyやSecretsはフロントエンドのPUBLIC環境変数としての管理しない。
@@ -37,11 +38,15 @@
 ## 運用上の細則（参照）
 - サンプルコード運用、依存評価の補助基準、ADR-liteテンプレ等の詳細は `doc/guide/ai_guidelines.md` を参照。
 - デザイン系スキルの使い分けは `doc/guide/design_workflow.md` を参照。
+- 開発ライフサイクル全体のフローは `doc/guide/development_flow.md` を参照。
+- Gitブランチ運用は `doc/guide/git_workflow.md` を参照。
+- チーム並列開発の運用規約は `doc/guide/team_protocol.md` を参照。
 
 ## よく使うワークフロー（スキルチェーン）
 | 目的 | フロー |
 |------|--------|
 | **新規プロジェクト** | `/project-init`（壁打ち → rdd.md → ボイラーテンプレート → AIテンプレート適用） |
+| **開発フロー** | 要件定義 → デザイン → `/task-list` → `/task-detail` → `/task-run` → `/basic-review` → ユーザー確認 → 修正ループ → デプロイ（`doc/guide/development_flow.md`） |
 | **タスク実行** | `/task-list` → `/task-detail` → `/task-run` → `/basic-review` |
 | **バグ対応** | `/bug-new` → `/bug-investigate` → `/bug-propose` → `/bug-fix` |
 | **デザイン** | `/design-mock` or `/design-ssot` → (`/design-html`) → `/design-ui` → `/design-components` → `/design-assemble` |
