@@ -123,7 +123,6 @@ ensure_target_parent_dir() {
 
 # 反映対象（AIテンプレとして必要最小）
 INCLUDES=(
-  "CLAUDE.md"
   "AGENTS.md"
   ".mise.toml"
   "doc/index.md"
@@ -133,9 +132,9 @@ INCLUDES=(
   "doc/devlog/README.md"
 )
 
-# --no-skills が指定されていない場合のみ .claude/ を含める
+# --no-skills が指定されていない場合のみ CLAUDE.md と .claude/ を含める
 if [ "$NO_SKILLS" = "false" ]; then
-  INCLUDES+=(".claude/")
+  INCLUDES+=("CLAUDE.md" ".claude/")
 fi
 
 timestamp="$(date +%Y%m%d-%H%M%S)"
