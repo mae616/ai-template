@@ -173,9 +173,6 @@ main
 - **[/project-init](.claude/skills/project-init/SKILL.md)**: 新規プロジェクトを壁打ちから一気通貫で作成
   - **入力**: プロジェクトの概要（任意）
   - **出力**: 壁打ち → rdd.md → ボイラーテンプレート → AIテンプレート適用
-- **[/skill-create](.claude/skills/skill-create/SKILL.md)**: 新しいスキルを壁打ち→テンプレ生成→登録確認まで
-  - **入力**: スキルの目的や名前（任意）
-  - **出力**: 要件整理 → SKILL.md生成 → 認識確認
 - **[/skill-audit](.claude/skills/skill-audit/SKILL.md)**: スキル一覧の分析・重複検出・改善提案
 - **[/commit-msg](.claude/skills/commit-msg/SKILL.md)**: ステージ差分から日本語コミットメッセージを生成
 
@@ -185,7 +182,6 @@ main
 /repo-tour design
 /pair design 設定画面の情報設計を壁打ちしたい
 /project-init SaaSダッシュボードを始めたい
-/skill-create react-query の判断軸が欲しい
 ```
 
 
