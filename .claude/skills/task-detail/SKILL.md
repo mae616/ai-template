@@ -1,6 +1,6 @@
 ---
 user-invocable: true
-description: "[タスク] 2. Issue詳細化 + 依存関係設定"
+description: "Sprint配下のIssueに実装詳細と依存関係を設定し、ready-for-devラベルを付与する。スプリント計画後のタスク詳細化で使う。"
 ---
 
 # [タスク] 2. Issue詳細化 + 依存関係設定
@@ -15,13 +15,6 @@ description: "[タスク] 2. Issue詳細化 + 依存関係設定"
 - 組み込みTaskの **依存関係（blocks/blockedBy）** を設定する
 - 実装前の調査・準備を明示的に行い、品質を担保する
 - GitHub Issue と 組み込みTask の両方に依存関係を反映する
-
----
-
-## 共通前提（参照）
-- 口調・出力規約・TDD・Docコメント等は `CLAUDE.md` に従う
-- `doc/input/rdd.md` を読み、該当する `.claude/skills/*` を適用
-- 詳細運用は `doc/guide/ai_guidelines.md` を参照
 
 ---
 

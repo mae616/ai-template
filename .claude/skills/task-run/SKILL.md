@@ -1,6 +1,6 @@
 ---
 user-invocable: true
-description: "[タスク] 3. Issue実行 + 進捗同期"
+description: "依存解決済みのIssueを選択して実装を実行し、進捗をIssueと組み込みTaskに同期する。タスクの実装着手で使う。"
 ---
 
 # [タスク] 3. Issue実行 + 進捗同期
@@ -15,13 +15,6 @@ description: "[タスク] 3. Issue実行 + 進捗同期"
 - 指定されたIssue（または選択したIssue）に従って実装を行う
 - **組み込みTask** と **GitHub Issue** の進捗を同期する
 - 完了時に両方を更新（Task: completed、Issue: close）
-
----
-
-## 共通前提（参照）
-- 実装規約・口調・TDD・Docコメント等は `CLAUDE.md` に従う
-- `doc/input/rdd.md` を読み、該当する `.claude/skills/*` を適用
-- 詳細運用は `doc/guide/ai_guidelines.md` を参照
 
 ---
 
@@ -53,6 +46,21 @@ gh issue view {ISSUE_NUMBER}
 - 組み込みTaskの blockedBy が空か確認
 
 ### 2.5. 作業ブランチ作成（通常 or worktree）
+
+> **ブランチ戦略**: `.claude/rules/git.md` に従う。
+> task/* ブランチは **最新の sprint/* から作成** する。sprint/* が存在しない場合は main から作成。
+
+**ベースブランチの決定:**
+```bash
+# sprint/* ブランチの存在を確認
+SPRINT_BRANCH=$(git branch -r --list 'origin/sprint/*' --sort=-committerdate | head -1 | xargs)
+if [ -z "$SPRINT_BRANCH" ]; then
+  BASE_BRANCH="main"
+else
+  BASE_BRANCH="${SPRINT_BRANCH#origin/}"
+fi
+git switch "$BASE_BRANCH" && git pull
+```
 
 **通常モード（単一タスク）:**
 ```bash
@@ -131,6 +139,28 @@ gh issue comment {ISSUE_NUMBER} --body "📝 進捗報告
 "
 ```
 
+### 6.5. 設計書の差分更新
+
+**変更モジュールの特定:**
+```bash
+# 変更ファイルからモジュールを特定
+git diff --name-only HEAD~1 | grep "^src/" | cut -d'/' -f2 | sort -u
+```
+
+**対応する設計書を更新:**
+- 変更があったモジュールの `doc/generated/reverse/modules/{module}.md` を更新
+- 更新内容: 変更した関数/クラスの説明、データフロー、設計意図
+- **全体再生成ではなく差分のみ**（変更箇所に関連する部分だけ）
+
+**更新例:**
+```markdown
+## 変更履歴（今回の変更）
+- {変更内容の要約}
+- 影響範囲: {関連するモジュール/API}
+```
+
+> 💡 設計書がPRに含まれることで、レビュアーがコード変更の意図を理解しやすくなる
+
 ### 7. コミット + PR作成
 
 **コミット（⚠️ 確認あり）:**
@@ -150,7 +180,20 @@ git push -u origin task/{ISSUE_NUMBER}-{short-description}
 ```
 
 **PR作成（⚠️ 確認あり）:**
+
+> **base先の決定**: `.claude/rules/git.md` に従う。
+> - sprint/* ブランチが存在する → `--base sprint/*`（task → sprint へマージ）
+> - sprint/* が存在しない → `--base main`
+
 ```bash
+# base先を動的に決定
+SPRINT_BRANCH=$(git branch -r --list 'origin/sprint/*' --sort=-committerdate | head -1 | xargs)
+if [ -z "$SPRINT_BRANCH" ]; then
+  PR_BASE="main"
+else
+  PR_BASE="${SPRINT_BRANCH#origin/}"
+fi
+
 gh pr create \
   --title "feat: {変更概要}" \
   --body "## 概要
@@ -173,7 +216,7 @@ gh pr create \
 2. {確認手順2}
 
 Closes #${ISSUE_NUMBER}" \
-  --base main
+  --base "$PR_BASE"
 ```
 
 > **Note**: `Closes #${ISSUE_NUMBER}` により、PRマージ時にIssueが自動closeされるにゃ。
@@ -243,6 +286,7 @@ gh issue comment {ISSUE_NUMBER} --body "🚫 実現不能
 - [ ] **コミットメッセージに Issue番号を含めている**
 - [ ] **PRを作成し、`Closes #Issue番号` を本文に含めている**
 - [ ] **組み込みTask が completed に更新済み**
+- [ ] **変更モジュールの設計書（doc/generated/reverse/modules/）が更新済み**
 
 ---
 

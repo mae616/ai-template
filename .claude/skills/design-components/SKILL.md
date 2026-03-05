@@ -1,6 +1,6 @@
 ---
 user-invocable: true
-description: "[デザイン] 3. 静的UI骨格 → Layout/Component を抽出して分離"
+description: "静的UI骨格からLayout/Componentを抽出して技術スタックの標準配置に分離する。UI骨格を再利用可能なコンポーネント構造に整理するときに使う。"
 ---
 
 # [デザイン] 3. 静的UI骨格 → Layout/Component を抽出して分離
@@ -24,14 +24,6 @@ description: "[デザイン] 3. 静的UI骨格 → Layout/Component を抽出し
   - **Layout**（ページ枠/セクション/グリッド）
   - **Component**（ボタン/カード/フォーム等の再利用部品）
   を抽出して分離し、保守しやすくする
-
----
-
-## 共通前提（参照）
-- 口調・出力規約は `CLAUDE.md` に従う。
-- プロジェクト固有の事実は `doc/input/rdd.md`（先頭のAI用事実ブロック）を参照する。
-- 判断軸は `.claude/skills/*` を適用する（例: `ui-designer` / `tailwind` / `creative-coder` / `usability-psychologist`）。
-- 詳細運用（差分/サンプル運用等）は `doc/guide/ai_guidelines.md` を参照。
 
 ---
 
@@ -66,3 +58,8 @@ description: "[デザイン] 3. 静的UI骨格 → Layout/Component を抽出し
 - 見た目が維持されている（主要ページ/主要コンポーネント）
 - 重複UIが減っている（同じ構造が3回以上なら抽出を検討）
 - ここで停止
+
+---
+
+## 次に推奨
+→ `/design-assemble` でvariants → 型付きProps結合

@@ -8,10 +8,6 @@ set -euo pipefail
 # 使い方:
 #   scripts/apply_template.sh --target /path/to/project --dry-run
 #   scripts/apply_template.sh --target /path/to/project
-#
-# 想定:
-# - このスクリプトは ai-template リポジトリ内から実行する
-# - 反映対象は「AI開発支援用のファイル群」に限定する
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 TEMPLATE_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
@@ -19,22 +15,28 @@ TEMPLATE_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 TARGET_DIR=""
 DRY_RUN="false"
 BACKUP="true"
-MODE="safe" # safe(default): 既存を上書きしない / force: 上書きする / sync: 上書き＋削除で同期（危険）
+MODE="safe"  # safe: 既存を上書きしない / force: 上書き / sync: 上書き+削除
 OVERWRITE_RDD="false"
 NO_SKILLS="false"
+
+# ビルド成果物などの共通除外パターン
+COMMON_EXCLUDES=(
+  .git/ node_modules/ dist/ build/ .next/ out/
+  coverage/ .venv/ vendor/ .cache/ target/
+)
 
 usage() {
   cat <<'USAGE'
 使い方:
-  scripts/apply_template.sh --target /abs/path/to/project [--safe|--force|--sync] [--dry-run] [--no-backup] [--no-skills]
+  scripts/apply_template.sh --target /abs/path/to/project [オプション]
 
 オプション:
-  --target <dir>   反映先（必須）
+  --target <dir>   反映先（必須・絶対パス）
   --safe           既存ファイルは上書きしない（デフォルト）
-  --force          テンプレ対象ファイルを上書きする（バックアップ推奨）
-  --sync           テンプレ対象ファイルを同期（上書き＋削除）。危険：テンプレ配下で削除が発生しうる
-  --overwrite-rdd  `doc/input/rdd.md` を上書きする（非推奨：通常は各プロジェクト固有）
-  --no-skills      `.claude/` をコピーしない（グローバル適用済みの場合に使用）
+  --force          テンプレ対象ファイルを上書き（バックアップ推奨）
+  --sync           テンプレ対象ファイルを同期（上書き+削除）。危険
+  --overwrite-rdd  doc/input/rdd.md を上書き（非推奨：通常は各プロジェクト固有）
+  --no-skills      .claude/ をコピーしない（スキルはグローバルや手動管理の場合）
   --dry-run        実際には書き込まず、差分だけ表示
   --no-backup      上書き前バックアップを作成しない（非推奨）
   -h, --help       ヘルプ
@@ -43,137 +45,61 @@ USAGE
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
-    --target)
-      TARGET_DIR="${2:-}"
-      shift 2
-      ;;
-    --dry-run)
-      DRY_RUN="true"
-      shift
-      ;;
-    --safe)
-      MODE="safe"
-      shift
-      ;;
-    --force)
-      MODE="force"
-      shift
-      ;;
-    --sync)
-      MODE="sync"
-      shift
-      ;;
-    --overwrite-rdd)
-      OVERWRITE_RDD="true"
-      shift
-      ;;
-    --no-backup)
-      BACKUP="false"
-      shift
-      ;;
-    --no-skills)
-      NO_SKILLS="true"
-      shift
-      ;;
-    -h|--help)
-      usage
-      exit 0
-      ;;
-    *)
-      echo "ERROR: 不明な引数: $1" >&2
-      usage >&2
-      exit 2
-      ;;
+    --target)         TARGET_DIR="${2:-}"; shift 2 ;;
+    --dry-run)        DRY_RUN="true"; shift ;;
+    --safe)           MODE="safe"; shift ;;
+    --force)          MODE="force"; shift ;;
+    --sync)           MODE="sync"; shift ;;
+    --overwrite-rdd)  OVERWRITE_RDD="true"; shift ;;
+    --no-backup)      BACKUP="false"; shift ;;
+    --no-skills)      NO_SKILLS="true"; shift ;;
+    -h|--help)        usage; exit 0 ;;
+    *)                echo "ERROR: 不明な引数: $1" >&2; usage >&2; exit 2 ;;
   esac
 done
 
-if [ -z "$TARGET_DIR" ]; then
-  echo "ERROR: --target は必須です" >&2
-  usage >&2
-  exit 2
-fi
-
-if [ "${TARGET_DIR:0:1}" != "/" ]; then
-  echo "ERROR: --target は絶対パスで指定してください: $TARGET_DIR" >&2
-  exit 2
-fi
-
-if [ ! -d "$TARGET_DIR" ]; then
-  echo "ERROR: --target が存在しません: $TARGET_DIR" >&2
-  exit 2
-fi
+# バリデーション
+[ -z "$TARGET_DIR" ] && { echo "ERROR: --target は必須です" >&2; usage >&2; exit 2; }
+[ "${TARGET_DIR:0:1}" != "/" ] && { echo "ERROR: --target は絶対パスで指定してください: $TARGET_DIR" >&2; exit 2; }
+[ ! -d "$TARGET_DIR" ] && { echo "ERROR: --target が存在しません: $TARGET_DIR" >&2; exit 2; }
 
 need() { command -v "$1" >/dev/null 2>&1 || { echo "ERROR: '$1' が必要です" >&2; exit 2; }; }
 need rsync
 need date
 
-# dry-run 以外では、rsync の出力先（親ディレクトリ）が無いとエラーになる。
-# 例: 反映先リポジトリに doc/ が存在しない場合、`doc/ai_guidelines.md` のコピーで失敗する。
-ensure_target_parent_dir() {
-  local rel_path="$1"
-
-  if [[ "$rel_path" == */ ]]; then
-    # ディレクトリの同期先（末尾 /）はディレクトリ自体を作っておく。
-    mkdir -p "$TARGET_DIR/$rel_path"
-    return 0
-  fi
-
-  mkdir -p "$TARGET_DIR/$(dirname -- "$rel_path")"
-}
-
 # 反映対象（AIテンプレとして必要最小）
-INCLUDES=(
-  "CLAUDE.md"
-  "AGENTS.md"
-  ".mise.toml"
-  "doc/index.md"
-  "doc/input/"
-  "doc/guide/"
-  "doc/generated/"
-  "doc/devlog/README.md"
-)
+INCLUDES=("AGENTS.md" ".mise.toml" "doc/index.md" "doc/input/" "doc/generated/")
+[ "$NO_SKILLS" = "false" ] && INCLUDES+=("CLAUDE.md" ".claude/")
 
-# --no-skills が指定されていない場合のみ .claude/ を含める
-if [ "$NO_SKILLS" = "false" ]; then
-  INCLUDES+=(".claude/")
-fi
-
+# バックアップ
 timestamp="$(date +%Y%m%d-%H%M%S)"
 backup_dir="$TARGET_DIR/.ai-template-backup/$timestamp"
 
 if [ "$BACKUP" = "true" ] && [ "$DRY_RUN" = "false" ]; then
   mkdir -p "$backup_dir"
   for p in "${INCLUDES[@]}"; do
-    src="$TARGET_DIR/$p"
-    if [ -e "$src" ]; then
-      mkdir -p "$backup_dir/$(dirname -- "$p")"
-      # バックアップは「いまあるものを退避」できれば十分。失敗しても進められるようにする。
-      rsync -a -- "$src" "$backup_dir/$p" >/dev/null 2>&1 || true
-    fi
+    [ -e "$TARGET_DIR/$p" ] || continue
+    mkdir -p "$backup_dir/$(dirname "$p")"
+    rsync -a -- "$TARGET_DIR/$p" "$backup_dir/$p" >/dev/null 2>&1 || true
   done
   echo "バックアップ作成: $backup_dir"
 fi
 
+# rsync フラグ構築
 RSYNC_FLAGS=(-a)
-if [ "$DRY_RUN" = "true" ]; then
-  RSYNC_FLAGS+=("--dry-run")
-fi
-
+[ "$DRY_RUN" = "true" ] && RSYNC_FLAGS+=("--dry-run")
 case "$MODE" in
-  safe)
-    RSYNC_FLAGS+=("--ignore-existing")
-    ;;
-  force)
-    # 既存を上書きする（削除はしない）
-    ;;
-  sync)
-    RSYNC_FLAGS+=("--delete")
-    ;;
-  *)
-    echo "ERROR: 不正なMODE: $MODE" >&2
-    exit 2
-    ;;
+  safe)  RSYNC_FLAGS+=("--ignore-existing") ;;
+  force) ;;  # 上書きのみ（削除なし）
+  sync)  RSYNC_FLAGS+=("--delete") ;;
+  *)     echo "ERROR: 不正なMODE: $MODE" >&2; exit 2 ;;
 esac
+
+# 共通除外を --exclude に変換
+EXCLUDE_FLAGS=()
+for pat in "${COMMON_EXCLUDES[@]}"; do
+  EXCLUDE_FLAGS+=("--exclude" "$pat")
+done
 
 echo "テンプレート: $TEMPLATE_ROOT"
 echo "反映先:       $TARGET_DIR"
@@ -184,32 +110,23 @@ echo "対象:         ${INCLUDES[*]}"
 echo
 
 for p in "${INCLUDES[@]}"; do
-  # doc/input/rdd.md は「プロジェクト所有」の色が強いので、
-  # デフォルトでは上書きしない（安全側）。必要な場合だけ明示フラグで上書きする。
   EXTRA_FLAGS=()
-  if [ "$p" = "doc/input/" ] && [ "$OVERWRITE_RDD" != "true" ]; then
-    # input/ ディレクトリ全体を対象に、rdd.md だけ上書き回避
-    EXTRA_FLAGS+=("--ignore-existing")
+
+  # rdd.md はプロジェクト固有。force/sync でも既存があれば守る（--overwrite-rdd で解除）
+  if [ "$p" = "doc/input/" ] && [ "$OVERWRITE_RDD" != "true" ] && [ -f "$TARGET_DIR/doc/input/rdd.md" ]; then
+    EXTRA_FLAGS+=("--exclude" "rdd.md")
   fi
 
-  # 実反映時のみ、出力先ディレクトリを事前作成して rsync エラーを防ぐ。
+  # 出力先ディレクトリを事前作成（dry-run時は不要）
   if [ "$DRY_RUN" = "false" ]; then
-    ensure_target_parent_dir "$p"
+    if [[ "$p" == */ ]]; then
+      mkdir -p "$TARGET_DIR/$p"
+    else
+      mkdir -p "$TARGET_DIR/$(dirname "$p")"
+    fi
   fi
 
-  rsync "${RSYNC_FLAGS[@]}" \
-    "${EXTRA_FLAGS[@]}" \
-    --exclude ".git/" \
-    --exclude "node_modules/" \
-    --exclude "dist/" \
-    --exclude "build/" \
-    --exclude ".next/" \
-    --exclude "out/" \
-    --exclude "coverage/" \
-    --exclude ".venv/" \
-    --exclude "vendor/" \
-    --exclude ".cache/" \
-    --exclude "target/" \
+  rsync "${RSYNC_FLAGS[@]}" "${EXTRA_FLAGS[@]}" "${EXCLUDE_FLAGS[@]}" \
     -- "$TEMPLATE_ROOT/$p" "$TARGET_DIR/$p"
 done
 
@@ -219,4 +136,3 @@ if [ "$DRY_RUN" = "true" ]; then
 else
   echo "反映完了"
 fi
-

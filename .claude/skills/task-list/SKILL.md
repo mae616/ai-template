@@ -1,6 +1,6 @@
 ---
 user-invocable: true
-description: "[タスク] 1. Sprint計画（Milestone + Issue一括作成）"
+description: "rdd.mdからSprint計画を作成し、GitHub MilestoneとIssueを一括生成する。スプリント計画、タスク分解で使う。"
 ---
 
 # [タスク] 1. Sprint計画（Milestone + Issue一括作成）
@@ -25,13 +25,6 @@ Repository = プロダクト
       └── Milestone = Sprint
            └── Issue = タスク
 ```
-
----
-
-## 共通前提（参照）
-- 口調・出力規約・TDD・Docコメント等は `CLAUDE.md` に従う
-- `doc/input/rdd.md` を読み、該当する `.claude/skills/*` を適用
-- 詳細運用は `doc/guide/ai_guidelines.md` を参照
 
 ---
 

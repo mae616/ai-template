@@ -2,7 +2,11 @@
 .ssh/
 .serena/
 .pnpm-store
-!.claude/settings.local.json
+
+
+# セッション一時ファイル（プロジェクト固有の作業状態）
+.claude/session-context.md
+.claude/team-board.md
 
 # Logs
 logs
