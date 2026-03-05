@@ -68,7 +68,7 @@ need rsync
 need date
 
 # 反映対象（AIテンプレとして必要最小）
-INCLUDES=("AGENTS.md" ".mise.toml" "doc/index.md" "doc/input/" "doc/generated/")
+INCLUDES=(".mise.toml" "doc/index.md" "doc/input/" "doc/generated/")
 [ "$NO_SKILLS" = "false" ] && INCLUDES+=("CLAUDE.md" ".claude/")
 
 # バックアップ
