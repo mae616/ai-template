@@ -1,6 +1,6 @@
 ---
 user-invocable: true
-description: "1. Sprint計画（Milestone + Issue一括作成）"
+description: "rdd.mdからSprint計画を作成し、GitHub MilestoneとIssueを一括生成する。スプリント計画、タスク分解で使う。"
 ---
 
 # [タスク] 1. Sprint計画（Milestone + Issue一括作成）

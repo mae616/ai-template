@@ -1,6 +1,6 @@
 ---
 user-invocable: true
-description: "1.（Figma起点）SSOT（tokens/components/context/assets）を生成"
+description: "Figma（Dev Mode）からデザインSSOT（tokens/components/context/assets）をJSON形式で抽出する。Figmaのデザインを実装に落とし込む起点として使う。"
 ---
 
 # [デザイン] 1.（Figma起点）SSOT（tokens/components/context/assets）を生成

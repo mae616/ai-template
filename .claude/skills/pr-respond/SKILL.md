@@ -1,6 +1,6 @@
 ---
 user-invocable: true
-description: "レビューコメントに順次対応 - fetch→リスト→対応→コミットのループ"
+description: "PRのレビューコメントに1件ずつ対応してコミット・pushする。レビュー指摘への対応、PR修正作業で使う。"
 ---
 
 # [PR] レビューコメント対応

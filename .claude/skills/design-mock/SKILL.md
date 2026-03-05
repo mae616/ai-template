@@ -1,6 +1,6 @@
 ---
 user-invocable: true
-description: "1.（会話起点）SSOT + 静的HTML（叩き台）を生成"
+description: "会話からデザインSSOT（JSON）と静的HTML叩き台を同時に生成する。画面デザインの初期検討、UIの方向性を素早く形にしたいときに使う。"
 ---
 
 # [デザイン] 1.（会話起点）SSOT + 静的HTML（叩き台）を生成

@@ -1,6 +1,6 @@
 ---
 user-invocable: true
-description: "Basic Review - typo/命名/フォーマットの表面チェック"
+description: "コードのtypo、命名規約、フォーマットを表面チェックする。PR作成前やコード変更後の最初のレビューパスとして使う。"
 ---
 
 # [レビュー] Basic Review

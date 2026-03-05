@@ -39,7 +39,7 @@ doc/
 
 1. **[input/rdd.md](./input/rdd.md)** - 要件・制約・技術スタック
 2. **[input/architecture.md](./input/architecture.md)** - 全体構造・境界・依存方向
-3. **`.claude/rules/git-workflow.md`** - ブランチ運用（自動適用）
+3. **`.claude/rules/git.md`** - ブランチ運用（自動適用）
 
 ---
 

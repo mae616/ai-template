@@ -1,6 +1,6 @@
 ---
 user-invocable: true
-description: "（任意）SSOT → 静的HTML を生成し、doc/input/design/html/ に保存"
+description: "デザインSSOT JSONからドキュメント・共有用の静的HTMLを生成しdoc/input/design/html/に保存する。SSOTだけ先にある場合の視覚的確認や共有に使う。"
 ---
 
 # [デザイン] （任意）SSOT → 静的HTML を生成し、`doc/input/design/html/` に保存

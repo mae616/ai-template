@@ -1,6 +1,6 @@
 ---
 user-invocable: true
-description: "Deep Review - 設計/セキュリティ/RDD整合の深掘りチェック"
+description: "設計整合性、セキュリティ、RDD準拠を深掘りチェックする。basic-review後の二次レビュー、sprint→mainマージ前の品質確認で使う。"
 ---
 
 # [レビュー] Deep Review

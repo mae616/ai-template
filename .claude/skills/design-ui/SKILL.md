@@ -1,6 +1,6 @@
 ---
 user-invocable: true
-description: "2. SSOT → 静的UI骨格（見た目のみ）を生成"
+description: "デザインSSOT JSONから技術スタック準拠の静的UI骨格（見た目のみ）を生成する。SSOT確定後、コンポーネント分割の前段階として使う。"
 ---
 
 # [デザイン] 2. SSOT → 静的UI骨格（見た目のみ）を生成

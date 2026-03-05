@@ -1,6 +1,6 @@
 ---
 user-invocable: true
-description: "終了時の進捗サマリー・再開用プロンプト生成"
+description: "進捗サマリーと再開用プロンプトを生成してsession-context.mdに保存する。作業の区切り、コンテキスト圧縮が近いとき、セッション終了時に使う。"
 ---
 
 # [セッション] セッション終了

@@ -141,7 +141,7 @@ main
 | `sprint/*` | スプリント全体 | フルビルド/テスト |
 | `hotfix/*` | 本番緊急修正 | フルビルド/テスト |
 
-詳細は [.claude/rules/git-workflow.md](.claude/rules/git-workflow.md) を参照（Claude Codeが自動読み込み）。
+詳細は [.claude/rules/git.md](.claude/rules/git.md) を参照（Claude Codeが自動読み込み）。
 
 ## Claude Code コマンドの使い方
 

@@ -1,6 +1,6 @@
 ---
 user-invocable: true
-description: "2. Issue詳細化 + 依存関係設定"
+description: "Sprint配下のIssueに実装詳細と依存関係を設定し、ready-for-devラベルを付与する。スプリント計画後のタスク詳細化で使う。"
 ---
 
 # [タスク] 2. Issue詳細化 + 依存関係設定
