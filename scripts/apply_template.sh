@@ -126,6 +126,12 @@ for p in "${INCLUDES[@]}"; do
     fi
   fi
 
+  # テンプレート側に対象が存在しない場合はスキップ
+  if [ ! -e "$TEMPLATE_ROOT/$p" ]; then
+    echo "SKIP: $p（テンプレートに存在しません）"
+    continue
+  fi
+
   rsync "${RSYNC_FLAGS[@]}" "${EXTRA_FLAGS[@]}" "${EXCLUDE_FLAGS[@]}" \
     -- "$TEMPLATE_ROOT/$p" "$TARGET_DIR/$p"
 done
