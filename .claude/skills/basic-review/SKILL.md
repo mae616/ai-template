@@ -1,6 +1,6 @@
 ---
 user-invocable: true
-description: "[レビュー] Basic Review - typo/命名/フォーマットの表面チェック"
+description: "Basic Review - typo/命名/フォーマットの表面チェック"
 ---
 
 # [レビュー] Basic Review

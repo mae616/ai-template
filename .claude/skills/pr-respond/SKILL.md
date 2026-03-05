@@ -1,6 +1,6 @@
 ---
 user-invocable: true
-description: "[PR] レビューコメントに順次対応 - fetch→リスト→対応→コミットのループ"
+description: "レビューコメントに順次対応 - fetch→リスト→対応→コミットのループ"
 ---
 
 # [PR] レビューコメント対応

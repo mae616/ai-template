@@ -1,6 +1,6 @@
 ---
 user-invocable: true
-description: "[デザイン] （任意）SSOT → 静的HTML を生成し、doc/input/design/html/ に保存"
+description: "（任意）SSOT → 静的HTML を生成し、doc/input/design/html/ に保存"
 ---
 
 # [デザイン] （任意）SSOT → 静的HTML を生成し、`doc/input/design/html/` に保存
@@ -19,11 +19,6 @@ description: "[デザイン] （任意）SSOT → 静的HTML を生成し、doc/
 - 実装に進むなら `/design-ui` → `/design-components` → `/design-assemble`（READMEのフローに合流）
 
 > **旧 `/design-split` の役割はこのスキルが担う**: `/design-mock` が生成したSSOTからページ単位HTMLを生成するため、1枚ペラHTMLを手動で分割する必要はない
-
-## 共通前提（参照）
-- 口調・出力規約・差分出力の方針は `CLAUDE.md` に従う。
-- `doc/input/rdd.md` を読み、該当する `.claude/skills/*` を適用して判断軸を揃える（例: `ui-designer` / `usability-psychologist` / `tailwind`）。
-- 詳細運用（ADR-lite/差分/サンプル運用等）は `doc/guide/ai_guidelines.md` を参照。
 
 ## 見た目の基準（ビューポート）について
 - まず `doc/input/rdd.md` の「ターゲット表示環境（事実）」を参照し、生成HTMLの確認は **そのビューポートを基準**に行う

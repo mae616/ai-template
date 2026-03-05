@@ -1,6 +1,5 @@
 ---
 name: animation-principles
-category: design
 user-invocable: false
 description: ディズニーの12原則とジブリ的自然運動をベースに、UIアニメーションの「なぜ動かすか」「どう動かすか」を判断する。アニメーション/モーション/トランジション設計の相談で、ツール非依存の概念的判断軸として使う。
 ---

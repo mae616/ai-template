@@ -1,6 +1,5 @@
 ---
 name: keyboard-shortcuts
-category: role
 user-invocable: false
 description: UIキーボードショートカットを「公式基準（W3C APG / WCAG）＋プラットフォーム規約（Apple HIG / Fluent UI）＋デファクトスタンダード（GitHub・Gmail・Slack等）」に沿って設計し、衝突なく・発見しやすく・無効化可能な形で実装するための判断軸。
 ---

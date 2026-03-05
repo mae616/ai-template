@@ -1,6 +1,6 @@
 ---
 user-invocable: true
-description: "[レビュー] Deep Review - 設計/セキュリティ/RDD整合の深掘りチェック"
+description: "Deep Review - 設計/セキュリティ/RDD整合の深掘りチェック"
 ---
 
 # [レビュー] Deep Review

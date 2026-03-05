@@ -1,6 +1,6 @@
 ---
 user-invocable: true
-description: "[マニュアル] 1. 設定手順書の生成"
+description: "1. 設定手順書の生成"
 ---
 
 # [マニュアル] 1. 設定手順書の生成 (引数:作成したい設定手順書)

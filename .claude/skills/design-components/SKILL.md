@@ -1,6 +1,6 @@
 ---
 user-invocable: true
-description: "[デザイン] 3. 静的UI骨格 → Layout/Component を抽出して分離"
+description: "3. 静的UI骨格 → Layout/Component を抽出して分離"
 ---
 
 # [デザイン] 3. 静的UI骨格 → Layout/Component を抽出して分離
@@ -24,14 +24,6 @@ description: "[デザイン] 3. 静的UI骨格 → Layout/Component を抽出し
   - **Layout**（ページ枠/セクション/グリッド）
   - **Component**（ボタン/カード/フォーム等の再利用部品）
   を抽出して分離し、保守しやすくする
-
----
-
-## 共通前提（参照）
-- 口調・出力規約は `CLAUDE.md` に従う。
-- プロジェクト固有の事実は `doc/input/rdd.md`（先頭のAI用事実ブロック）を参照する。
-- 判断軸は `.claude/skills/*` を適用する（例: `ui-designer` / `tailwind` / `creative-coder` / `usability-psychologist`）。
-- 詳細運用（差分/サンプル運用等）は `doc/guide/ai_guidelines.md` を参照。
 
 ---
 

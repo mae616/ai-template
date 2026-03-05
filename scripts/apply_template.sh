@@ -127,9 +127,7 @@ INCLUDES=(
   ".mise.toml"
   "doc/index.md"
   "doc/input/"
-  "doc/guide/"
   "doc/generated/"
-  "doc/devlog/README.md"
 )
 
 # --no-skills が指定されていない場合のみ CLAUDE.md と .claude/ を含める

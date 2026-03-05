@@ -94,9 +94,6 @@ scripts/apply_global.sh
 scripts/apply_global.sh --all-skills
 ```
 
-詳細な運用方法は [doc/guide/ai_template_operation.md](doc/guide/ai_template_operation.md) を参照してください。
-skills一覧（索引）は [doc/guide/skills_catalog.md](doc/guide/skills_catalog.md) を参照してください。
-コマンド一覧（索引）は [doc/guide/commands_catalog.md](doc/guide/commands_catalog.md) を参照してください。
 ドキュメント全体の入口は [doc/index.md](doc/index.md) です。
 
 #### 開発プロジェクトの作成
@@ -144,7 +141,7 @@ main
 | `sprint/*` | スプリント全体 | フルビルド/テスト |
 | `hotfix/*` | 本番緊急修正 | フルビルド/テスト |
 
-詳細は [doc/guide/git_workflow.md](doc/guide/git_workflow.md) を参照してください。
+詳細は [.claude/rules/git-workflow.md](.claude/rules/git-workflow.md) を参照（Claude Codeが自動読み込み）。
 
 ## Claude Code コマンドの使い方
 
@@ -414,7 +411,6 @@ claude --teammate-mode tmux
 ```
 
 - **[/team-start](.claude/skills/team-start/SKILL.md)**: tmux分割でエージェントチームを起動
-- **チーム運用規約**: [doc/guide/team_protocol.md](doc/guide/team_protocol.md) を参照
 
 #### チームワークフロー
 
@@ -489,17 +485,10 @@ ai-template/
 │   │   ├── rdd.md             # 要件定義
 │   │   ├── architecture.md    # アーキテクチャ
 │   │   └── design/            # デザインSSOT
-│   ├── guide/                 # 【テンプレ提供】運用ガイド
-│   │   ├── git_workflow.md    # Gitブランチ運用
-│   │   ├── team_protocol.md   # チーム連携プロトコル
-│   │   ├── design_workflow.md # デザインワークフロー
-│   │   ├── ai_guidelines.md   # AI運用ガイドライン
-│   │   ├── commands_catalog.md # 手順系スキルカタログ
-│   │   └── skills_catalog.md  # 判断軸スキルカタログ
 │   ├── generated/             # 【AI生成】上書きOK
 │   │   ├── manual/            # /manual-gen 出力先
 │   │   └── reverse/           # /docs-reverse 出力先
-│   └── devlog/                # AI作業ログ（任意）
+│   └── rules/                 # 運用ルール（自動適用）
 ├── scripts/                   # スクリプト
 │   ├── apply_template.sh      # プロジェクトへの適用
 │   └── apply_global.sh        # ~/.claude への適用
@@ -514,7 +503,7 @@ ai-template/
 
 ### ⭐ このテンプレートの本質
 - **`.claude/skills/`** → 実際の「作業フローを動かすスキル群」（54スキル: 手順系29 + 判断軸25）
-- **[CLAUDE.md](CLAUDE.md) / [doc/input/rdd.md](doc/input/rdd.md) / [.claude/skills/](.claude/skills/) / [doc/guide/](doc/guide/)** → 判断軸（SSOT/運用）
+- **[CLAUDE.md](CLAUDE.md) / [.claude/rules/](.claude/rules/) / [doc/input/rdd.md](doc/input/rdd.md) / [.claude/skills/](.claude/skills/)** → 判断軸（SSOT/運用）
 
 この2つが中核であり、他の構成要素はそれを支える仕組みになっています。
 
@@ -560,7 +549,7 @@ ai-template/
 | **ツール** | `playwright` | E2Eテストのベストプラクティス |
 | | `agent-browser` | Headlessブラウザ自動化のUI検証 |
 
-> 詳細は [doc/guide/skills_catalog.md](doc/guide/skills_catalog.md) を参照
+> 各スキルの詳細は `.claude/skills/*/SKILL.md` を参照
 
 
 ## 🤝 コントリビューション

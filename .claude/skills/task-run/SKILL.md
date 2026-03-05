@@ -1,6 +1,6 @@
 ---
 user-invocable: true
-description: "[タスク] 3. Issue実行 + 進捗同期"
+description: "3. Issue実行 + 進捗同期"
 ---
 
 # [タスク] 3. Issue実行 + 進捗同期
@@ -15,16 +15,6 @@ description: "[タスク] 3. Issue実行 + 進捗同期"
 - 指定されたIssue（または選択したIssue）に従って実装を行う
 - **組み込みTask** と **GitHub Issue** の進捗を同期する
 - 完了時に両方を更新（Task: completed、Issue: close）
-
----
-
-## 共通前提（参照）
-- 実装規約・口調・TDD・Docコメント等は `CLAUDE.md` に従う
-- `doc/input/rdd.md` を読み、該当する `.claude/skills/*` を適用
-- 詳細運用は `doc/guide/ai_guidelines.md` を参照
-- **Gitブランチ運用は `doc/guide/git_workflow.md` に従う**（ブランチ命名・base先・CI要件）
-- **チーム運用時は `doc/guide/team_protocol.md` も参照**
-- **開発フローは `doc/guide/development_flow.md` に従う**
 
 ---
 
@@ -57,7 +47,7 @@ gh issue view {ISSUE_NUMBER}
 
 ### 2.5. 作業ブランチ作成（通常 or worktree）
 
-> **ブランチ戦略**: `doc/guide/git_workflow.md` に従う。
+> **ブランチ戦略**: `.claude/rules/git-workflow.md` に従う。
 > task/* ブランチは **最新の sprint/* から作成** する。sprint/* が存在しない場合は main から作成。
 
 **ベースブランチの決定:**
@@ -191,7 +181,7 @@ git push -u origin task/{ISSUE_NUMBER}-{short-description}
 
 **PR作成（⚠️ 確認あり）:**
 
-> **base先の決定**: `doc/guide/git_workflow.md` に従う。
+> **base先の決定**: `.claude/rules/git-workflow.md` に従う。
 > - sprint/* ブランチが存在する → `--base sprint/*`（task → sprint へマージ）
 > - sprint/* が存在しない → `--base main`
 

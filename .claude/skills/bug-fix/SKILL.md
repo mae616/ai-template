@@ -1,6 +1,6 @@
 ---
 user-invocable: true
-description: "[バグ対応] 4. 修正実行を恒久対応・段階実施＋無効時ロールバックでする"
+description: "4. 修正実行を恒久対応・段階実施＋無効時ロールバックでする"
 ---
 
 # [バグ対応] 4. 修正実行を恒久対応・段階実施＋無効時ロールバックでする (引数:Issue番号)
@@ -29,10 +29,6 @@ description: "[バグ対応] 4. 修正実行を恒久対応・段階実施＋無
 
 ---
 
-## 共通前提（参照）
-- **Gitブランチ運用は `doc/guide/git_workflow.md` に従う**（ブランチ命名・base先・CI要件）
-- **チーム運用時は `doc/guide/team_protocol.md` も参照**
-
 ## 前提ポリシー（安全運用）
 - **安全第一**：本番影響のある操作は別環境で実施、シークレット露出禁止、最小権限
 - **検証必須**：修正ごとに再現テスト／自動テスト／メトリクスで効果判定
@@ -54,7 +50,7 @@ gh issue view {ISSUE_NUMBER} --json title,body,labels
 
 ### 2. 作業ブランチ作成（通常 or worktree）
 
-> **ブランチ命名**: `doc/guide/git_workflow.md` に従う。
+> **ブランチ命名**: `.claude/rules/git-workflow.md` に従う。
 > - Sprint統合後のバグ → `feature_fix/{short-description}`（base: sprint/*）
 > - 本番緊急バグ → `hotfix/{short-description}`（base: main）
 > - Sprint外のバグ → `feature_fix/{ISSUE_NUMBER}-{short-description}`（base: sprint/* or main）
@@ -131,7 +127,7 @@ c. **判定**
 
 ### 5. PR作成
 
-> **base先**: `doc/guide/git_workflow.md` に従う。sprint/* があれば sprint/* へ、なければ main へ。
+> **base先**: `.claude/rules/git-workflow.md` に従う。sprint/* があれば sprint/* へ、なければ main へ。
 
 ```bash
 # base先を動的に決定（ステップ2で取得済みの $BASE_BRANCH を使用）

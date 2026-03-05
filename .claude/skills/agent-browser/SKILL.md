@@ -1,6 +1,5 @@
 ---
 name: agent-browser
-category: tech
 user-invocable: false
 description: Agent Browser（Headlessブラウザ自動化CLI）を使ったUI検証・E2Eテスト・スクリーンショット取得の判断軸。アクセシビリティツリーベースの要素選択を優先し、壊れにくいテスト設計を目指す。
 ---
