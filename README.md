@@ -476,7 +476,7 @@ ai-template/
 ├── .claude/                   # Claude Code設定
 │   ├── skills/                # スキル（判断軸 + 手順系）⭐
 │   ├── hooks/                 # フック（Mermaid構文検証等）
-│   ├── settings.local.json    # AIのコマンド権限
+│   ├── settings.json          # AIの権限・hooks設定
 │   ├── session-context.md     # セッション状態（.gitignore対象）
 │   └── team-board.md          # チームホワイトボード（.gitignore対象）
 ├── doc/                       # ドキュメント
