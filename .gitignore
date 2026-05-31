@@ -8,6 +8,9 @@
 .claude/session-context.md
 .claude/team-board.md
 
+# テンプレート刷新の作業メモ（配布物には含めない）
+history/
+
 # Logs
 logs
 *.log
