@@ -11,11 +11,8 @@
 # テンプレート刷新の作業メモ（配布物には含めない）
 history/
 
-# 個人環境の音源（無料配布サイト由来＝再配布ライセンス不明のため公開しない）
-meta/personal-env/sounds/
-
-# グローバル設定の完全バックアップ（個人環境・絶対パス含むため公開しない）
-meta/personal-env/global-settings.json.backup
+# 個人環境設定（音源・グローバルsettings等）。OSS公開対象外＝ローカルのみ保持
+meta/personal-env/
 
 # Logs
 logs

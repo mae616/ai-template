@@ -121,3 +121,32 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
 ### Alternatives
 - `history/YYYY-MM-DD.md` と日付ごとにファイル分割する案 → ファイルが増えて一覧性が落ちる → 単一ファイルに積む方式を採用
 - session-context.md に履歴も兼ねさせる案 → 上書き運用と衝突。役割を分けるため別ファイルにした
+
+---
+
+## ADR-005: 個人環境とOSS公開ハーネスの分離
+
+- **日付**: 2026-06-05
+- **対象**: `~/.claude/settings.json`（グローバル）, `meta/personal-env/`, `.gitignore`
+
+### Context
+- ai-template は**フィードバックOSS**として公開している → 公開対象は「プロンプトハーネスとして再利用できるもの」に限るべき
+- グローバル設定を一旦全削除したが、プラグイン/statusLine/音声入力/音などは**完全に個人・アプリ全体の設定**で、ハーネスの一部ではない
+- Claude Code の設定は階層マージされ、グローバルとプロジェクトの hooks は両方発火する
+
+### Decision
+- **設定を3層に分離**:
+  - 個人・アプリ全体（statusLine / plugins / voice / 音フック / 音源）→ `~/.claude/`（グローバル。公開しない）
+  - 開発ワークフロー（permissions / 開発系 hooks / skills / rules / CLAUDE.md）→ ai-template の配布物（公開する）
+  - 個人環境の記録・バックアップ → `meta/personal-env/`（gitignore＝ローカルのみ）
+- `meta/personal-env/` はリポジトリ追跡から外し、ローカル保持に切り替え
+- 公開する開発ドキュメント（`meta/rdd.ai-template.md` 等）からは**個人的文脈（契約・料金・属性）をスクラブ**し汎用表現にする
+
+### Consequences
+- (+) 公開リポジトリが「再利用可能なプロンプトハーネス」として純化される
+- (+) 個人設定はグローバルで一元管理でき、プロジェクト hooks と両立する
+- (−) `meta/personal-env/README.md` は過去コミットの履歴に残る（中身は非機密のため履歴書き換えはしない）
+
+### Alternatives
+- 個人設定もプロジェクトに置く案 → プラグイン等はアプリ全体設定でプロジェクト固有ではない。グローバルが適切 → 不採用
+- 履歴を force push で書き換えて完全削除する案 → 非機密かつ破壊リスクが高い → 非推奨で見送り
