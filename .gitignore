@@ -14,6 +14,9 @@ history/
 # 個人環境の音源（無料配布サイト由来＝再配布ライセンス不明のため公開しない）
 meta/personal-env/sounds/
 
+# グローバル設定の完全バックアップ（個人環境・絶対パス含むため公開しない）
+meta/personal-env/global-settings.json.backup
+
 # Logs
 logs
 *.log
