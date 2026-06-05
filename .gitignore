@@ -11,6 +11,9 @@
 # テンプレート刷新の作業メモ（配布物には含めない）
 history/
 
+# 個人環境の音源（無料配布サイト由来＝再配布ライセンス不明のため公開しない）
+meta/personal-env/sounds/
+
 # Logs
 logs
 *.log
