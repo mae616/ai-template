@@ -67,3 +67,57 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
 ### Alternatives
 - 思想を熱量そのまま長文で入れる案 → CLAUDE.md が肥大化し技術ルールが埋もれる → 簡潔版を採用、詳細は meta/ に委譲
 - グローバル `~/.claude/CLAUDE.md` も同時更新する案 → グローバルは削除予定のため本体のみ更新
+
+---
+
+## ADR-003: 危険変更チェックリストを code-quality.md（ルール）へ
+
+- **日付**: 2026-06-05
+- **対象**: `.claude/rules/code-quality.md`
+- **出典**: `history/log.md` L229-253（`[ ]`）, `meta/rdd.ai-template.md` L160-168
+
+### Context
+- 一人開発では認証・決済・削除など高リスク変更の見落としが事故に直結する
+- 置き場所が「security-expert スキル or code-quality.md」で未確定だった
+
+### Decision
+- **`code-quality.md`（ルール）に追加**。常時自動適用で全変更に効かせる
+- セキュリティ項目の詳細判断は `security-expert` スキルに委譲し、本リストは「変更時の関所」と役割分担を明記
+
+### Consequences
+- (+) DBマイグレーション・削除・通知など、security-expert の発火条件から漏れる運用リスクも取りこぼさない
+- (+) 「コンテキスト依存ルール→仕組みで強制」の思想に沿う（常時適用＝取りこぼし減）
+- (−) 本来の強制（hook/CI）ではなくテキストルールなので、AIが読み飛ばす余地は残る（CI/CD整備で将来補強）
+
+### Alternatives
+- security-expert スキルに入れる案 → スキルはセキュリティ文脈検知時のみ発火。運用リスク項目が漏れる → 不採用
+- hook/CI で強制する案 → 最も確実だが今回スコープ外（CI/CD は後フェーズ）。将来補強として保留
+
+---
+
+## ADR-004: 開発日誌（journal.md）の運用開始と session スキル連携
+
+- **日付**: 2026-06-05
+- **対象**: `history/journal.md`（新規）, `session-start`/`session-end` スキル
+- **出典**: `history/log.md` L341-353（`[ ]`）
+
+### Context
+- `session-context.md` はセッションごとに**上書き**される＝過去の経緯が消える
+- 一人開発はコンテキストスイッチが多く「昨日何やったか」の想起コストが高い
+- 積み上がる引き継ぎログが欲しい
+
+### Decision
+- `history/journal.md` を新規作成。`## YYYY-MM-DD` を上に積む引き継ぎ日誌
+- `session-start` に「0. 前回からの引き継ぎ確認」（journal 最新エントリを読む）を追加
+- `session-end` に「5.5 開発日誌へ追記」（上書きせず先頭に積む）を追加
+- 書く=やったこと/引き継ぎ/判断メモ、書かない=反省・感情ログ（コスト高）
+- 配置は `history/`（gitignore済み）→ クライアント情報も安全に書ける／公開リポジトリにも載らない
+
+### Consequences
+- (+) セッション冒頭で前回コンテキストが復元でき、想起コストが下がる
+- (+) session-context.md（上書き・再開用）と journal.md（積み上げ・履歴）の役割が分離
+- (−) journal.md は配布されない（history/ は apply_template 対象外）。各プロジェクトで初回は空から始まる（session-start がスキップ対応）
+
+### Alternatives
+- `history/YYYY-MM-DD.md` と日付ごとにファイル分割する案 → ファイルが増えて一覧性が落ちる → 単一ファイルに積む方式を採用
+- session-context.md に履歴も兼ねさせる案 → 上書き運用と衝突。役割を分けるため別ファイルにした
