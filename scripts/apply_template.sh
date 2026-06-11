@@ -68,7 +68,8 @@ need rsync
 need date
 
 # 反映対象（AIテンプレとして必要最小）
-INCLUDES=(".mise.toml" "doc/index.md" "doc/input/" "doc/generated/")
+# doc/output/ は送り状（to-template.md）の雛形を新規プロジェクトへ配布するために含める
+INCLUDES=(".mise.toml" "doc/index.md" "doc/input/" "doc/generated/" "doc/output/")
 [ "$NO_SKILLS" = "false" ] && INCLUDES+=("CLAUDE.md" ".claude/")
 
 # バックアップ

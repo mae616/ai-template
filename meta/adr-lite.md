@@ -150,3 +150,35 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
 ### Alternatives
 - 個人設定もプロジェクトに置く案 → プラグイン等はアプリ全体設定でプロジェクト固有ではない。グローバルが適切 → 不採用
 - 履歴を force push で書き換えて完全削除する案 → 非機密かつ破壊リスクが高い → 非推奨で見送り
+
+---
+
+## ADR-006: 送り状モデルの仕組み化と mae616-web 7項目の取り込み
+
+- **日付**: 2026-06-11
+- **対象**: `.claude/skills/{template-feedback,judgment-harness,project-design-language,image-prep}/`（新規）, `.claude/rules/dev-practices.md`, `CLAUDE.md`, `.claude/skills/{ui-designer,animation-principles}/SKILL.md`, `scripts/apply_template.sh`, `doc/output/to-template.md`（雛形）
+- **出典**: mae616-web `doc/output/to-template.md`（送り状7項目・全て未取込だったもの）
+
+### Context
+- プロジェクトで得た汎用学びを ai-template へ還流する仕組みがなく、手作業・口伝だった
+- mae616-web 側で「送り状モデル」（outbox／プロジェクトは template を直接編集しない＝競合回避／取り込みは template 側で直列処理）を設計済み。7項目が未取込で溜まっていた
+
+### Decision
+- **送り状モデルを仕組み化**: `template-feedback` skill（取り込み手順・/template-feedback で起動）＋ 送り状雛形 `doc/output/to-template.md` を配布物へ（`apply_template.sh` の INCLUDES に `doc/output/` を追加）＋ dev-practices「可視性の確保」に送り状習慣を1行
+- **7項目を取り込み**。送り状の反映先候補から変えた点と理由:
+  - 項目5（命名衝突）: `.card`→`.namecard` 等の固有例は載せず汎用表現のみ
+  - 項目6（静止の焦点アンカー）: usability-psychologist ではなく **animation-principles のみ**に1行（モーション設計時に発火する場所が適切。二重記載回避）
+  - 項目7（画像加工）: dev-practices へのツールメモは追加せず **`image-prep` skill に集約**（rules 肥大化回避）
+  - 項目1: `judgment-harness` は user-invocable: true（立ち上げ時に明示起動できる）。穴埋め雛形 `project-design-language` は false
+- **取り込み中のユーザーフィードバックをルール化**（このセッションの教訓）:
+  - 「テンプレに書くのは**判断軸・優先順位・困ったとき何を疑うか・固有の手順/思想のみ**。AIが既に持つ一般知識・特定プロジェクトの具体例は書かない」→ `template-feedback` の反映工程に関所として明記
+  - 「**思考の見える化（モデル非依存）**」→ CLAUDE.md 役割＋ dev-practices 基本スタンスへ追加。背景: モデルによっては判断過程を見せず結果だけ出し、Human in the Loop（判断基準は人間が握る）が機能しなくなるため、行動レベルで明文化した
+
+### Consequences
+- (+) 複数プロジェクト並行でも template が競合しない還流ループが回る（学びが揮発しない）
+- (+) 判断軸ハーネス（レイヤー構造＋発酵ループ）で新規プロジェクトの立ち上げ方が型化される
+- (−) 送り状の記入・取り込みの往復の手間が増える（「速さより意図」の方針で許容）
+
+### Alternatives
+- 各プロジェクトが ai-template を直接編集する案 → 並行開発で競合し判断も分散する → 不採用（送り状で直列化）
+- 取り込みを hook/CI で自動化する案 → 「汎用化できるか」の判断は人間との対話が必要 → 手動の直列処理を採用

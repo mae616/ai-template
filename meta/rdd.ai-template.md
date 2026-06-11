@@ -87,6 +87,7 @@ paginate: true
 - **自律より「聞いて意図を反映」**が基本
   - 疑問の先出し・確認はOK
   - 確認なしの自律着手はNG
+- **思考の見える化（モデル非依存）**: 作業の前に「何を考え、なぜそうするか」を言葉にしてから動く。判断基準はAIに委ねず人間が握る（どのモデルに変わっても維持する）
 - スコープ・優先度の判断（今日何をやる/やらないか）は**毎回人間が決める**
 
 ## 自律度の使い分け
@@ -118,11 +119,17 @@ paginate: true
 
 # 🏗️ 機能・構成
 
-## 現状スナップショット（2026-06-01時点）
-- スキル: 41個（`.claude/skills/`）
+## 現状スナップショット（2026-06-11時点）
+- スキル: 45個（`.claude/skills/`）
 - フック: 4個（check-release-notes / post-edit-notify / validate-mermaid / warn-destructive-bash）
 - ルール: 4個（code-quality / dev-practices / git / tool-usage）
 - スクリプト: apply_template.sh / apply_global.sh
+- 送り状雛形: `doc/output/to-template.md`（配布対象）
+
+## フィードバックループ（送り状モデル）
+- 各プロジェクトは汎用学びを自リポの送り状 `doc/output/to-template.md` に記録するだけ（ai-template を直接編集しない＝競合回避）
+- 取り込みは ai-template 側で `/template-feedback` により直列処理し、反映済み項目は送り状の状態を `取込済` に倒す（二重取り込み防止台帳）
+- テンプレに書くのは**判断軸・優先順位・困ったとき何を疑うか・固有の手順/思想のみ**（AIが既に持つ一般知識・固有例は書かない）
 
 ## ファイル・ディレクトリ命名方針
 - 名前を見ただけで**役割・機能がわかる**ことを最優先
