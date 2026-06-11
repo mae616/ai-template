@@ -8,6 +8,12 @@
 .claude/session-context.md
 .claude/team-board.md
 
+# テンプレート刷新の作業メモ（配布物には含めない）
+history/
+
+# 個人環境設定（音源・グローバルsettings等）。OSS公開対象外＝ローカルのみ保持
+meta/personal-env/
+
 # Logs
 logs
 *.log

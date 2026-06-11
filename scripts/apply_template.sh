@@ -68,7 +68,8 @@ need rsync
 need date
 
 # 反映対象（AIテンプレとして必要最小）
-INCLUDES=(".mise.toml" "doc/index.md" "doc/input/" "doc/generated/")
+# doc/output/ は送り状（to-template.md）の雛形を新規プロジェクトへ配布するために含める
+INCLUDES=(".mise.toml" "doc/index.md" "doc/input/" "doc/generated/" "doc/output/")
 [ "$NO_SKILLS" = "false" ] && INCLUDES+=("CLAUDE.md" ".claude/")
 
 # バックアップ
@@ -115,6 +116,12 @@ for p in "${INCLUDES[@]}"; do
   # rdd.md はプロジェクト固有。force/sync でも既存があれば守る（--overwrite-rdd で解除）
   if [ "$p" = "doc/input/" ] && [ "$OVERWRITE_RDD" != "true" ] && [ -f "$TARGET_DIR/doc/input/rdd.md" ]; then
     EXTRA_FLAGS+=("--exclude" "rdd.md")
+  fi
+
+  # 送り状はプロジェクト側の蓄積データ（未取込の学び）。force/sync でも既存があれば守る
+  # ※ プロジェクト側の蓄積ファイルを配布対象に増やす場合は、ここに同様の保護を足すこと
+  if [ "$p" = "doc/output/" ] && [ -f "$TARGET_DIR/doc/output/to-template.md" ]; then
+    EXTRA_FLAGS+=("--exclude" "to-template.md")
   fi
 
   # 出力先ディレクトリを事前作成（dry-run時は不要）
