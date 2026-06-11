@@ -118,6 +118,12 @@ for p in "${INCLUDES[@]}"; do
     EXTRA_FLAGS+=("--exclude" "rdd.md")
   fi
 
+  # 送り状はプロジェクト側の蓄積データ（未取込の学び）。force/sync でも既存があれば守る
+  # ※ プロジェクト側の蓄積ファイルを配布対象に増やす場合は、ここに同様の保護を足すこと
+  if [ "$p" = "doc/output/" ] && [ -f "$TARGET_DIR/doc/output/to-template.md" ]; then
+    EXTRA_FLAGS+=("--exclude" "to-template.md")
+  fi
+
   # 出力先ディレクトリを事前作成（dry-run時は不要）
   if [ "$DRY_RUN" = "false" ]; then
     if [[ "$p" == */ ]]; then
