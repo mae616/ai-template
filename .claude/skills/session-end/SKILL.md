@@ -154,6 +154,48 @@ mkdir -p history
 
 ---
 
+### 5.6 自律ループの中断状態を拾う（Loop Engineering 連携）
+
+> 設計根拠: `meta/adr-lite.md` の **ADR-012**
+>
+> `/auto-task` `/auto-bug` 等の自律ループスキルは実行中に `history/loop-state.md` へ状態を逐次書き出している。
+> セッション終了時にこのファイルを読み、**未完了ループがあれば journal に「中断・再開ポイント」を明示**して、次セッションで `session-start` が拾えるようにする。
+
+#### 手順
+
+1. **状態ファイルの存在確認**
+   ```bash
+   [ -f history/loop-state.md ] && cat history/loop-state.md
+   ```
+
+2. **最新エントリの `status` を判定**
+   - `status: completed` → 正常終了。次の手順はスキップして良い。完了済みエントリはアーカイブ（ファイル末尾に "completed" セクションへ移動）または削除して構わない
+   - `status: in_progress` → **中断**。下記の引き継ぎ追記を行う
+   - `status: blocked_by_bug` / `blocked_by_user_confirm` → ブロック中。原因を journal へ転記
+
+3. **journal.md の「翌日への引き継ぎ」に明示**
+
+   今日のエントリの「翌日への引き継ぎ」セクションに、次の形で追加:
+
+   ```markdown
+   ### 翌日への引き継ぎ
+   - ...（既存の引き継ぎ）
+   - 🔄 **中断中の自律ループ**: `/auto-task #<issue>` （branch: `<branch>`）
+     - 最終アクション: `<last_action>`
+     - 完了済みステップ: `task-run`, `local-checks` まで
+     - 残ステップ: `basic-review` 以降
+     - **再開**: 同じ Issue 番号で `/auto-task #<issue>` を再起動するとループが続きから判定して再開
+   ```
+
+4. **状態ファイルは消さない**: 次セッションで `session-start` も拾うため、`status: completed` 以外は保持
+
+#### 注意
+
+- usage 切れ・API エラーで強制終了した場合、最終ステップが flush されていない可能性がある → `history/loop-state.md` の `last_action` と `git log` を突き合わせて実態を判断する
+- 課金前確認プロンプトで止まった場合は `status: blocked_by_user_confirm` を期待。これも引き継ぎへ記録
+
+---
+
 ### 6. 終了確認
 
 ```markdown

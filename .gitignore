@@ -11,6 +11,12 @@
 # テンプレート刷新の作業メモ（配布物には含めない）
 history/
 
+# /build-context-site の生成物（毎回再生成される一時サイト）
+doc/generated/context-site/
+
+# /auto-task /auto-bug の自律ループレポート（reviewable-html-workbench 出力）
+doc/generated/loop-reports/
+
 # 個人環境設定（音源・グローバルsettings等）。OSS公開対象外＝ローカルのみ保持
 meta/personal-env/
 
