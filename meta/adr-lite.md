@@ -205,3 +205,298 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
 
 ### Alternatives
 - モデルごとの注意点リストを維持する案 → モデル更新のたびに陳腐化し、リスト自体が信頼できなくなる → 不採用
+
+---
+
+## ADR-008: ループエンジニアリングの全体ビジョン（5層モデル）
+
+- **日付**: 2026-06-21
+- **対象**: ai-template 全体方針（実装は ADR-009 以降で個別化）
+- **出典**: `history/journal.md` 2026-06-21 エントリ（壁打ち全体）
+
+### Context
+- 2026年6月、Loop Engineering（Addy Osmani / Boris Cherny / Peter Steinberger 発）が AI コーディング界の新トレンドに浮上
+- 進化系譜: Prompt（〜2024）→ Context（2025）→ Harness（2026初頭）→ **Loop（2026.6〜）**
+- このリポは Context 層（CLAUDE.md/rdd.md 等）と Harness 層（44スキル+rules+hooks）は厚いが、**Loop 層が薄い**
+- 6/15 に `self-driving-loop` スキルを「重い」と削除した経緯がある → 同じ轍を避ける必要
+- ユーザー直観: 「1スラッシュコマンドでユースケース実行」型（=Inner Loop）に振りたい。Outer Loop（cron的）は最小限
+
+### Decision
+ループエンジニアリング取り込みを **5層モデル**で整理し、今回スコープを **L1部分+L2+L4+L5** に絞る:
+
+| L | 役割 | 今回スコープ |
+|---|---|---|
+| L1 | 思考の場（要件・設計の HTML 化サイト） | ✅ 既存全 doc を HTML 化（要件・デザイン・ADR含む全コンテキスト閲覧） |
+| L2 | 自律実装ループ（task/bug の親ループ） | ✅ `/auto-task` `/auto-bug` 新設（ADR-009） |
+| L3 | 1ユースケース処理（人間フィードバック後の修正等） | ❌ 既存スキルで代替、今回は外す |
+| L4 | 観測・記録（PR/思考プロセスの HTML 残し） | ✅ `reviewable-html-workbench` プラグイン統合（後半 ADR） |
+| L5 | ガードレール（usage 切れ・課金前停止） | ✅ 自動停止 + 未完了記録（後半 ADR） |
+
+**設計原則**:
+- **Inner Loop 優先**: 1コマンドで完結する親ループを設計。Outer Loop（時間駆動 cron）は採用しない
+- **既存スキルは触らない**: 親ループは既存スキル（task-run / bug-fix / basic-review / deep-review 等）を**連鎖呼び出し**するだけ。Harness 層と Loop 層を分離
+- **モデル非依存（ADR-007 継承）**: 親ループは手続きで賢さを補う。特定モデル前提にしない
+
+### Consequences
+- (+) 既存 Harness 層（44スキル）を再利用できる。実装コスト軽め
+- (+) Inner Loop なので「重くて使われない」失敗（6/15 self-driving-loop 削除の教訓）を避けられる
+- (+) ループエンジニアリングのトレンドを取り込みつつ、このリポの「人間 on the Loop」思想と整合
+- (−) Outer Loop（夜中走らせ）は今回入らない。後で必要なら追加
+- (−) L3 を外したため、人間フィードバック後の修正は既存スキル（pr-respond / task-run 等）を手動で呼ぶ運用が続く
+
+### Alternatives
+- **全層一気に実装**: 数週間〜数ヶ月仕事。6/15 の失敗（重さで死蔵）を繰り返すリスク → 段階導入を採用
+- **Outer Loop 採用**（`/loop 30m /auto-task` 等）: 派手だが運用が重い・トークン消費激しい・誤発火怖い。このリポの性格に合わない → Inner Loop に絞る
+- **スキル復活（旧 self-driving-loop 再導入）**: 6/15 削除の教訓を尊重。スキルでなく**親コマンド**として実装 → スキル復活は不採用
+
+---
+
+## ADR-009: 自律実装ループ `/auto-task` `/auto-bug`（L2）
+
+- **日付**: 2026-06-21
+- **対象**: `.claude/commands/auto-task.md`（新規）, `.claude/commands/auto-bug.md`（新規）
+- **出典**: ADR-008 全体ビジョン
+
+### Context
+- L2「自律実装ループ」の具体実装
+- 既存スキル群が **Inner Loop の素材**として揃っている: `task-run` / `bug-investigate` / `bug-propose` / `bug-fix` / `basic-review` / `deep-review` / `pr-respond` 等
+- 必要なのは**これらを連鎖する親コマンド**
+- ユーザー要件: task 実行中に bug 検知したら自律的に bug 処理へフォールバック
+
+### Decision
+**2つの親コマンドを新設**:
+
+**`/auto-task <issue#>`** — task 自律処理:
+```
+1. task-run（実装）
+2. ローカル lint + typecheck
+3. テスト実行
+   └─ 失敗/不整合検知 → 内部で bug-* スキル連鎖発動
+        ├─ bug-investigate
+        ├─ bug-propose
+        └─ bug-fix
+4. basic-review 反復（致命指摘0まで）
+5. deep-review 反復（全指摘0まで）
+6. PR 作成（gh CLI）
+7. ラベル付与 `ai-merged-unreviewed`（ADR-010）
+8. task → sprint へ自律マージ（ADR-010）
+```
+
+**`/auto-bug <issue#>`** — bug 単独処理:
+```
+1. bug-investigate
+2. bug-propose
+3. bug-fix
+4. テスト確認
+5. /auto-task と同じ後半（review→PR→label→merge）
+```
+
+**設計のキモ**:
+- `/auto-task` が `/auto-bug` を**コマンドとして呼ぶ**のではなく、内部で**bug-* スキルを連鎖呼び出し**する（同一セッション内での処理）
+- `/auto-bug` は人間が単独でも呼べる独立コマンドとして両立
+- どちらも既存スキルを**そのまま再利用**。スキル本体は触らない
+- 親コマンドは Markdown プロンプトファイル（`.claude/commands/*.md`）として実装。Boris Cherny / Anthropic 公式と同じ流儀
+
+### Consequences
+- (+) 既存 44 スキルを壊さず、新規ファイル 2 本（`auto-task.md`, `auto-bug.md`）で L2 が完成
+- (+) Inner Loop なので 1 起動で完結。usage 消費が予測しやすい
+- (+) bug 検知時のフォールバックが組み込まれているため、テスト失敗で止まらず自走する
+- (−) `/auto-task` の中身（Markdown プロンプト）の品質がループ全体の品質を決める → 初版から完璧は無理、運用しながら磨く
+- (−) スキル連鎖の途中で詰まった場合、どこで止まったか追跡が必要（→ ADR-012 で session-end が未完了箇所を記録する）
+
+### Alternatives
+- **Stop Hook で再投入する Ralph Loop パターン**: Anthropic 公式の Ralph Wiggum と同じ流儀。完了文字列まで強制反復。L3 まで含むなら有力だが、L2 だけなら親コマンドの方が読みやすい → 採用見送り（将来必要なら追加）
+- **Workflow スクリプト（多エージェント敵対的検証）**: Boris の `/batch` 的なパターン。トークン消費が重い。L2 の標準動作には過剰 → 採用見送り（深い review 等の限定用途で将来）
+- **スキル本体を改造して連鎖呼び出しを内蔵**: スキルの責務が肥大化し再利用性が落ちる → 親コマンド側で連鎖する分離設計を採用
+
+---
+
+## ADR-010: マージ戦略（ラベル運用パターン、AI 自律マージ）
+
+- **日付**: 2026-06-21
+- **対象**: ADR-009 の親コマンド内動作（gh CLI のラベル運用）, `git.md` は無改訂
+
+### Context
+- ADR-009 で AI が自律マージする設計を採用 → どのブランチまで AI 自律で、どこから人間レビューか の線引きが必要
+- 既存 `git.md`: `task/* → sprint/* → main` の3層。sprint→main は CI＋人間レビュー必須
+- ユーザー懸念: 人間目視前に main へ入る事故を防ぎたい
+- 検討した選択肢:
+  - A: 現状ブランチ構造 + ラベル運用
+  - B: `task/* → ai-sprint/* → sprint/* → main` の4層化
+  - C: スプリント PR は人間トリガーのみ
+
+### Decision
+**選択肢 A 採用**: 現状ブランチ構造維持 + ラベル運用
+
+**ルール**:
+- `task/*` → `sprint/*`: **AI 自律マージ可**。PR 作成時に `ai-merged-unreviewed` ラベルを付与
+- `sprint/*` → `main`: **人間レビュー＆マージ必須**（git.md の既存ルールそのまま）
+- ユーザーが PR を目視確認したら、ラベル `ai-merged-unreviewed` を手動で外す（or 将来 `/reviewed` コマンドで自動外し）
+- 未レビュー PR の一覧は `gh pr list --label ai-merged-unreviewed` で取得可能
+
+**git.md は無改訂**: ブランチ構造は変えない。AI 自律マージはあくまで `task/* → sprint/*` の範囲内で、既存ルールと整合する
+
+### Consequences
+- (+) `git.md` 既存ルールを破らずに AI 自律マージが組み込める
+- (+) ラベルだけで「人間未確認」を可視化できる。GitHub 標準機能のみで完結
+- (+) sprint→main は人間がレビューする原則が守られるため、本番影響を伴うマージは必ず人手を経る
+- (+) sprint 単位で「AI が組み立てた中身」を人間が一括レビューできる（task ごとにレビュー強制よりも軽い）
+- (−) `sprint/*` 内に「AI 統合済み・未レビュー」と「人間確認済み」が混在する状態が発生する（ラベルで区別）
+- (−) ラベル付与・剥がしのオペレーションがユーザー側で必要（最初は手動、将来コマンド化）
+
+### Alternatives
+- **B: 4層化（`task/* → ai-sprint/* → sprint/* → main`）**: 物理的に AI/人間ラインが分離して安心感あり。ただし git.md 改訂が必要、ブランチ階層が深くなり promote 作業が増える。運用負荷が上回る → 不採用
+- **C: スプリント PR は人間トリガー**: AI 自律マージの旨みが減る。task→sprint の大量マージ後に sprint→main の差分が膨らみレビュー負荷が逆に増える → 不採用
+- **task→sprint も人間マージ**: AI 自律ループの価値を消す。L2 採用の動機と矛盾 → 不採用
+
+---
+
+## ADR-011: 全コンテキスト HTML サイト（L1 部分採用）
+
+- **日付**: 2026-06-21
+- **対象**: 新規スラッシュコマンド `/build-context-site`（仮）, 既存 `design-html` skill との関係整理
+- **出典**: ADR-008、ユーザー要件「ここ見れば人間も全コンテキスト分かるよ」的なローカル HTML サイト
+
+### Context
+- L1（思考の場）のうち、**HTML 設計書サイト**だけを部分採用する
+- ユーザー要件: 既存 design ドキュメントが Markdown 中心で、HTML 化されていない → **ローカルで閲覧できる HTML サイト**として全コンテキストを横断できる場が欲しい
+- 既存資産:
+  - `design-html` skill: Markdown/JSON から HTML を生成
+  - `design-mock` / `design-ssot` / `design-ui` skill: デザイン段階の HTML 生成
+  - `reviewable-html-workbench` プラグイン（ADR-013 で統合）: HTML レンダリング機能あり
+- 「全コンテキスト」の範囲: `doc/input/*` + `doc/generated/*` + `meta/adr-lite.md` + 関連 `history/*`（gitignore 配下なのでローカルのみ）
+
+### Decision
+**全コンテキスト HTML サイトを生成する親コマンドを新設**:
+
+**`/build-context-site`**（仮称）の動作:
+1. 対象ドキュメントを収集:
+   - `doc/input/*.md`（要件定義、デザイン SSOT 等）
+   - `doc/generated/*`（マニュアル、設計書）
+   - `meta/adr-lite.md`（設計決定ログ）
+   - `history/journal.md` の最新N日分（ローカル閲覧用、配布物には含まない）
+2. **MCP の drawio / mermaid で図を埋め込む**（要件・設計の構造可視化）
+3. `reviewable-html-workbench` の `render` を使って HTML バンドル生成
+4. ローカルプレビューサーバを起動 → ブラウザで `/index.html` を開く
+5. ナビゲーションは「ファイル一覧 + 横断検索」で全文を渡り歩ける形
+
+**生成物の置き場**: `doc/generated/context-site/`（配布対象外）
+
+**既存スキルとの関係**:
+- `design-html` / `design-mock` / `design-ui` / `design-ssot` は**デザイン領域の HTML 生成**を担当（既存責務維持）
+- `/build-context-site` は**横断的にサイト化する親コマンド**として上位レイヤで動く。スキルは触らない
+
+### Consequences
+- (+) 人間が「このプロジェクトの全前提」をブラウザ1つで把握できる → 引き継ぎ・確認コスト激減
+- (+) AI も同じサイトを参照対象にできる（Context 層の補強）
+- (+) drawio/mermaid 図を埋め込むことで Markdown だけより構造理解が早い
+- (+) `reviewable-html-workbench` のレンダリング基盤を再利用 → 実装軽量
+- (−) サイト生成のたびに各ドキュメントの最新状態を再収集する必要（手動更新 or watch モードは後で検討）
+- (−) `history/` は gitignore 配下のためチーム共有不可。ローカル閲覧専用と割り切る
+
+### Alternatives
+- **既存 `design-html` skill を拡張して全コンテキスト化**: スキル責務が「デザイン」から「全ドキュメント」に肥大化 → スキル分離原則違反。新規親コマンドを採用
+- **静的サイトジェネレータ（Docusaurus 等）導入**: 学習コスト・依存追加が重い。既存 `reviewable-html-workbench` で足りる範囲 → 採用見送り
+- **doc/input を直接 HTML で書く**: Markdown 編集の手軽さを失う。Markdown→HTML 変換を採用
+
+---
+
+## ADR-012: ガードレール（usage 自動停止 + 未完了記録）
+
+- **日付**: 2026-06-21
+- **対象**: `session-end` skill 拡張, 親コマンド（ADR-009）内の課金前確認プロンプト
+- **出典**: ADR-008 L5、ユーザー要件「クレジット切れたら止まる」「できてないとこ判断して session-end に残す」
+
+### Context
+- 自律ループ（ADR-009）が暴走すると課金事故になる → ガードレールが必要
+- ただしユーザー要件は**最小限**:
+  - usage 切れの**自動検知＆復活再開は不要**（Claude が API エラーで勝手に止まるのに任せる）
+  - 課金発生ポイント（外部 API 呼び出し等）は**事前に止める**
+  - **未完了箇所を session-end に記録**して、次セッションで再開できるように
+- L5 を「過剰に作り込まない」のが方針（重さで死蔵を避ける ADR-008 の精神を継承）
+
+### Decision
+**ガードレールを3点に絞る**:
+
+1. **usage 切れは自動停止に任せる**
+   - Anthropic API のレート/クレジット切れは Claude セッションが自然停止する → 明示的な検知ロジックは作らない
+   - 親コマンド側で「停止検知」のための polling 等は不要
+
+2. **課金発生ポイントは確認プロンプトで止める**
+   - 親コマンド内（ADR-009 の `/auto-task` / `/auto-bug`）で以下の操作直前に **人間確認を挟む**:
+     - 新規パッケージインストール（`npm install` 等で従量課金 SaaS が絡む場合）
+     - リモートデプロイ（本番影響）
+     - 外部 API 呼び出し（OpenAI/Anthropic 以外の従量課金サービス）
+     - GitHub Actions の有料ランナー起動（今回は CI 保留のため発火想定なし）
+   - ローカルツール（gh CLI / git / lint / typecheck / test）は課金ゼロなので**確認不要**
+
+3. **未完了箇所を session-end が記録**
+   - `session-end` skill を拡張: セッション終了時に「自律ループが途中で止まったか」を判定
+   - 判定ロジック: `/auto-task` `/auto-bug` の進行状態（実装中／レビュー中／PR 作成中／マージ前 等）を**状態ファイル**（`history/loop-state.md`、gitignore）に逐次書く設計
+   - `session-end` が状態ファイルを読んで「未完了の場合は journal に「中断・再開ポイント」を明示」する
+   - 次セッションで `session-start` がこれを拾って続きから再開できる
+
+**状態ファイル**: `history/loop-state.md`
+- 親コマンド開始時に新規作成
+- 各ステップ完了時に追記
+- 完了時にクリアまたはアーカイブ
+
+### Consequences
+- (+) 過剰実装を避けつつ、最低限の安全網が機能する
+- (+) usage 切れの「復活検知＆再開」を作らないことで実装コストが激減（ユーザー方針）
+- (+) 未完了箇所が journal に残るため、次セッションでコンテキストロスなく再開できる
+- (+) 課金前停止は親コマンドの prompt に書くだけで実現できる（hook 不要）
+- (−) usage 切れの瞬間に状態ファイルが書き終わってない可能性（最終状態を毎ステップ flush することで緩和）
+- (−) 「課金発生ポイント」の網羅性は親コマンド作成者の判断に依存（運用しながらリスト拡充）
+
+### Alternatives
+- **usage 監視を polling で実装**: API コール費用が増える＋運用が重い。ユーザー却下 → 不採用
+- **すべての破壊的操作で確認プロンプト**: 確認の嵐になり自律ループの旨みが消える → 課金ポイントに絞る
+- **状態ファイルを JSON にする**: 機械可読性は上がるが、人間が journal と並べて読む時 Markdown が楽 → Markdown 採用
+
+---
+
+## ADR-013: `reviewable-html-workbench` 統合（L4 観測・記録）
+
+- **日付**: 2026-06-21
+- **対象**: 新規依存（外部プラグイン）, `/auto-task` `/auto-bug` の出力フェーズ拡張
+- **出典**: ADR-008 L4、ユーザー指定リポ `u-ichi/reviewable-html-workbench`
+
+### Context
+- L4「観測・記録」: AI の PR・思考プロセス・成果物を **HTML で残し、人間が後追いレビュー可能**にする
+- `reviewable-html-workbench`（ユーザー自作の Claude Code プラグイン）が**まさにこの用途**: HTML バンドル生成 + ブラウザ上でインライン コメント + AI がコメントを読み取り更新
+- 機能: skills（`visual-html-renderer`, `reviewable-design-doc`, `plan-preview`）+ CLI（`render`, `ingest-review`, `watch-comments` 等）
+- インストール: `claude plugin marketplace add u-ichi/reviewable-html-workbench` → `claude plugin install reviewable-html-workbench`
+
+### Decision
+**`reviewable-html-workbench` を依存として組み込み、2用途で活用**:
+
+**用途1: 設計段階のレビュー**（L1 と連動）
+- `/build-context-site`（ADR-011）が生成する HTML を `reviewable-html-workbench` 経由で出力
+- 人間がブラウザでコメント → AI が `ingest-review` で読み取り → 設計を更新
+
+**用途2: 自律ループの成果残し**（L4 本体）
+- `/auto-task` / `/auto-bug`（ADR-009）の最終ステップで、以下を HTML バンドル化:
+  - **PR の中身**（diff、コミットメッセージ、関連 issue リンク）
+  - **思考プロセスログ**（task-run / bug-investigate / レビューループの判断履歴）
+  - **テスト結果・review 指摘の収束履歴**
+- 出力先: `doc/generated/loop-reports/<timestamp>-<task-id>/`
+- ローカルプレビューサーバで閲覧可能 → 人間が後から流し読み＆コメント可能
+- コメントが付いたら、次の `/auto-task` 起動時に AI が拾って改善ループへフィードバック
+
+**統合の最小範囲**:
+- プラグインは**依存として install するだけ**。本体は触らない
+- ai-template 側では `/auto-task` の最終ステップに「`reviewable-html-workbench` の `render` 呼び出し」を追加するだけで完了
+
+### Consequences
+- (+) AI の作業履歴が**ブラウザで人間レビュー可能な形**で残る → blind merge 防止の Vibe Coding ループ（dev-practices.md）と完全整合
+- (+) `reviewable-html-workbench` がユーザー自作で**よく分かっている依存**（外部リスクが小さい）
+- (+) コメント → AI 取り込みの双方向フィードバックが動く → self-improving メモリ的に効く
+- (+) L1（設計段階）と L4（実装後）の両方で同じ仕組みを再利用できる
+- (−) 外部プラグイン依存が1つ増える（更新の追従が必要）
+- (−) `reviewable-html-workbench` 本体に問題があった場合、ai-template 側で完全には吸収できない（軽い結合に留めることで緩和）
+
+### Alternatives
+- **HTML 出力を自前実装**: 車輪の再発明。`reviewable-html-workbench` がインライン コメント機能を含んで揃っている → 自前不採用
+- **GitHub PR ページのみで完結**: PR コメントだけだと思考プロセス・テスト履歴等を整理して残しにくい。HTML バンドルの方が情報密度が高い → PR + HTML の併用採用
+- **Notion/Confluence 等の外部サービス**: クラウド依存が増える、課金リスク、ユーザー方針（ローカル閲覧優先）と矛盾 → 不採用
