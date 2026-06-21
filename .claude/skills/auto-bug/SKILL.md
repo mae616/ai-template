@@ -112,13 +112,16 @@ npm test
 
 ### 7. PR 作成
 
-- `gh pr create` で `feature_fix/* → sprint/*` の PR を作成
+- `gh pr create` で **適切なブランチ → sprint/*** の PR を作成
+  - スプリント統合後に見つかった bug → `feature_fix/* → sprint/*`
+  - task 実装中に派生した bug → `task/* → sprint/*`
+  - 判断基準は `.claude/rules/git.md` 参照
 - 本文には:
   - Closes #<issue-number>
   - 採用した修正案（複数試した場合は経緯）
   - 試した順序と効果の有無
   - ローカル検証結果
-- target ブランチは適切な sprint ブランチ（`.claude/rules/git.md` 参照）
+- target ブランチは適切な sprint ブランチ
 
 ---
 

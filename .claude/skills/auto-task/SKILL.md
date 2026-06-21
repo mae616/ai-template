@@ -103,7 +103,7 @@ npm test         # or pytest など
 
 1. `basic-review` 実行
 2. **致命指摘**（typo・命名・フォーマット等の表面的ミスのうち、修正必須のもの）がある:
-   - 指摘を反映 → コミット → ステップ1（basic-review 再実行）
+   - 指摘を反映 → コミット → 1. に戻る
 3. 致命指摘0 → 次へ
 4. **最大反復回数**: 5 周。超えたら中断してユーザー確認
 
@@ -165,7 +165,7 @@ gh pr merge <PR-NUMBER> --squash --delete-branch
 
 - 新規パッケージインストール（特に従量課金 SaaS を絡める場合）
 - リモートデプロイ
-- OpenAI/Anthropic 以外の外部 API 課金
+- 任意の従量課金 SaaS への新規呼び出し（Claude API 以外の外部 API）
 - GitHub Actions の有料ランナー起動
 
 **確認なしで OK**: gh CLI / git / lint / typecheck / test / ローカルツール全般
