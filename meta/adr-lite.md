@@ -499,4 +499,28 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
 ### Alternatives
 - **HTML 出力を自前実装**: 車輪の再発明。`reviewable-html-workbench` がインライン コメント機能を含んで揃っている → 自前不採用
 - **GitHub PR ページのみで完結**: PR コメントだけだと思考プロセス・テスト履歴等を整理して残しにくい。HTML バンドルの方が情報密度が高い → PR + HTML の併用採用
+
+---
+
+## ADR-014: ループ運用向け権限の事前緩和（settings.json への直接反映）
+
+### Context
+- miku2026 で auto-task / auto-bug を回した際、`gh issue create/edit/comment/close/reopen` `gh pr create/review` `gh project item-add` `gh api *` `git push *` が `ask` に入っていて確認プロンプトで止まる事象が頻発
+- 送り状（miku2026）からは `.claude/settings.local.json.example` テンプレ + rules（新規 `loop-engineering.md`）追記が候補として上がっていた
+- ai-template は「ループ運用前提のテンプレート」（`auto-task` / `auto-bug` を親スキルとして既に同梱）
+
+### Decision
+- `settings.local.json.example` は新設せず、**配布される `.claude/settings.json` 本体の `allow` に直接移動**する
+- 移動: `git push *` / `gh issue create|edit|comment|close|reopen *` / `gh pr create|review *` / `gh project item-add *` / `gh api *`
+- 維持される `ask`（破壊的・統合系）: `gh pr merge` / `gh pr close` / `rm *` / `git branch -D` / `git reset` / `git clean` / `npm install` / `brew` / `docker`
+- 専用 rules（`loop-engineering.md`）は作らない。判断軸は ADR と settings.json のコメントレスな構造で読み取れる
+
+### Consequences
+- (+) 配布された全プロジェクトでループ運用が摩擦なく回る（個人で `.local.json` を作らなくて済む）
+- (+) `pr merge` / `branch -D` / `reset` / `clean` / `rm` 等の破壊的操作は引き続き `ask` で関所を維持
+- (−) `git push *` を allow に上げているため、力のある操作が事前承認となる（破壊的なのは branch -D / reset / force 側に集約されているので影響限定）
+
+### Alternatives
+- **`settings.local.json.example` 配布**: 個人で copy する手間が増える / 配布物を増やしたくない → 不採用
+- **新規 `loop-engineering.md` rules**: 常時読込される rules を肥大化させる。判断軸は settings.json + ADR で十分 → 不採用
 - **Notion/Confluence 等の外部サービス**: クラウド依存が増える、課金リスク、ユーザー方針（ローカル閲覧優先）と矛盾 → 不採用
