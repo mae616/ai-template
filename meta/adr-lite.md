@@ -524,3 +524,64 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
 - **`settings.local.json.example` 配布**: 個人で copy する手間が増える / 配布物を増やしたくない → 不採用
 - **新規 `loop-engineering.md` rules**: 常時読込される rules を肥大化させる。判断軸は settings.json + ADR で十分 → 不採用
 - **Notion/Confluence 等の外部サービス**: クラウド依存が増える、課金リスク、ユーザー方針（ローカル閲覧優先）と矛盾 → 不採用
+
+---
+
+## ADR-014: 最上位親ループ `/auto-build`（プロンプト/成果物 → 完成＋エビデンス）
+
+- **日付**: 2026-07-04
+- **対象**: `.claude/skills/auto-build/SKILL.md`（新規）, `.claude/skills/auto-task/SKILL.md`（強化）, `.claude/skills/task-list/SKILL.md` `.claude/skills/task-detail/SKILL.md`（次のステップ配線）
+- **出典**: 2026-07-04 セッションのユーザー要求（「プロンプト文だけで最後まで作ってくれるもの」「既存成果物からも作れる二通り」「人間が安心できるエビデンスをHTMLで提示」）
+
+### Context
+- ADR-008/009 で Inner Loop（`/auto-task` `/auto-bug`）は整備済みだが、「1タスク」より上の粒度（プロジェクト全体）を自律で運ぶ入口がなかった
+- ユーザーの要求は2通りの入口: (A) プロンプト文のみ → 要件定義から生成、(B) 既存成果物（要件定義・設計の HTML/MD、プロトタイプ）→ 読み込んで開始
+- 途中は人間レスで SOLID・TDD・レビュー収束（basic/deep）・テストピラミッド網羅（単体/結合/E2E）を守り、最後に人間が検証できるエビデンス（HTML）を提示する
+- ADR-008 は「Outer Loop（時間駆動 cron）不採用」を決めているが、本件は**時間駆動ではなく1コマンド完結**であり Inner Loop 哲学の延長
+
+### Decision
+- **`/auto-build` を1本だけ新設**する（`auto-mvp` / `auto-product` の2本案は運用が面倒なため不採用。`--scope mvp|product` 引数で吸収、デフォルト mvp）
+- フロー: 入力正規化（rdd.md）→ task-list → Sprintごと（task-detail + sprint/* ブランチ → Issueごとに auto-task）→ sprint→main PR 作成 → エビデンスレポート（HTML）生成 → 人間へ引き渡し
+- **人間の関所は最小限の2箇所**: (1) モードAのみ rdd.md 生成直後の要件確認（要件ズレは全工程を無駄にするため）、(2) エビデンスを見て sprint → main のマージを判断する（AI は PR 作成まで）。加えて停止条件（同一 Sprint 内 2 タスク blocked / 危険変更チェック該当）で人間に制御を返す
+- 既存スキルは**連鎖呼び出しのみ**（Harness 層不可侵、ADR-008 の設計原則を継承）
+- 付随して `/auto-task` を強化: sprint/* 起動時の task/* 自動作成、bug 連鎖の問題解決志向化（複数案→試行→効果検証→ロールバック）、テストピラミッド全層の明記、Sprint 完了検知時の sprint→main PR 準備
+- エビデンスは `doc/output/evidence/*.html`（build-context-site の仕組みを流用、自己完結 HTML）。「AIがやったと言っている」ではなく「人間が検証できる」（ログ・PR・コミット由来で出典を辿れる）形を必須とする
+
+### Consequences
+- (+) 「作って」の一言〜完成まで、既存 Harness/Loop 資産の連鎖だけで到達できる
+- (+) dev-practices の「事後確認（Vibe Coding）」と接続: エビデンス確認 → 触って確認 → フィードバックは既存フローで受ける
+- (−) 長時間ループになるため中断・再開（loop-state.md の二重管理: 全体=auto-build / タスク内=auto-task）の運用が前提
+- (−) モードAの要件生成は AI 判断が混ざる → rdd.md に「AI判断」明記でトレース可能にして緩和
+
+### Alternatives
+- **`auto-mvp` と `auto-product` の2スキル**: ユーザー自身が「二つあったらめんどくさい」→ 1本 + `--scope` 引数に統合
+- **Outer Loop（cron 駆動）で実現**: ADR-008 で不採用済み。1コマンド完結型で十分 → 不採用
+- **エビデンスを MD で提示**: 人間の「安心して見られる」要求には閲覧性の高い自己完結 HTML が適合（L1/L4 の既存方針とも整合）→ MD 単体は不採用
+
+---
+
+## ADR-015: デザイン親ループ `/auto-design`（Figma/会話 → 型付きコンポーネント）
+
+- **日付**: 2026-07-04
+- **対象**: `.claude/skills/auto-design/SKILL.md`（新規）, `.claude/skills/auto-build/SKILL.md`（デザインIssueの振り分け配線）
+- **出典**: 2026-07-04 セッションのユーザー要求（「Figmaからのデザイン→SSOTの一連もオートでできるものが欲しい」）
+
+### Context
+- デザインパイプラインは既存スキルで揃っている（design-ssot / design-mock → design-html → design-ui → design-components → design-assemble）が、毎回手動で連鎖させる必要があった
+- ADR-014 の `/auto-build` はタスク実装の自律化のみで、デザイン系 Issue の受け皿がなかった
+- デザインには dev-practices の「design TDD（発酵ループ）」があり、**触って確認する Vibe Coding が本質的に人間の仕事**
+
+### Decision
+- **`/auto-design` を新設**: 入口3通り（A: Figma → design-ssot / B: 会話 → design-mock / C: 既存SSOT JSON）から、確認用HTML → UI骨格 → コンポーネント分離 → 型付き結合 → 検証（bug時は問題解決志向のbug-*連鎖）→ basic/deep レビュー収束 → task→sprint 自律マージまでを1コマンドで運ぶ
+- **人間の関所は Vibe Coding**: コード品質の収束は AI、体験の判断（触って「違う」）は人間。auto-task の関所（sprint→main マージ）とは関所の性質が異なることを明示
+- SSOT を唯一の起点とし、Figma から直接コードを書くショートカットは禁止（トレーサビリティ維持）
+- `/auto-build` の Sprint ループでデザイン系 Issue は `/auto-design` に振り分ける
+
+### Consequences
+- (+) Figma を渡すだけで再利用可能な型付きコンポーネントまで自律で到達できる
+- (+) design TDD の発酵ループと接続: Vibe フィードバック → 該当ステップから再実行、で反復が回る
+- (−) SSOT 抽出の精度は Figma 側の構造（命名・variants 整理）に依存する。乱れた Figma では人間の介入が増える
+
+### Alternatives
+- **auto-task にデザイン手順を吸収**: タスク実装とデザインパイプラインは連鎖するスキル群が別物で、1スキルが肥大化する → 分離を採用
+- **design 系スキル自体にループを埋め込む**: ADR-008 の「Harness 層不可侵（親ループは連鎖呼び出しのみ）」に反する → 不採用

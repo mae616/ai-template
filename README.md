@@ -45,71 +45,31 @@ React / Svelte / Tailwind / GSAP / Three.js / Blender 等の技術スタック�
 
 すべてのセッションは `/setup` で開始します（`/clear` → `/setup` が前提）。
 
-### 新規プロジェクト作成
+### 自律ループ（Loop Engineering）
 
-```
-/project-init
-```
+1コマンドでゴールまで自律実行する親スキル群。既存スキルを連鎖呼び出しし、人間の関所を最小限に絞って設計しています（設計根拠: `meta/adr-lite.md` ADR-008/014/015）。
 
-壁打ち（要件定義）→ rdd.md → ボイラーテンプレート → AIテンプレート適用を対話形式で実行。
+| コマンド | 入力 → ゴール | 人間の関所 |
+|---------|--------------|-----------|
+| `/auto-build "プロンプト文"` or `成果物パス` | 要件定義 → Sprint計画 → 全タスク自律実装 → エビデンスHTML提示 | rdd.md確認（プロンプト起点時）/ sprint→main マージ |
+| `/auto-task #123` | 1タスクの実装 → テスト → レビュー収束 → task→sprint 自律マージ | 危険変更該当時のマージ判断 |
+| `/auto-design <Figma URL/会話/SSOT>` | デザインSSOT → UI骨格 → 型付きコンポーネント → マージ | Vibe Coding（触って確認） |
+| `/auto-bug #123` | bug調査 → 修正案の試行・効果検証 → マージ | 危険変更該当時のマージ判断 |
 
-### タスク実行（スクラムサイクル）
+**共通の停止条件**: レビュー反復の上限超過 / bug連鎖3周で未解決 / 危険変更チェックリスト該当（`.claude/rules/code-quality.md`）/ 課金発生前。中断時は `history/loop-state.md` から再開できます。
 
-GitHub Issue/Milestone + Claude Code組み込みTaskを連携して管理します。
+### 手動フロー（1ステップずつ進めたい場合）
 
-```
-/task-list doc/input/rdd.md   # 1. Sprint計画 → GitHub Milestone + Issue生成
-/task-detail sprint-1          # 2. Issue詳細化 + 依存関係設定
-/task-run #123                 # 3. 依存解決済みIssueを実装 → 完了時にIssue close
-```
+各コマンドの詳細な流れは `.claude/skills/*/SKILL.md` に記載しています。
 
-### バグ対応（Issue → PR）
-
-```
-/bug-new podmanが起動しない    # 1. GitHub Issue起票（再現手順・仮説を記録）
-/bug-investigate #123          # 2. 調査 → Issueコメントに追記
-/bug-propose #123              # 3. 修正案をIssueコメントに追記（任意）
-/bug-fix #123                  # 4. ブランチ作成 → 実装 → PR（Fixes #123）
-```
-
-### デザイン連携（SSOT → 実装）
-
-技術スタックは [doc/input/rdd.md](doc/input/rdd.md)、SSOTスキーマは [doc/input/design/ssot_schema.md](doc/input/design/ssot_schema.md) がSSOT。
-
-**会話起点（叩き台から）:**
-```
-/design-mock                   # 1. 会話からSSOT JSON + HTML叩き台を生成
-/design-ui                     # 2. SSOT → 技術スタック準拠の静的UI骨格
-/design-components src         # 3. UI骨格 → コンポーネント/レイアウト分割
-/design-assemble vue           # 4. variants → 型付きPropsへマッピング・結合
-```
-
-**Figma起点（Dev Mode → SSOT）:**
-```
-/design-ssot HomePage=https://...   # 1. Figma MCPからSSOT JSON確立
-/design-ui                          # 2〜4は同じ
-/design-components src
-/design-assemble vue
-```
-
-- `/design-html`: SSOT → ドキュメント/共有用の静的HTML生成（任意）
-- `/design-mock` の反復: HTML調整後、差分を会話で共有 → 再実行でHTML+SSOTを同時更新
-
-### レビュー・PR対応
-
-```
-/basic-review                  # typo/命名/フォーマットの表面チェック
-/deep-review                   # 設計/セキュリティ/RDD整合の深掘り
-/pr-respond #45                # PRレビューコメントに1件ずつ対応 → コミット → push
-```
-
-### セッション管理
-
-```
-/session-start                 # ゴール・完了条件・タイムボックスを設定
-# ... 作業 ...
-/session-end                   # 進捗サマリー・再開用プロンプトを生成
-```
+| 領域 | コマンド連鎖 |
+|------|------------|
+| プロジェクト開始 | `/project-init`（壁打ち → rdd.md → テンプレート適用） |
+| タスク | `/task-list` → `/task-detail` → `/task-run` |
+| バグ | `/bug-new` → `/bug-investigate` → `/bug-propose` → `/bug-fix` |
+| デザイン | `/design-mock`（会話起点）or `/design-ssot`（Figma起点）→ `/design-ui` → `/design-components` → `/design-assemble`（任意: `/design-html`） |
+| レビュー・PR | `/basic-review` → `/deep-review` / `/pr-respond` |
+| セッション | `/session-start` → 作業 → `/session-end` |
 
 ### 補助コマンド
 
@@ -138,7 +98,7 @@ main
 ```
 ai-template/
 ├── .claude/
-│   ├── skills/           # スキル（手順系25 + 判断軸16）
+│   ├── skills/           # スキル（自律ループ / 手順系 / 判断軸）
 │   ├── hooks/            # フック（Mermaid構文検証等）
 │   ├── rules/            # 運用ルール（自動適用）
 │   └── settings.json     # 権限・hooks設定

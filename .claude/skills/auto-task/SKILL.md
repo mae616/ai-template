@@ -25,7 +25,14 @@ description: "task の自律実装ループ。task-run → テスト → bug 検
 
 ## 前提（必ず確認）
 
-- このスキルは **`task/*` ブランチ上で動く前提**。`sprint/*` 直下や `main` での起動は中止
+- このスキルは **`task/*` ブランチ上で動く前提**。`main` での起動は中止
+- **`sprint/*` 上で起動された場合**は、対象 Issue 用の `task/*` ブランチを自動作成してから開始する（命名は `.claude/rules/git.md` 準拠）:
+
+```bash
+# 最新の sprint/* を取り込んでから task ブランチを切る
+git pull
+git checkout -b task/YYYY-MM-機能名-詳細   # Issue タイトルから生成
+```
 - ローカル lint / typecheck / test が**通る状態をゴール**にする（通らないまま PR は出さない）
 - 課金が発生しうる操作（新規パッケージインストール、リモートデプロイ、外部 API 課金）は**事前にユーザーへ確認**して止まる
 - usage 切れは Claude が自動停止に任せる（明示検知不要）
@@ -66,7 +73,7 @@ description: "task の自律実装ループ。task-run → テスト → bug 検
 
 ---
 
-### 2. ローカル検証（lint / typecheck / test）
+### 2. ローカル検証（lint / typecheck / テストピラミッド全層）
 
 順に実行:
 
@@ -74,8 +81,13 @@ description: "task の自律実装ループ。task-run → テスト → bug 検
 # プロジェクトの package.json / pyproject.toml 等を確認して適切なコマンドを選ぶ
 npm run lint     # or eslint . / ruff check . など
 npm run typecheck # or tsc --noEmit / mypy . など
-npm test         # or pytest など
+npm test         # or pytest など（単体テスト）
+npm run test:integration  # 結合テスト（存在する場合）
+npm run test:e2e          # E2Eテスト（存在する場合）
 ```
+
+- テストは **単体 → 結合 → E2E のピラミッド全層**を対象にする。テストの書き方・粒度は `testing` スキルに従う
+- 変更箇所に対応するテストが**存在しない層があれば作成**してから検証する（t_wada流TDDの原則に沿い、本来は実装前に書く）
 
 **判定**:
 - すべて成功 → ステップ3へ
@@ -85,13 +97,15 @@ npm test         # or pytest など
 
 ### 3. bug 検知時のフォールバック（bug-* スキル連鎖）
 
-ローカル検証で失敗を検知した、または実装途中で挙動異常を見つけた場合:
+ローカル検証で失敗を検知した、または実装途中で挙動異常を見つけた場合、**問題解決志向**（`/auto-bug` と同じ流儀）で自己修復する:
 
 1. **bug-investigate** スキルで原因調査（Issue 起票はスキップ可、ローカルメモで進める）
-2. **bug-propose** で修正案を列挙
-3. **bug-fix** で恒久対応を実施
-4. ステップ2のローカル検証を**再実行**
-5. 通るまで（最大3周）反復。**4周目に入る場合は中断してユーザー確認**:
+2. **bug-propose** で修正案を**複数列挙**（恒久対応のみ。暫定対応は恒久案に置換）
+3. **bug-fix** で修正案の**上から順に**実施し、各修正後にローカル検証で**効果を確認**:
+   - **効果なし**: 修正前へ**ロールバック**して次案へ（無関係な修正を積み上げない）
+   - **効果あり**: 確定してステップ4へ
+4. ステップ2のローカル検証を**再実行**し、通ったら**元のタスクのループに復帰**してゴール（マージ）まで続行
+5. 全案を試しても直らない場合は再調査から（最大3周）反復。**4周目に入る場合は中断してユーザー確認**:
    - `history/loop-state.md` に `status: blocked_by_bug` を記録
    - 「3周試みたが修正できない。原因仮説と試行内容を提示するので方針を確認したい」とユーザーへ報告して終了
 
@@ -146,7 +160,13 @@ gh pr edit <PR-NUMBER> --add-label ai-merged-unreviewed
 
 ### 8. 自律マージ（task → sprint）
 
-**重要**: マージ対象は **task → sprint のみ**。sprint → main へは絶対に自律マージしない。
+**重要**: マージ対象は **task → sprint のみ**。sprint → main へは絶対に自律マージしない。**PR のベースが `main` の場合**（sprint/* が存在しないプロジェクト等）も自律マージせず、PR 作成とラベル付与までで停止して人間へ引き渡す。
+
+**マージ前の停止条件（危険変更チェック）**: 変更が `.claude/rules/code-quality.md` の危険変更チェックリスト（認証・認可 / 決済 / 個人情報 / DBマイグレーション / 権限設定 / 外部API連携 / 削除処理 / 通知・メール送信）のいずれかに該当する場合、**自律マージせずここで停止**する:
+- PR 作成とラベル付与までは実施し、`history/loop-state.md` に `status: blocked_by_danger_check` と該当項目を記録
+- 「危険変更に該当するため人間のマージ判断が必要」とユーザーへ報告して終了
+
+**該当しない場合のみ**自律マージする:
 
 ```bash
 gh pr merge <PR-NUMBER> --squash --delete-branch
@@ -156,6 +176,27 @@ gh pr merge <PR-NUMBER> --squash --delete-branch
 - `history/loop-state.md` の `status: completed` に更新
 - ユーザーへ「`gh pr list --label ai-merged-unreviewed` で人間レビュー待ちPR一覧」を案内
 - レビュー済みなら `gh pr edit <PR> --remove-label ai-merged-unreviewed` で外す運用
+
+---
+
+### 9. Sprint 完了検知 → sprint→main PR の準備（マージはしない）
+
+マージ後、対象 Sprint（実装した Issue の Milestone から特定）に open な task Issue が残っていないか確認する:
+
+```bash
+gh issue list --milestone "sprint-N" --state open --label task
+```
+
+**全タスク完了なら**、sprint → main の PR を**作成だけ**して人間へ引き渡す:
+
+```bash
+gh pr create --base main --head sprint/YYYY-MM-機能名 \
+  --title "Sprint N: {Sprint目的}" \
+  --body "..."  # Sprint内の全task PR一覧・テスト結果サマリ・ai-merged-unreviewed の残数を記載
+```
+
+- **マージ判断は人間**（通常フローの最終関所。危険変更該当時はステップ8でも人間判断が入る）。AI は PR 作成と判断材料の提示まで
+- `/auto-build` 経由の場合はエビデンスレポート（HTML）へのパスも本文に記載する
 
 ---
 
