@@ -53,6 +53,7 @@ description: "プロンプト文または既存成果物（要件定義・設計
 ## YYYY-MM-DD HH:MM /auto-build <入力の要約> (--scope <mvp|product>)
 - status: in_progress
 - steps:
+  - [ ] project-init-check (未初期化なら project-init 連鎖)
   - [ ] input-normalize (rdd.md 準備)
   - [ ] task-list (Sprint計画)
   - [ ] sprint-loop (Sprintごとの実装。進捗は sprint 単位で追記)
@@ -65,13 +66,13 @@ description: "プロンプト文または既存成果物（要件定義・設計
 
 ---
 
-### 0.5 プロジェクト初期化判定
+### 1. プロジェクト初期化判定
 
 実行ディレクトリが**未初期化**（判定基準: `package.json`/`pyproject.toml` 等のプロジェクト定義ファイルが無い、または `src` 相当が空）の場合、Sprint 計画へ進む前に **`project-init` を連鎖**し、公式推奨ボイラーテンプレート（`npm create` 等）からプロジェクトを作成する。対話式コマンドは `.claude/rules/tool-usage.md` の対話式コマンドガイドに従い、ユーザー手動実行を案内する。既に初期化済みならスキップする。
 
 ---
 
-### 1. 入力判定 → rdd.md 準備
+### 2. 入力判定 → rdd.md 準備
 
 **モードA（プロンプト文）**:
 1. プロンプトから「目標 / 非目標 / 想定ユーザー / 技術スタック / 非機能要件」を骨子に起こす
@@ -88,7 +89,7 @@ description: "プロンプト文または既存成果物（要件定義・設計
 
 ---
 
-### 2. Sprint 計画（task-list 連鎖）
+### 3. Sprint 計画（task-list 連鎖）
 
 - `task-list` の手順に従い、rdd.md から Milestone（Sprint）と Issue を一括作成
 - `--scope mvp` の場合は **MVP に必要な Sprint のみ**計画する。`--scope product` は要件全体を Sprint に分割
@@ -96,7 +97,7 @@ description: "プロンプト文または既存成果物（要件定義・設計
 
 ---
 
-### 3. Sprint ループ（Sprintごとに反復）
+### 4. Sprint ループ（Sprintごとに反復）
 
 各 Sprint について以下を順に実行する:
 
@@ -117,7 +118,7 @@ description: "プロンプト文または既存成果物（要件定義・設計
 
 ---
 
-### 4. エビデンスレポート生成（HTML）
+### 5. エビデンスレポート生成（HTML）
 
 全 Sprint 完了後（または `--scope mvp` の範囲完了後）、人間の判断材料を1つの HTML に集約する。
 
@@ -139,7 +140,7 @@ description: "プロンプト文または既存成果物（要件定義・設計
 
 ---
 
-### 5. 人間への引き渡し（handoff）
+### 6. 人間への引き渡し（handoff）
 
 1. エビデンスレポートのパスを提示し、内容の要約（3〜5行）を添える
 2. sprint → main の PR 一覧と「マージ判断をお願いする」旨を明示
