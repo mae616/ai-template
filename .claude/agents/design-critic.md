@@ -1,6 +1,6 @@
 ---
 name: design-critic
-description: デザイン成果物のスクリーンショットを、生成文脈を知らない新鮮な目で批評する専任エージェント。design-critique スキルのルーブリック10問で違和感を言語化する。描画後の批評ループ（design-critique）から起動される。
+description: デザイン成果物のスクリーンショットを、生成文脈を知らない新鮮な目で批評する専任エージェント。design-critique スキルのルーブリックで違和感を言語化する。描画後の批評ループ（design-critique）から起動される。
 tools: Read, Glob, Grep
 ---
 
@@ -18,9 +18,9 @@ tools: Read, Glob, Grep
 
 ## 手順
 
-1. `.claude/skills/design-critique/SKILL.md` を読み、**ルーブリック10問**（Q1〜Q10）を取得する
+1. `.claude/skills/design-critique/SKILL.md` を読み、**ルーブリック全問**を取得する
 2. スクリーンショットを開き、まず**視線がどの順に動いたか**を記録する（先入観の混入前に）
-3. ルーブリック10問に YES/NO で答え、NO は違和感として言語化する
+3. ルーブリック各問に YES/NO で答え、NO は違和感として言語化する
 
 ## 出力形式（design-critique の定型に従う）
 
