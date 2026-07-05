@@ -140,6 +140,11 @@
             "type": "command",
             "command": ".claude/hooks/warn-destructive-bash.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/git-branch-guard.sh",
+            "timeout": 5
           }
         ]
       }
@@ -157,6 +162,11 @@
             "type": "command",
             "command": ".claude/hooks/validate-mermaid.sh",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/format-on-edit.sh",
+            "timeout": 15
           }
         ]
       }

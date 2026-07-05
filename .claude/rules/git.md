@@ -2,7 +2,7 @@
 
 ## ブランチ構造
 ```
-main                    ← リリース可能な安定版（直接push禁止）
+main                    ← リリース可能な安定版（直接push禁止・`.claude/hooks/git-branch-guard.sh` でcommit/pushをブロック済み）
 ├── sprint/*            ← スプリント単位（CI通過後にmainへマージ）
 │   ├── task/*          ← 1タスク=1AI実装単位（動作不要）
 │   └── feature_fix/*   ← スプリント統合後のバグ修正

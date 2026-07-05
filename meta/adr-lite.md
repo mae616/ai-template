@@ -585,3 +585,34 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
 ### Alternatives
 - **auto-task にデザイン手順を吸収**: タスク実装とデザインパイプラインは連鎖するスキル群が別物で、1スキルが肥大化する → 分離を採用
 - **design 系スキル自体にループを埋め込む**: ADR-008 の「Harness 層不可侵（親ループは連鎖呼び出しのみ）」に反する → 不採用
+
+---
+
+## ADR-016: template-feedback 取り込み（uilab3 + fable_test1 の送り状23項目）
+
+- **日付**: 2026-07-05
+- **対象**: `.claude/rules/*.md`（tool-usage / code-quality / dev-practices / context-management / git）、`.claude/skills/*/SKILL.md`（image-prep / testing / developer-specialist / creative-coder / basic-review / design-ssot / agent-browser / deep-review / task-run / template-feedback / project-init / auto-build / project-design-language）、新規 `.claude/skills/experience-plan/SKILL.md`・`.claude/skills/auto-mvp/SKILL.md`、新規 `.claude/hooks/git-branch-guard.sh`・`.claude/hooks/format-on-edit.sh`、`.claude/settings.json`
+- **出典**: `../uilab3/doc/output/to-template.md`（項目1-7）、`/Users/mae/fable_test1/doc/output/to-template.md`（項目1-16、発: aqualchemy）
+
+### Context
+- `/template-feedback` の定型走査（`ls ../*/doc/output/to-template.md`）で uilab3 の未取込7項目を検出
+- ユーザーから追加で `/Users/mae/fable_test1`（sibling ディレクトリの外、`../` の走査には入らない場所）の送り状を今回のスコープに含める指示があり、16項目を追加で走査
+- 計23項目のスコープ確認を人間に取り、「両方全部を順に検討」で合意
+
+### Decision
+- **uilab3 7項目**: 全て反映。secret検証・pnpm非対話化・TLSラグは `tool-usage.md` へ、image-prep白線画レシピは `image-prep/SKILL.md` へ、vitest設定分離と不変条件テストは `testing/SKILL.md` へ、宣言的フォールバックは `developer-specialist/SKILL.md` へ
+- **fable_test1 16項目**: 全て反映。うち以下は候補から調整:
+  - 項目1（体験網羅プラン）: 候補は「新規skill or task-run追記」→ 新規 `experience-plan` skill を作成し `task-run` から参照する形に決定（他スキルからも再利用できるため）
+  - 項目9（品質ゲート3層hook）: `git-branch-guard.sh`（main/master へのcommit/push を `exit 2` でブロック）と `format-on-edit.sh`（Prettier/ESLint --fix）を新規作成し `settings.json` に配線。lint/type-checkの重い検査はCI据え置き（hookに入れない）と判断
+  - 項目15（auto-mvp新設）: ユーザーから「auto-mvpはMVP作成までで、本実装はauto-buildに引き継ぐ」と明示指示があり、スコープをauto-buildのモードC（`--from-mvp`）への引き継ぎまでに限定
+  - 項目16（表現の演繹フレームワーク）: 出典は16行の長大な記述だったが、`template-feedback`項目13（スキル記述の最小主義）に従い、creative-coder（4つの問い）/ project-design-language（メタファー宣言欄）/ deep-review（未翻訳検出）へ要点のみ圧縮して分散配置
+
+### Consequences
+- (+) main への直接 push が仕組み（hook）でブロックされ、rules 文書頼みの規律から一段強化される
+- (+) SSOT直書き検出→昇格、体験網羅チェックリスト等、レビュー品質をモデル性能に依存させない「宣言＋チェックリスト」パターンが複数スキルに横展開された
+- (−) 新規hook（`format-on-edit.sh`）は `npx prettier`/`eslint` が無いプロジェクトでは無音でno-opになる（プロジェクト側にPrettier未導入だと効果が出ない → project-init のPrettier標準化とセット運用が前提）
+- (−) auto-mvp は本実装を持たないため、単体では「動くプロトタイプ止まり」。auto-buildとの連携（`--from-mvp`）が前提の設計
+
+### Alternatives
+- 表現の演繹フレームワーク（項目16）を専用の新規skillとして独立させる案 → 既存skillの薄い追記で足りる内容であり、スキル数を増やすと `judgment-harness` のレイヤー構造が複雑化する → 既存skill分散配置を採用
+- hookのlint/type-check強制も同時に実装する案 → プロジェクトごとにスクリプト名が異なり誤検知リスクがあるため、今回はbranch-guardとformatのみに限定し見送り
