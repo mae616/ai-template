@@ -149,6 +149,7 @@ Phase 1 で決めた技術スタックに基づき、CLI コマンドを提案�
 1. `package.json` 等を確認して、追加で必要なパッケージを提案する
 2. Phase 1 で決めた技術スタックに基づき、追加インストールを実行する
 3. **Prettier をボイラーテンプレート標準に含める**: `prettier` + 対象スタックの `eslint-config-prettier` 相当を導入し、設定ファイルを配置する。`.claude/hooks/format-on-edit.sh` が編集直後に適用するため、後付けの摩擦を避けるべく最初から導入する
+4. **テストランナーを最初から導入する**: RDD のテスト戦略に従いテストランナー（Vite系なら Vitest 等）を導入し、`package.json` に `test` スクリプトとスモークテスト1本（起動確認レベル）を置く。TDD 前提のためタスク1本目からテストが生まれる。CI の Test ゲート（main 向け PR で実行）を**最初の PR から緑**にするための布石で、「初期開発が終わってからテストを設定する」運用はしない
 
 ---
 
@@ -236,7 +237,7 @@ jobs:
 ```
 
 - パッケージマネージャ（npm/pnpm）と scripts 名は、生成したボイラーテンプレートの `package.json` に合わせて調整する
-- 対応する scripts（`lint` / `typecheck` / `build` / `test`）が `package.json` に無い場合は先に追加する
+- 対応する scripts（`lint` / `typecheck` / `build` / `test`）が `package.json` に無い場合は先に追加する（`test` は Phase 2.4 のテストランナー導入とセット。TDD 前提なので Test ステップも最初から有効にし、後から足す運用はしない）
 - プライベートリポジトリでは GitHub Actions の無料枠を超えると**従量課金**になる旨を一言添える
 
 ### 3.4 .gitignore の確認
