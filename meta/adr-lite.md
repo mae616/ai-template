@@ -616,3 +616,29 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
 ### Alternatives
 - 表現の演繹フレームワーク（項目16）を専用の新規skillとして独立させる案 → 既存skillの薄い追記で足りる内容であり、スキル数を増やすと `judgment-harness` のレイヤー構造が複雑化する → 既存skill分散配置を採用
 - hookのlint/type-check強制も同時に実装する案 → プロジェクトごとにスクリプト名が異なり誤検知リスクがあるため、今回はbranch-guardとformatのみに限定し見送り
+
+---
+
+## ADR-017: project-init に CI セットアップ確認、課金操作の事前アラートを追加
+
+- **日付**: 2026-07-05
+- **対象**: `.claude/skills/project-init/SKILL.md`（3.3 CI確認ステップ）、`.claude/settings.json`（ask にデプロイ/公開系コマンド追加）、`.claude/rules/dev-practices.md`（課金前合意の禁止事項追記）
+- **出典**: ユーザー要望（2026-07-05 セッション）。CI 雛形は fable_test1 の `.github/workflows/ci.yml`（git.md の CI 要件を実装した実績物）を汎用化
+
+### Context
+- `rules/git.md` に CI 要件（task/*→Lint+TypeCheck、main PR→+Build+Test）は定義済みだが、CI を実際にセットアップする工程がどのスキルにも無く、プロジェクトごとに手作りだった
+- 課金が発生しうる操作（デプロイ・従量課金API）は auto-build/auto-task の「課金前停止ポイント」にはあるが、ループ外の通常作業では守る仕組みが無かった
+
+### Decision
+- `project-init` Phase 3.3 として「CI をセットアップしますか？」の確認ステップを追加。YES なら git.md 準拠の workflow を生成（スクリプト名・PMはボイラーの package.json に合わせて調整）
+- デプロイ/公開系 CLI（npm publish / wrangler / vercel / firebase / aws / gcloud / terraform 等）を `settings.json` の ask に追加し、実行前にユーザー確認を機械的に挟む
+- コマンド以外の課金経路（従量課金APIのコード内利用・有料SaaS前提の選定）は `dev-practices.md` の禁止事項として原則を追記（仕組みで拾えない範囲を文書で補完する二段構え）
+
+### Consequences
+- (+) 新規プロジェクトが最初から CI 要件と一致した workflow を持てる（fable_test1 実績の還流）
+- (+) 課金操作は「ask（機械）＋原則（文書）」の二層でガードされる
+- (−) `aws *` / `gcloud *` は読み取り系コマンドも ask になる（保守的に倒した。頻用するプロジェクトは settings.local.json で緩和する想定）
+
+### Alternatives
+- 課金アラートを hook（PreToolUse の warn）で実装する案 → 警告だけでは素通りできる。ask は承認そのものを要求するため permissions を採用
+- CI workflow を独立ファイルとしてテンプレ同梱する案 → apply_template の配布対象が増え、CI 不要なプロジェクトにもコピーされる。project-init で「聞いてから生成」に寄せた

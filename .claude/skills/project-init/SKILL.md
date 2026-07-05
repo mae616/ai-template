@@ -199,7 +199,47 @@ Phase 1.3 で作成したドラフトを `doc/input/rdd.md` に書き出す。
 # Phase 1 のドラフト内容を doc/input/rdd.md に書き込む
 ```
 
-### 3.3 .gitignore の確認
+### 3.3 CI セットアップの確認（ユーザーに聞く）
+
+「GitHub Actions で CI をセットアップしますか？」とユーザーに確認する。YES なら `.claude/rules/git.md` の CI 要件に準拠した `.github/workflows/ci.yml` を生成する:
+
+```yaml
+# CI要件は .claude/rules/git.md に準拠:
+#   task/*, feature_fix/* push  → Lint + TypeCheck
+#   main への PR（sprint/hotfix）→ Lint + TypeCheck + Build + Test
+name: CI
+
+on:
+  push:
+    branches: ['task/**', 'feature_fix/**', 'hotfix/**', 'sprint/**']
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - name: Build（main向けPRのみ）
+        if: github.event_name == 'pull_request'
+        run: npm run build
+      - name: Test（main向けPRのみ）
+        if: github.event_name == 'pull_request'
+        run: npm test
+```
+
+- パッケージマネージャ（npm/pnpm）と scripts 名は、生成したボイラーテンプレートの `package.json` に合わせて調整する
+- 対応する scripts（`lint` / `typecheck` / `build` / `test`）が `package.json` に無い場合は先に追加する
+- プライベートリポジトリでは GitHub Actions の無料枠を超えると**従量課金**になる旨を一言添える
+
+### 3.4 .gitignore の確認
 
 ボイラーテンプレートの `.gitignore` に以下が含まれているか確認し、なければ追記する:
 

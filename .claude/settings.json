@@ -117,7 +117,23 @@
       "Bash(git clean *)",
 
       "Bash(gh pr merge *)",
-      "Bash(gh pr close *)"
+      "Bash(gh pr close *)",
+
+      "Bash(npm publish*)",
+      "Bash(pnpm publish*)",
+      "Bash(wrangler deploy*)",
+      "Bash(wrangler publish*)",
+      "Bash(vercel *)",
+      "Bash(netlify deploy*)",
+      "Bash(firebase deploy*)",
+      "Bash(fly deploy*)",
+      "Bash(flyctl deploy*)",
+      "Bash(aws *)",
+      "Bash(gcloud *)",
+      "Bash(az *)",
+      "Bash(terraform apply*)",
+      "Bash(terraform destroy*)",
+      "Bash(cdk deploy*)"
     ]
   },
   "hooks": {
