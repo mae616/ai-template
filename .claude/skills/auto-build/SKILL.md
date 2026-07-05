@@ -91,6 +91,9 @@ description: "プロンプト文または既存成果物（要件定義・設計
 
 ### 3. Sprint 計画（task-list 連鎖）
 
+- **デザイン適用タイミングの判定**（UI を持つプロジェクトのみ）:
+  - デザインSSOT（`doc/input/design/*`）・Figma参照・rdd.md のデザイン要件が**既にある** → **先行**: design 系 Issue を最初の Sprint から含める（実装は `auto-design` 連鎖）
+  - **無い** → **🛑 人間に確認**: 先行（`design-mock` で叩き台から固める）か、後行（機能 Sprint を先に回し、機能の Vibe 確認後にデザイン Sprint を計画）かを選んでもらう。後行の場合、機能実装は `dev-practices.md` の後行時実装規約（SSOT参照の仮値・セマンティック構造）で進める
 - `task-list` の手順に従い、rdd.md から Milestone（Sprint）と Issue を一括作成
 - `--scope mvp` の場合は **MVP に必要な Sprint のみ**計画する。`--scope product` は要件全体を Sprint に分割
 - 組み込み Task にも登録（並行・依存管理）
