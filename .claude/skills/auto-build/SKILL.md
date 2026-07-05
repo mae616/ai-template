@@ -94,6 +94,9 @@ description: "プロンプト文または既存成果物（要件定義・設計
 - **デザイン適用タイミングの判定**（UI を持つプロジェクトのみ）:
   - デザインSSOT（`doc/input/design/*`）・Figma参照・rdd.md のデザイン要件が**既にある** → **先行**: design 系 Issue を最初の Sprint から含める（実装は `auto-design` 連鎖）
   - **無い** → **🛑 人間に確認**: 先行（`design-mock` で叩き台から固める）か、後行（機能 Sprint を先に回し、機能の Vibe 確認後にデザイン Sprint を計画）かを選んでもらう。後行の場合、機能実装は `dev-practices.md` の後行時実装規約（SSOT参照の仮値・セマンティック構造）で進める
+- **project-design-language の起票確認**（UI を持つプロジェクトのみ）: `.claude/skills/project-design-language/SKILL.md` が**雛形のまま**（基本方針が `{...}` / TBD）なら、デザイン実装に入る前に埋める工程を計画へ組み込む:
+  - **先行**の場合 → この場で `judgment-harness` の発酵ループに従い、基本方針（誰のため/北極星/単一メタファー）を人間と対話で埋めてから design 系 Issue へ進む
+  - **後行**の場合 → デザイン Sprint の先頭に「project-design-language 起票」Issue を作成する（機能 Sprint 中は TBD のままでよい）
 - `task-list` の手順に従い、rdd.md から Milestone（Sprint）と Issue を一括作成
 - `--scope mvp` の場合は **MVP に必要な Sprint のみ**計画する。`--scope product` は要件全体を Sprint に分割
 - 組み込み Task にも登録（並行・依存管理）

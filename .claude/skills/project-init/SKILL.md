@@ -200,7 +200,17 @@ Phase 1.3 で作成したドラフトを `doc/input/rdd.md` に書き出す。
 # Phase 1 のドラフト内容を doc/input/rdd.md に書き込む
 ```
 
-### 3.3 CI セットアップの確認（ユーザーに聞く）
+### 3.3 project-design-language の初期起票
+
+Phase 3.1 でコピーされた穴埋め雛形 `.claude/skills/project-design-language/SKILL.md` を、`judgment-harness` の発酵ループに従って**このタイミングで対話起票**する（雛形のまま放置しない）:
+
+1. **基本方針（存在設計の核）だけを対話で埋める**: 誰のためのプロダクトか / 何を良しとするか（北極星）/ 単一メタファー宣言。Phase 1 の壁打ち・rdd.md の内容から手がかりを拾い、弱ければ候補提示→人間選定
+2. 固有値レジストリ（色/タイポ/モーション/声）は **TBD のままでよい**。推測で埋めない
+3. UIを持たないプロジェクト（CLI/ライブラリ等）の場合は、その旨を確認してスキップしてよい（スキップした事実を rdd.md に記録する）
+
+> ここで最低限の核を入れておくことで、後続の `auto-build` / `auto-design` / `creative-coder` / `deep-review` がメタファー参照で動ける状態になる。
+
+### 3.4 CI セットアップの確認（ユーザーに聞く）
 
 「GitHub Actions で CI をセットアップしますか？」とユーザーに確認する。YES なら `.claude/rules/git.md` の CI 要件に準拠した `.github/workflows/ci.yml` を生成する:
 
@@ -240,7 +250,7 @@ jobs:
 - 対応する scripts（`lint` / `typecheck` / `build` / `test`）が `package.json` に無い場合は先に追加する（`test` は Phase 2.4 のテストランナー導入とセット。TDD 前提なので Test ステップも最初から有効にし、後から足す運用はしない）
 - プライベートリポジトリでは GitHub Actions の無料枠を超えると**従量課金**になる旨を一言添える
 
-### 3.4 .gitignore の確認
+### 3.5 .gitignore の確認
 
 ボイラーテンプレートの `.gitignore` に以下が含まれているか確認し、なければ追記する:
 
@@ -308,6 +318,7 @@ Phase 0 で新たにテンプレートパスを検出/指定した場合:
 
 ## 品質チェックリスト
 - [ ] rdd.md の「AI用事実ブロック」が埋まっている（技術スタック/ターゲット環境/制約）
+- [ ] project-design-language の基本方針（誰のため/北極星/メタファー）が埋まっている（またはスキップ理由が rdd.md に記録済み）
 - [ ] .claude/skills/ がコピーされ、スキル一覧で認識される
 - [ ] CLAUDE.md がプロジェクトルートに存在する
 - [ ] .gitignore にセキュリティ関連（.env等）が含まれている
