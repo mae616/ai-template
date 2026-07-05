@@ -667,3 +667,29 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
 ### Alternatives
 - 常にデザイン先行を強制する案 → プロトタイプ駆動（着手時点で人間も答えを持たない）と矛盾。機能検証が先のプロジェクトで空回りする → 二択を人間に委ねる形を採用
 - auto-design 側にタイミング判定を持たせる案 → auto-design は「デザイン実装の実行」担当で、いつやるかは Sprint 計画（auto-build）の責務。判定は auto-build に置いた
+
+---
+
+## ADR-019: template-feedback 取り込み（sonnet_test: 描画技術選定の既定値）
+
+- **日付**: 2026-07-05
+- **対象**: `.claude/skills/creative-coder/SKILL.md`（描画技術選定の節を新設）、`.claude/skills/architecture-expert/SKILL.md`（非機能チェックリストに1行）
+- **出典**: `../sonnet_test/doc/output/to-template.md` 項目1（実測比較: sonnet_test と fable_test1 が同一課題で独立に Canvas 2D を手書きした事例。fable_test1 の `src/render/liquid-renderer.ts` 実在を確認済み）
+
+### Context
+- 描画技術選定のルールが無いと、異なるモデルが独立に Canvas 2D を手書きし、車輪の再発明と CPU 律速の性能上限を各自で抱える（2プロジェクトの実測で確認）
+- 送り状の反映先候補は5箇所（rules 新節 / creative-coder / frontend-implementation / architecture-expert / CLAUDE.md 一行）だった
+
+### Decision
+- **creative-coder に判断軸を集約**: 「描画量 × 更新頻度」マトリクス、WebGL オフロード既定、計測してから最適化、ドメインロジックの描画分離、ドグマ化しない注意
+- **architecture-expert に1行参照**: 非機能チェックリストから creative-coder の判断軸へ誘導
+- rules 新節・CLAUDE.md 追記は**見送り**（常時読込の肥大化回避。「rules は薄く・最小で」原則）
+- frontend-implementation への追記も**見送り**（同スキルは「技術は別skillに委ねる」と自己宣言しており領分外）
+
+### Consequences
+- (+) どのモデルでも「ライブラリ＋WebGL既定」の同じ判断に収束する（ADR-007 モデル非依存と整合）
+- (+) 判断軸が1箇所（creative-coder）に集約され、他スキルは参照で辿れる
+- (−) creative-coder が発火しない文脈（純バックエンド寄りの相談から描画に波及した場合等）では届かない可能性 → architecture-expert の参照行で補完
+
+### Alternatives
+- 送り状候補どおり5箇所に反映する案 → rules/CLAUDE.md の肥大化、同内容の重複記載で保守コスト増 → 集約＋参照を採用
