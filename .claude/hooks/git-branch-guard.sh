@@ -16,4 +16,13 @@ if [[ "$BRANCH" == "main" || "$BRANCH" == "master" ]]; then
   exit 2
 fi
 
+# 他ブランチからでも refspec 指定（HEAD:main / foo:main / origin main 等）で
+# リモートの main/master を直接更新する push はブロックする
+if echo "$COMMAND" | grep -qE '\bgit push\b' && \
+   echo "$COMMAND" | grep -qE '(^| |:)(main|master)( |$)'; then
+  echo "🚫 リモートの main/master を直接更新する push は .claude/rules/git.md により禁止されています。" >&2
+  echo "💡 PR（sprint/* → main 等）を作成してマージ判断は人間に委ねてください。" >&2
+  exit 2
+fi
+
 exit 0
