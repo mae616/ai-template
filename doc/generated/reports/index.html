@@ -1,0 +1,143 @@
+<!-- artifact-url: https://claude.ai/code/artifact/2efea48b-4cc5-4afa-9474-6968c9006199 -->
+<!-- 更新時: 別セッションからはこの URL を Artifact ツールの url パラメータに渡して同じ URL を維持する -->
+<title>ai-template レポート一覧</title>
+<style>
+  :root {
+    --paper: #f5f7f8;
+    --ink: #22303a;
+    --ink-soft: #5a6b76;
+    --line: #d5dde2;
+    --card: #ffffff;
+    --accent: #b35c00;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #141b21;
+      --ink: #dde5ea;
+      --ink-soft: #8fa0ab;
+      --line: #2b3843;
+      --card: #1b242c;
+      --accent: #f0a340;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #141b21;
+    --ink: #dde5ea;
+    --ink-soft: #8fa0ab;
+    --line: #2b3843;
+    --card: #1b242c;
+    --accent: #f0a340;
+  }
+  :root[data-theme="light"] {
+    --paper: #f5f7f8;
+    --ink: #22303a;
+    --ink-soft: #5a6b76;
+    --line: #d5dde2;
+    --card: #ffffff;
+    --accent: #b35c00;
+  }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+    line-height: 1.7;
+    margin: 0;
+  }
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 3rem 1.25rem 5rem;
+  }
+  .eyebrow {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 0.5rem;
+  }
+  h1 {
+    font-size: 1.6rem;
+    margin: 0 0 0.3rem;
+    text-wrap: balance;
+  }
+  .meta {
+    color: var(--ink-soft);
+    font-size: 0.85rem;
+    margin: 0 0 2rem;
+  }
+  ol.reports {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+  .report {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1rem 1.2rem;
+  }
+  .report .date {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+  }
+  .report h2 {
+    font-size: 1.05rem;
+    margin: 0.15rem 0 0.3rem;
+  }
+  .report h2 a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .report h2 a:hover,
+  .report h2 a:focus-visible {
+    text-decoration: underline;
+  }
+  .report p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+  }
+  .report .path {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+    margin-top: 0.4rem;
+    word-break: break-all;
+  }
+  .howto {
+    margin-top: 3rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--line);
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+  }
+  .howto code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.95em;
+  }
+</style>
+
+<main>
+  <p class="eyebrow">Reports Index</p>
+  <h1>ai-template レポート一覧</h1>
+  <p class="meta">作業レポート（図解つきHTML）の目次。新しいものが上。</p>
+
+  <ol class="reports">
+    <li class="report">
+      <span class="date">2026-07-17</span>
+      <h2><a href="https://claude.ai/code/artifact/cb9540c9-1247-4812-99cf-d798d0e8441c">herdr で Claude の変更差分をレビューできるようにした</a></h2>
+      <p>差分ビューア hunk とファイルビューアの導入、キーバインド設定、Claude 統合の確認。構成図・作業フロー図つき。</p>
+      <div class="path">doc/generated/reports/2026-07-17-herdr-setup.html</div>
+    </li>
+  </ol>
+
+  <div class="howto">
+    運用ルール: レポートは <code>doc/generated/reports/YYYY-MM-DD-スラッグ.html</code> に保存し、
+    アーティファクトとして公開したうえで、この一覧に行を追加して同じ URL で再公開する（詳細は CLAUDE.md「概念・設計説明の可視化」）。
+  </div>
+</main>
