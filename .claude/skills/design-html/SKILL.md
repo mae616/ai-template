@@ -12,7 +12,7 @@ description: "デザインSSOT JSONからドキュメント・共有用の静的
 - **ドキュメント共有/レビュー用**に「ブラウザで見られる見た目」が欲しいとき
 - 実装スタックに依存しない形で、UIの骨格・トークン反映を目視確認したいとき
 - `/design-mock` で1枚ペラHTMLを作った後、**ページ単位でイメージ確認**したいとき
-- `/design-ssot`・`/design-mock`・Pencil MCP のいずれかで SSOT が揃っている前提（このコマンドはSSOTを作らない）
+- `/design-ssot`・`/design-mock` のいずれかで SSOT が揃っている前提（このコマンドはSSOTを作らない）
 
 ## 次に何をする？
 - 見た目の調整が必要なら、HTMLの差分/変更点を根拠に SSOT（tokens/components/context）へ反映する

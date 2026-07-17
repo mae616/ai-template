@@ -1,15 +1,15 @@
 ---
 name: frontend-implementation
 user-invocable: false
-description: デザインツール（Figma/Pencil等）やUI要件を「壊れない・拡張しやすい」実装へ翻訳するための判断軸。px写経を避け、比率・構造・制約・状態を先に設計してからUIを組み立てる。
+description: デザインツール（Figma等）やUI要件を「壊れない・拡張しやすい」実装へ翻訳するための判断軸。px写経を避け、比率・構造・制約・状態を先に設計してからUIを組み立てる。
 ---
 
 # Frontend Implementation Skill
 
 ## 発火条件（適用タイミング）
-- 依頼が「UI実装」「デザインから実装」「Figmaから実装」「Pencilから実装」「コンポーネント実装」「スタイル調整」「レスポンシブ対応」「既存UIの崩れ修正」なら適用する。
+- 依頼が「UI実装」「デザインから実装」「Figmaから実装」「コンポーネント実装」「スタイル調整」「レスポンシブ対応」「既存UIの崩れ修正」なら適用する。
 - 技術（React/Next/Svelte/Tailwind等）は別skillに委ねる。このSkillは「読み替え」と「実装の判断基準」に集中する。
-- デザインツールの種類は問わない（Figma/Pencil/Canva/手書きスケッチ等）。
+- デザインツールの種類は問わない（Figma/Canva/手書きスケッチ等）。
 
 ## 共通前提（参照）
 - 実装規約・口調・TDD・Docコメント等は `CLAUDE.md` に従う
