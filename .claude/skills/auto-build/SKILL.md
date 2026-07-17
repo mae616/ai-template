@@ -19,7 +19,7 @@ description: "プロンプト文または既存成果物（要件定義・設計
 |---|---|---|
 | **A: プロンプト** | `/auto-build "家計簿アプリを作って"` | AI が要件定義（rdd.md）から起こす |
 | **B: 成果物** | `/auto-build doc/input/設計.md` | 既存の要件定義・設計（HTML/MD・プロトタイプ）を読み込んで開始 |
-| **C: auto-mvp選定結果** | `/auto-build --from-mvp <選定結果パス>` | `auto-mvp` で発散・選定した案を rdd.md の種として取り込み、TDD で作り直す（プロトのコード再利用は最小限） |
+| **C: proto-loop選定結果** | `/auto-build --from-proto <設定集パス>` | `proto-loop` で連作・統合した結果（設定集＋統合プロト）を rdd.md の種として取り込み、TDD で作り直す（プロトのコード再利用は最小限。`--from-mvp` は旧称エイリアス） |
 
 オプション（省略時は `mvp`）:
 - `--scope mvp`: MVP（最小の動く価値）までを計画・実装する

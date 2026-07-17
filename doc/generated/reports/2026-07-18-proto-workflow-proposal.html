@@ -1,0 +1,233 @@
+<title>プロトタイプ工程の再設計 提案</title>
+<style>
+  :root {
+    --paper: #f5f7f8;
+    --ink: #22303a;
+    --ink-soft: #5a6b76;
+    --line: #d5dde2;
+    --card: #ffffff;
+    --accent: #b35c00;
+    --accent-soft: #fdf3e6;
+    --ok: #2e7d4f;
+    --code-bg: #eceff1;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #141b21;
+      --ink: #dde5ea;
+      --ink-soft: #8fa0ab;
+      --line: #2b3843;
+      --card: #1b242c;
+      --accent: #f0a340;
+      --accent-soft: #2a2118;
+      --ok: #5cb97f;
+      --code-bg: #232e37;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #141b21; --ink: #dde5ea; --ink-soft: #8fa0ab; --line: #2b3843;
+    --card: #1b242c; --accent: #f0a340; --accent-soft: #2a2118; --ok: #5cb97f; --code-bg: #232e37;
+  }
+  :root[data-theme="light"] {
+    --paper: #f5f7f8; --ink: #22303a; --ink-soft: #5a6b76; --line: #d5dde2;
+    --card: #ffffff; --accent: #b35c00; --accent-soft: #fdf3e6; --ok: #2e7d4f; --code-bg: #eceff1;
+  }
+  body {
+    background: var(--paper); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+    line-height: 1.75; margin: 0;
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 3rem 1.25rem 5rem; }
+  .eyebrow {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 0.5rem;
+  }
+  h1 { font-size: 1.7rem; line-height: 1.35; margin: 0 0 0.4rem; text-wrap: balance; }
+  .meta { color: var(--ink-soft); font-size: 0.85rem; margin: 0 0 2.5rem; }
+  h2 {
+    font-size: 1.15rem; margin: 3rem 0 0.8rem; padding-top: 1.2rem;
+    border-top: 1px solid var(--line); text-wrap: balance;
+  }
+  h2 .num {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    color: var(--accent); font-size: 0.9rem; margin-right: 0.6em;
+  }
+  h3 { font-size: 1rem; margin: 1.6rem 0 0.5rem; }
+  p { margin: 0.7rem 0; }
+  code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.85em;
+    background: var(--code-bg); padding: 0.1em 0.4em; border-radius: 4px;
+  }
+  .lead {
+    font-size: 1.02rem; background: var(--accent-soft);
+    border-left: 3px solid var(--accent); padding: 0.9rem 1.1rem;
+    border-radius: 0 6px 6px 0;
+  }
+  .diagram {
+    background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+    padding: 1rem; margin: 1.2rem 0; overflow-x: auto;
+  }
+  .diagram figcaption { font-size: 0.8rem; color: var(--ink-soft); margin-top: 0.6rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin: 1rem 0; }
+  th, td {
+    text-align: left; padding: 0.55rem 0.8rem;
+    border-bottom: 1px solid var(--line); vertical-align: top;
+  }
+  th { font-size: 0.78rem; letter-spacing: 0.06em; color: var(--ink-soft); font-weight: 600; }
+  ul, ol { padding-left: 1.3em; margin: 0.7rem 0; }
+  li { margin: 0.35rem 0; }
+  .note {
+    font-size: 0.88rem; color: var(--ink-soft);
+    border: 1px dashed var(--line); border-radius: 6px;
+    padding: 0.8rem 1rem; margin: 1.2rem 0;
+  }
+  .good { color: var(--ok); font-weight: 600; }
+</style>
+
+<main>
+  <p class="eyebrow">Design Proposal</p>
+  <h1>プロトタイプ工程の再設計 — 「盲目的な並列発散」から「設定集で学びを継ぐ連作ループ」へ</h1>
+  <p class="meta">2026-07-18 ・ ai-template ワークフロー提案 ・ <span class="good">承認済み・実装反映済み</span>（auto-mvp → proto-loop 改修 / proto-medium 新設 / design-language 参照欄追加 / dev-practices 更新）</p>
+
+  <p class="lead">
+    現行の <code>/auto-mvp</code> は「プロンプト1文 → 無指示で2〜4案並べる」発散だった。
+    これを、<strong>1案ごとに問いを立て、触った学びを「設定集」に蒸留し、次のプロトに継いでいく連作ループ</strong>に変える。
+    AI動画制作の「キャラ設定資料を作り、それを見ながらプロンプトを磨く」やり方をソフトウェアの体験設計に持ち込む提案。
+    あわせて「これはFigmaでやるべきか、コードで作るべきか」の判断ガイドを新設する。
+  </p>
+
+  <h2><span class="num">01</span>何が変わるか — 現行と提案の比較</h2>
+  <table>
+    <thead><tr><th></th><th>現行（auto-mvp）</th><th>提案（proto-loop）</th></tr></thead>
+    <tbody>
+      <tr><td>発散のしかた</td><td>無指示で2〜4案を一斉に並べる</td><td><strong>ラウンド制</strong>。毎回「このプロトで確かめたい問い」を人間と決めてから作る</td></tr>
+      <tr><td>学びの継承</td><td>選定時に一度だけ言語化</td><td>毎ラウンド<strong>設定集に蒸留</strong>し、次のプロトはそれを読んで始める</td></tr>
+      <tr><td>作り手</td><td>同一文脈で連続生成</td><td><strong>1プロト＝1エージェント</strong>。設定集と課題だけを渡す（文脈遮断で新鮮な解釈を得る）</td></tr>
+      <tr><td>媒体</td><td>常にコード</td><td><strong>Figma / コードを判断ガイドで使い分け</strong>（1ラウンド内の併用も可）</td></tr>
+      <tr><td>収束</td><td>選定 → auto-build</td><td>統合プロト（いいとこ取り1本）→ rdd反映 → auto-build。<strong>本番終盤に磨きラウンド</strong>を明示的に持つ</td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="num">02</span>全体フロー</h2>
+  <figure class="diagram">
+<pre class="mermaid">
+flowchart TD
+    init["0 世界観の初期化<br/>project-design-language を薄く書く（TBD可）<br/>+ design-brain 等の外部知識ベース参照を設定"]
+    subgraph round["プロトラウンド（繰り返し）"]
+        q["1 問いを立てる（人間と1〜3行）<br/>『このプロトで何を確かめる？』"]
+        medium["2 媒体を選ぶ<br/>Figma？ コード？ 併用？（判断ガイド）"]
+        make["3 制作<br/>担当エージェント1人に<br/>設定集＋問いだけ渡して作らせる"]
+        vibe["4 Vibe確認（人間）<br/>触って『いい・違う』を言葉にする"]
+        distill["5 設定集へ蒸留<br/>採用/不採用の表現・トーン・<br/>次プロト用プロンプトを更新（HTML公開）"]
+    end
+    converge["6 統合プロト<br/>いいとこ取りを1本に。最終Vibe確認"]
+    handoff["7 本番へ引き継ぎ<br/>rdd.md 反映・design-language 昇格<br/>→ auto-build（設計→実装→テストの自律ループ）"]
+    polish["8 磨きラウンド（本番終盤）<br/>『この機能もう少しこうしたい』を<br/>polishタスク化 → auto-task で回す"]
+
+    init --> q --> medium --> make --> vibe --> distill
+    distill -- "まだ探索する" --> q
+    distill -- "見えてきた" --> converge --> handoff --> polish
+</pre>
+    <figcaption>図1: 提案する全体フロー。ラウンドを回すたびに設定集が濃くなり、後のプロトほど的が絞れる。</figcaption>
+  </figure>
+
+  <h2><span class="num">03</span>設定集（Setting Book）— この提案の中核</h2>
+  <p>
+    AI動画制作の「キャラクター設定表」に相当する、<strong>プロジェクトの世界観・体験の資料集</strong>。
+    プロトを作るたびに更新し、HTML化してアーティファクト公開する（開発者が見て「これいいね」と言える形）。
+  </p>
+  <ul>
+    <li><strong>置き場</strong>: <code>doc/input/design/setting-book/</code>（ソースはMarkdown、公開用にHTML生成）</li>
+    <li><strong>中身</strong>: 世界観・トーンの言語化 ／ 採用した表現（スクリーンショット＋なぜ良いか）／ 不採用の表現（なぜ違うか）／ 画面・レイアウトの型 ／ <strong>プロンプト集</strong>（次のプロトを作るための指示文そのもの）</li>
+    <li><strong>SSOTとの関係</strong>: 設定集は「ビジュアル付きの発酵場所」。確定した判断だけを <code>project-design-language</code> スキル（SSOT）へ昇格する — judgment-harness の「メモとSSOTを分ける」原則そのまま</li>
+  </ul>
+
+  <h2><span class="num">04</span>Figma か、コードか — 判断ガイド（新設）</h2>
+  <p>基準は一言でいうと <strong>「止まっている絵で判断できるなら Figma、動かさないと分からないならコード」</strong>。</p>
+  <figure class="diagram">
+<pre class="mermaid">
+flowchart TD
+    start["この問いは何を確かめたい？"]
+    motion{"触った感触・動き・<br/>入力感が体験の核心？"}
+    data{"実データ・実ロジックが<br/>体験を左右する？<br/>（速度・量・エッジケース）"}
+    tone{"色・タイポ・レイアウト・<br/>トーンの比較検討？"}
+    flow{"画面遷移や情報設計を<br/>俯瞰して合意したい？"}
+    ds{"デザインシステム・<br/>トークンの整備？"}
+    code1["コードプロト<br/>（動きは Figma では嘘になる）"]
+    code2["コードプロト<br/>（本物のデータで触る）"]
+    figma1["Figma<br/>（variants で複数案を並べて比較）"]
+    figma2["Figma<br/>（1枚で俯瞰・他者と合意）"]
+    figma3["Figma<br/>（design-ssot で実装へ流せる）"]
+    both["迷ったら併用:<br/>Figma でトーンボード → コードで動きを確認"]
+
+    start --> motion
+    motion -- はい --> code1
+    motion -- いいえ --> data
+    data -- はい --> code2
+    data -- いいえ --> tone
+    tone -- はい --> figma1
+    tone -- いいえ --> flow
+    flow -- はい --> figma2
+    flow -- いいえ --> ds
+    ds -- はい --> figma3
+    ds -- いいえ --> both
+</pre>
+    <figcaption>図2: 媒体選択の判断フロー。プロトラウンドのステップ2でこのガイドを通す。</figcaption>
+  </figure>
+  <table>
+    <thead><tr><th>Figma が向く（Claude が MCP で操作）</th><th>コードプロトが向く</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>
+          ・色・タイポ・レイアウトの<strong>比較検討</strong>（複数案を並べる）<br/>
+          ・画面一覧・遷移フローの<strong>俯瞰</strong><br/>
+          ・デザイントークン・コンポーネントの整備<br/>
+          ・人に見せて<strong>合意を取る</strong>資料<br/>
+          ・手でドラッグして微調整したいもの
+        </td>
+        <td>
+          ・hover・スクロール・アニメーション等の<strong>触感</strong><br/>
+          ・実データ・レイテンシ・データ量が効く体験<br/>
+          ・技術的に成立するかの検証<br/>
+          ・レスポンシブの実挙動<br/>
+          ・生成的・ゲーム的な「動きに世界観が宿る」表現
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="note">
+    Figma側の実働はすでに揃っている: 書き込みは figma-generate-design / figma-use、実装への引き渡しは
+    <code>/design-ssot</code>（Dev Mode からトークン抽出）。このガイドはそれらの「入口の交通整理」を担う。
+  </div>
+
+  <h2><span class="num">05</span>design-brain と Fable のデザイン思想の活かし方</h2>
+  <p>
+    ai-template は OSS なので、個人の審美眼（design-brain）を本体に埋め込まない。
+    代わりに<strong>「参照欄」だけをテンプレートに置く</strong>方式を提案する — 置き場所方針（配布物 vs 個人環境）と同じ考え方。
+  </p>
+  <ul>
+    <li><code>project-design-language</code> 雛形に「外部デザイン知識ベース」欄（任意・パス記入式）を追加</li>
+    <li>記入されていれば、設定集の生成・各プロト制作時に <strong>personal-style → anti-patterns → principles → patterns</strong> の優先順で読む（design-brain 自身が定める使い方そのまま）</li>
+    <li>プロトで得た「効いた/効かなかった」は design-brain の <code>feedback/</code> へ還流（送り状方式）</li>
+    <li>Fableとのデザイン思想づくりは design-brain 側の <code>personal-style/</code> を育てる活動として位置づける（テンプレとは切り離す）</li>
+  </ul>
+
+  <h2><span class="num">06</span>実装するもの（GO 後）</h2>
+  <table>
+    <thead><tr><th>対象</th><th>変更</th></tr></thead>
+    <tbody>
+      <tr><td><code>.claude/skills/auto-mvp/</code></td><td>本提案の連作ループに改修（扱いは要相談: 置き換え or 共存）</td></tr>
+      <tr><td>媒体判断ガイド</td><td>新スキル（判断軸・user-invocable: false）として追加し、プロトループから参照</td></tr>
+      <tr><td><code>project-design-language</code> 雛形</td><td>「外部デザイン知識ベース参照」欄を追加</td></tr>
+      <tr><td><code>rules/dev-practices.md</code></td><td>「プロトタイプ駆動」「design TDD」の記述をラウンド制・設定集に合わせて更新</td></tr>
+      <tr><td>設定集の規約</td><td>置き場・構成・HTML公開の運用をスキル内に定義</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <strong>意見（設計者として）</strong>: 「並列で作って選ぶ」自体は捨てなくてよい。捨てるのは「無指示の並列」。
+    比較したい軸が明確なラウンド（例: トーンA vs トーンB）に限り、同ラウンド内で2案並行を許す —
+    これで「並行して作って統合したい」と「無指示で3つは違う」の両方が成り立つ。
+  </div>
+</main>
