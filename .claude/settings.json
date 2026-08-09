@@ -1,10 +1,4 @@
 {
-  "autoMemoryEnabled": false,
-  "env": {
-    "IS_DEMO": "true",
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
-    "CLAUDE_CODE_NO_FLICKER": "1"
-  },
   "permissions": {
     "allow": [
       "Read",
@@ -25,7 +19,6 @@
       "TaskOutput",
       "SendMessage",
 
-      "mcp__pencil__*",
       "mcp__blender__*",
       "mcp__drawio__*",
       "mcp__ide__*",
@@ -90,7 +83,18 @@
       "Bash(gh project view*)",
       "Bash(gh api * --method GET *)",
       "Bash(gh run view*)",
-      "Bash(gh run list*)"
+      "Bash(gh run list*)",
+
+      "Bash(git push *)",
+      "Bash(gh issue create *)",
+      "Bash(gh issue edit *)",
+      "Bash(gh issue comment *)",
+      "Bash(gh issue close *)",
+      "Bash(gh issue reopen *)",
+      "Bash(gh pr create *)",
+      "Bash(gh pr review *)",
+      "Bash(gh project item-add *)",
+      "Bash(gh api *)"
     ],
     "ask": [
       "Bash(npm install *)",
@@ -101,22 +105,28 @@
       "Bash(docker *)",
       "Bash(rm *)",
 
-      "Bash(git push *)",
       "Bash(git branch -D *)",
       "Bash(git reset *)",
       "Bash(git clean *)",
 
-      "Bash(gh issue create *)",
-      "Bash(gh issue edit *)",
-      "Bash(gh issue comment *)",
-      "Bash(gh issue close *)",
-      "Bash(gh issue reopen *)",
-      "Bash(gh pr create *)",
       "Bash(gh pr merge *)",
       "Bash(gh pr close *)",
-      "Bash(gh pr review *)",
-      "Bash(gh project item-add *)",
-      "Bash(gh api *)"
+
+      "Bash(npm publish*)",
+      "Bash(pnpm publish*)",
+      "Bash(wrangler deploy*)",
+      "Bash(wrangler publish*)",
+      "Bash(vercel *)",
+      "Bash(netlify deploy*)",
+      "Bash(firebase deploy*)",
+      "Bash(fly deploy*)",
+      "Bash(flyctl deploy*)",
+      "Bash(aws *)",
+      "Bash(gcloud *)",
+      "Bash(az *)",
+      "Bash(terraform apply*)",
+      "Bash(terraform destroy*)",
+      "Bash(cdk deploy*)"
     ]
   },
   "hooks": {
@@ -125,7 +135,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ~/.claude/hooks/check-release-notes.sh",
+            "command": "bash .claude/hooks/check-release-notes.sh",
             "timeout": 10
           }
         ]
@@ -138,6 +148,11 @@
           {
             "type": "command",
             "command": ".claude/hooks/warn-destructive-bash.sh",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/git-branch-guard.sh",
             "timeout": 5
           }
         ]
@@ -156,6 +171,11 @@
             "type": "command",
             "command": ".claude/hooks/validate-mermaid.sh",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/format-on-edit.sh",
+            "timeout": 15
           }
         ]
       }

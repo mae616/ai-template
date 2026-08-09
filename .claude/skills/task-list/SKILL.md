@@ -132,3 +132,17 @@ TaskCreate:
 ```bash
 /task-detail sprint-1  # Issue詳細化 + 依存関係設定
 ```
+
+### 全体フロー（ゴールまでの地図）
+```
+/task-list（全Sprint計画・Issue一括作成）← いまここ
+  └─ Sprintごとに:
+       /task-detail sprint-N（Issue詳細化 + sprint/* ブランチ作成）
+       └─ タスク（Issue）ごとに:
+            /auto-task #issue（task/* ブランチ作成 → 実装 → レビュー → task→sprint 自律マージ）
+            ※ 途中で bug 検知時は問題解決志向の bug-* 連鎖で自己修復してタスクに復帰
+       └─ Sprint 全タスク完了時:
+            AI が sprint → main の PR を作成 → 人間がマージ判断（ここだけ人間の関所）
+```
+
+> この地図全体（要件定義〜エビデンスレポート提示まで）を1コマンドで自律実行したい場合は **`/auto-build`** を使う。

@@ -117,6 +117,18 @@ TaskUpdate:
 gh issue edit 123 --add-label "ready-for-dev"
 ```
 
+### 7. Sprint ブランチ作成（Milestone 内の詳細化が完了したら）
+対象 Sprint の全 Issue に `ready-for-dev` が付いたら、実装の受け皿となる `sprint/*` ブランチを作成する（命名は `.claude/rules/git.md` 準拠）:
+
+```bash
+# main から sprint ブランチを作成（⚠️ 確認あり）
+git checkout main && git pull
+git checkout -b sprint/YYYY-MM-機能名
+git push -u origin sprint/YYYY-MM-機能名
+```
+
+> このブランチが以降の `/auto-task`（task/* の親）のマージ先になる。
+
 ---
 
 ## 依存関係の可視化
@@ -137,6 +149,7 @@ gh issue edit 123 --add-label "ready-for-dev"
 ### GitHub
 - **Issue本文**: 実装詳細セクションを追記
 - **ラベル**: `ready-for-dev` を追加
+- **ブランチ**: Milestone 内の詳細化完了時に `sprint/*` を作成
 
 ### 組み込みTask
 - **TaskUpdate**: blocks/blockedBy で依存関係を設定
@@ -161,5 +174,8 @@ gh issue edit 123 --add-label "ready-for-dev"
 
 ## 次のステップ
 ```bash
-/task-run  # 実行可能なIssue（依存解決済み）を表示・実行
+/auto-task #<issue番号>  # タスクごとに task/* ブランチを切って自律実装ループを実行
 ```
+- Sprint 内の `ready-for-dev` な Issue を依存関係順に `/auto-task` へ渡す（task→sprint マージまで自律）
+- Sprint の全タスク完了後、AI が **sprint → main の PR を作成**して人間へ引き渡す（マージ判断は人間）
+- 単発で手動実行したい場合のみ `/task-run` を使う

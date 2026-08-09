@@ -104,6 +104,7 @@ gh issue comment {ISSUE_NUMBER} --body "🚀 着手開始
 - `CLAUDE.md` の規約に従い、RED → GREEN → REFACTOR で段階的に進める
 - 要件をToDoに分解（最小ステップ）
 - 既存パターン再利用と重複回避を最優先
+- UI/画面を伴う実装は、着手前に `experience-plan` skill のチェックリスト（状態/モーション/世界観整合/文言/進行フィードバック）を宣言してから進める
 
 ### 5. 検証
 ```bash

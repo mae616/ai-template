@@ -11,6 +11,12 @@
 # テンプレート刷新の作業メモ（配布物には含めない）
 history/
 
+# /build-context-site の生成物（毎回再生成される一時サイト）
+doc/generated/context-site/
+
+# /auto-task /auto-bug の自律ループレポート（reviewable-html-workbench 出力）
+doc/generated/loop-reports/
+
 # 個人環境設定（音源・グローバルsettings等）。OSS公開対象外＝ローカルのみ保持
 meta/personal-env/
 
@@ -153,3 +159,13 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Codex向けミラー構成（CLAUDE.md/.claude の写し。ローカル専用で配布物には含めない）
+AGENTS.md
+.agents/
+.codex/
+
+# 投函箱の受信物（各PCローカル。出典マシンの絶対パスを含むため公開・配布しない）
+# README.md は仕組みの説明なので追跡する
+doc/input/from-projects/*.md
+!doc/input/from-projects/README.md

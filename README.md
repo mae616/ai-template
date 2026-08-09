@@ -1,8 +1,20 @@
 # ai-template
 
-Claude Code 向けの開発プロンプトテンプレート。スキル（`/command`）と判断軸で、人間とAIの協調開発を構造化します。
+Claude Code 向けの開発プロンプトテンプレート。スキル（`/command`）・判断軸・安全装置で、人間とAIの協調開発を構造化します。
+
+速さより **意図・存在設計・体験設計が宿ったソフトウェア** を作ることを目的にしています。AIに丸投げして速く終わらせるのではなく、判断基準を人間が握ったまま、AIに実装を任せられる状態を作ります。
 
 参考: [Cole Medin氏 context-engineering-intro](https://github.com/coleam00/context-engineering-intro)
+
+## 設計の考え方
+
+| 原則 | 内容 |
+|---|---|
+| **判断軸は人間が握る** | AIは「何を考え、なぜそうするか」を言葉にしてから動く。判断基準をAI内部に隠さない |
+| **レイヤーで積む** | 普遍ルール（`CLAUDE.md` / `rules`）の上に、プロジェクト固有の判断軸を重ねる（`judgment-harness`） |
+| **関所を仕組みで置く** | 事前確認 → 実行 → 事後レビューの各段でフック・レビューエージェントが機械的に働く |
+| **レビューは文脈遮断で** | 作った本人は自分の選択に錨づけされる。専任サブエージェントが差分だけを見て批評する |
+| **学びを還流させる** | 各プロジェクトで得た汎用的な学びを送り状としてテンプレートへ戻す |
 
 ## 前提条件
 
@@ -15,19 +27,25 @@ Claude Code 向けの開発プロンプトテンプレート。スキル（`/com
 
 ## セットアップ
 
-### プロジェクトへの適用
+### 1. プロジェクトへ適用する
 
 ```bash
-# dry-run で確認後、実行
+# dry-run で確認してから実行
 scripts/apply_template.sh --target /abs/path/to/your-project --safe --dry-run
 scripts/apply_template.sh --target /abs/path/to/your-project --safe
 ```
 
-- `--safe`（デフォルト）: 既存ファイルを上書きしない。`--force` で上書き、`--sync` で同期+削除
-- `--no-skills`: `.claude/` のコピーをスキップ（グローバル適用済みの場合）
-- `doc/input/rdd.md` は原則プロジェクト固有。上書きは `--overwrite-rdd` で明示
+| オプション | 動作 |
+|---|---|
+| `--safe`（既定） | 既存ファイルを上書きしない |
+| `--force` | テンプレート対象を上書き（削除はしない） |
+| `--sync` | 上書き＋削除で同期。**危険** |
+| `--no-skills` | `.claude/` をコピーしない（グローバル適用済みの場合） |
+| `--overwrite-rdd` | `doc/input/rdd.md` を上書き（原則プロジェクト固有なので非推奨） |
 
-### グローバル適用（~/.claude）
+配布されないもの: `doc/input/from-projects/`（テンプレート保守者の受信箱）、`doc/generated/reports/` の中身（ai-template 自身の作業記録）、`meta/`、`history/`。
+
+### 2. グローバルへ適用する（任意）
 
 ```bash
 scripts/apply_global.sh --dry-run      # 確認
@@ -37,98 +55,162 @@ scripts/apply_global.sh --all-skills   # 手順系スキルも含む
 
 適用対象: skills / hooks / rules / settings.json / CLAUDE.md
 
-### 言語・フレームワーク固有のスキル
+### 3. 安全装置が効いているか確認する
 
-React / Svelte / Tailwind / GSAP / Three.js / Blender 等の技術スタック固有スキルは **[ai-tech-knowledge](https://github.com/mae616/ai-tech-knowledge)** で管理しています。必要な技術のスキルをそちらから追加してください。
+`main` への直接 commit / push はフックでブロックされます。**入れただけで安心せず、実際に動くか確かめてください**。
 
-## コマンドフロー
+```bash
+bash .claude/hooks/test-git-branch-guard.sh
+```
+
+一時リポジトリを自動生成し、「通すべき4ケース」「止めるべき6ケース」を実測します。`PASS=10 FAIL=0` になれば正常です。
+
+> ガード系フックは、効いていないことが黙って起こります。「守られているつもり」は穴より危険なので、判定不能なら止める（fail-closed）設計にし、検証を同梱しています。
+
+### 4. 技術スタック固有のスキルを足す（任意）
+
+React / Svelte / Tailwind / GSAP / Three.js / Blender 等は **[ai-tech-knowledge](https://github.com/mae616/ai-tech-knowledge)** で管理しています。必要なものだけ追加してください。
+
+## 使いはじめ
 
 すべてのセッションは `/setup` で開始します（`/clear` → `/setup` が前提）。
 
-### 新規プロジェクト作成
+| 状況 | 最初のコマンド |
+|---|---|
+| 新規プロジェクトを立ち上げる | `/project-init`（壁打ち → rdd.md → テンプレート適用 → CI確認） |
+| 既存プロジェクトを把握する | `/repo-tour` → `/docs-reverse` |
+| まず体験を探りたい | `/proto-loop` |
+| 要件が固まっている | `/auto-build "作りたいものの説明"` |
 
-```
-/project-init
-```
+## コマンド
 
-壁打ち（要件定義）→ rdd.md → ボイラーテンプレート → AIテンプレート適用を対話形式で実行。
+### 自律ループ（Loop Engineering）
 
-### タスク実行（スクラムサイクル）
+1コマンドでゴールまで自律実行する親スキル群。既存スキルを連鎖呼び出しし、人間の関所を最小限に絞っています（設計根拠: `meta/adr-lite.md` ADR-008/014/015）。
 
-GitHub Issue/Milestone + Claude Code組み込みTaskを連携して管理します。
+| コマンド | 入力 → ゴール | 人間の関所 |
+|---------|--------------|-----------|
+| `/auto-build "プロンプト文"` or `成果物パス` | 要件定義 → Sprint計画 → 全タスク自律実装 → エビデンスHTML提示 | rdd.md確認（プロンプト起点時）/ sprint→main マージ |
+| `/auto-task #123` | 1タスクの実装 → テスト → レビュー収束 → task→sprint 自律マージ | 危険変更該当時のマージ判断 |
+| `/auto-design <Figma URL/会話/SSOT>` | デザインSSOT → UI骨格 → 型付きコンポーネント → マージ | Vibe Coding（触って確認） |
+| `/auto-bug #123` | bug調査 → 修正案の試行・効果検証 → マージ | 危険変更該当時のマージ判断 |
 
-```
-/task-list doc/input/rdd.md   # 1. Sprint計画 → GitHub Milestone + Issue生成
-/task-detail sprint-1          # 2. Issue詳細化 + 依存関係設定
-/task-run #123                 # 3. 依存解決済みIssueを実装 → 完了時にIssue close
-```
+**共通の停止条件**: レビュー反復の上限超過 / bug連鎖3周で未解決 / 危険変更チェックリスト該当（`.claude/rules/code-quality.md`）/ 課金発生前。中断時は `history/loop-state.md` から再開できます。
 
-### バグ対応（Issue → PR）
+### プロトタイプの連作ループ
 
-```
-/bug-new podmanが起動しない    # 1. GitHub Issue起票（再現手順・仮説を記録）
-/bug-investigate #123          # 2. 調査 → Issueコメントに追記
-/bug-propose #123              # 3. 修正案をIssueコメントに追記（任意）
-/bug-fix #123                  # 4. ブランチ作成 → 実装 → PR（Fixes #123）
-```
+`/auto-build` の前段。仕様を先に固めず、**1案ごとに「確かめたい問い」を人間と決めてから**作り、触った学びを設定集（Setting Book）へ蒸留して次の案に継ぎます。
 
-### デザイン連携（SSOT → 実装）
+| コマンド | 用途 |
+|---|---|
+| `/proto-loop` | 連作ループ本体。問いを立てる → 媒体を選ぶ → 作る → Vibe確認 → 設定集へ蒸留 → 反復 |
+| `proto-medium`（自動適用） | 「Figma か、コードか」の判断軸。止まっている絵で判断できるなら Figma、動かさないと分からないならコード |
 
-技術スタックは [doc/input/rdd.md](doc/input/rdd.md)、SSOTスキーマは [doc/input/design/ssot_schema.md](doc/input/design/ssot_schema.md) がSSOT。
+無指示で複数案を並べることはしません。比較軸が明確なラウンドでのみ2案を並行します。
 
-**会話起点（叩き台から）:**
-```
-/design-mock                   # 1. 会話からSSOT JSON + HTML叩き台を生成
-/design-ui                     # 2. SSOT → 技術スタック準拠の静的UI骨格
-/design-components src         # 3. UI骨格 → コンポーネント/レイアウト分割
-/design-assemble vue           # 4. variants → 型付きPropsへマッピング・結合
-```
+### 手動フロー（1ステップずつ進めたい場合）
 
-**Figma起点（Dev Mode → SSOT）:**
-```
-/design-ssot HomePage=https://...   # 1. Figma MCPからSSOT JSON確立
-/design-ui                          # 2〜4は同じ
-/design-components src
-/design-assemble vue
-```
+| 領域 | コマンド連鎖 |
+|------|------------|
+| タスク | `/task-list` → `/task-detail` → `/task-run` |
+| バグ | `/bug-new` → `/bug-investigate` → `/bug-propose` → `/bug-fix` |
+| デザイン | `/design-mock`（会話起点）or `/design-ssot`（Figma起点）→ `/design-ui` → `/design-components` → `/design-assemble`（任意: `/design-html`） |
+| セッション | `/session-start` → 作業 → `/session-end` |
 
-- `/design-html`: SSOT → ドキュメント/共有用の静的HTML生成（任意）
-- `/design-mock` の反復: HTML調整後、差分を会話で共有 → 再実行でHTML+SSOTを同時更新
+### レビュー（文脈遮断）
 
-### レビュー・PR対応
+作った本人は自分の選択に錨づけされ、違和感を検出できません。レビューは専任サブエージェントが対象の参照だけを受け取って実行します。**文脈遮断であって情報遮断ではありません**（レビュアーは差分・rdd.md・設計書を自分で読みます。渡さないのは実装時の会話と意図の弁明です）。
 
-```
-/basic-review                  # typo/命名/フォーマットの表面チェック
-/deep-review                   # 設計/セキュリティ/RDD整合の深掘り
-/pr-respond #45                # PRレビューコメントに1件ずつ対応 → コミット → push
-```
+| コマンド | 見るもの | 実行体 |
+|---|---|---|
+| `/basic-review` | typo・命名規約・フォーマット（表面） | `code-reviewer` |
+| `/deep-review` | 設計整合性・セキュリティ・RDD準拠 | `code-reviewer` |
+| `/design-critique` | レンダリング結果の違和感（デザイン版レビュー） | `design-critic` |
+| `/pr-respond` | PRレビューコメントへの個別対応 | — |
 
-### セッション管理
+### 判断軸・デザイン基盤
 
-```
-/session-start                 # ゴール・完了条件・タイムボックスを設定
-# ... 作業 ...
-/session-end                   # 進捗サマリー・再開用プロンプトを生成
-```
+| コマンド | 用途 |
+|---|---|
+| `/judgment-harness` | 「何を良しとするか」をレイヤーで積み上げる方法論。プロジェクト立ち上げ時に最初に回す |
+| `project-design-language`（雛形） | プロジェクト固有の存在設計・体験設計のSSOT。埋めて使う穴埋め雛形 |
+| `/art-direction` | 描く瞬間の規律。コンセプト一語から材質・配色・タイポまでを1本の線で導出し、汎用ダッシュボード化を防ぐ |
 
-### 補助コマンド
+### 補助
 
 | コマンド | 用途 |
 |---------|------|
 | `/repo-tour` | リポジトリ構造の案内（初見向け） |
 | `/pair plan\|design\|arch\|dev` | 壁打ち（短い反復で方針を固める） |
-| `/manual-gen` | 手順書を `doc/generated/manual/` に生成 |
-| `/manual-guide` | 生成済み手順書をステップごとに案内 |
-| `/docs-reverse` | コードベースから俯瞰ドキュメントを `doc/generated/reverse/` に生成 |
+| `/build-context-site` | 要件・設計・ADR・図を横断する現状サイトを生成 |
+| `/manual-gen` / `/manual-guide` | 手順書の生成と、ステップごとの案内 |
+| `/docs-reverse` | コードベースから俯瞰ドキュメントを生成 |
+| `/image-prep` | 生成AI画像を透過レイヤーへ加工（ImageMagick） |
+
+### テンプレート保守（ai-template 側で使う）
+
+| コマンド | 用途 |
+|---|---|
+| `/template-inbox` | このPCの投函箱を構築する。sibling を走査し、未取込の学びをローカルに materialize する |
+| `/template-feedback` | 送り状を走査し、汎用化された学びをテンプレートへ取り込む。取り込み後は台帳を取込済に倒す |
+
+## 学びの還流（送り状モデル）
+
+各プロジェクトで得た汎用的な学びを、テンプレートへ戻す仕組みです。**プロジェクトはテンプレート本体を編集しません**。判断が1か所に集まるので、複数プロジェクトが並行しても競合しません。
+
+```mermaid
+flowchart LR
+  P["プロジェクトで<br/>学びを得る"] --> S["正本<br/>doc/output/to-template.md"]
+  P --> I["投函箱の写し<br/>doc/input/from-projects/"]
+  S --> F["/template-feedback<br/>取り込み・直列"]
+  I --> F
+  F --> R["rules / skills / hooks<br/>へ反映"]
+  F --> L["両方の状態を<br/>取込済に倒す"]
+```
+
+- 送り状の書式は `doc/output/to-template.md`（各プロジェクトへ配布される雛形）
+- 投函箱だけが `解決済みファイル`（直した実物のパス）を持ちます。取り込み時に**説明文ではなく動いている実物を読む**ためです
+- 投函箱の中身は各PCローカル（Git追跡外）。受信データには出典マシンの絶対パスが載るため、公開・配布物に混ぜません。新しいマシンでは `/template-inbox` で組み直します
+- 「状態」欄が二重取り込み防止の台帳として機能します
+
+## 安全装置
+
+### フック（`.claude/hooks/`）
+
+| フック | タイミング | 役割 |
+|---|---|---|
+| `git-branch-guard.sh` | Bash実行前 | `main` / `master` への直接 commit・push をブロック。判定不能なら止める（fail-closed） |
+| `warn-destructive-bash.sh` | Bash実行前 | 破壊的コマンドを警告 |
+| `validate-mermaid.sh` | 編集後 | Mermaid構文を検証 |
+| `format-on-edit.sh` | 編集後 | フォーマッタを適用 |
+| `post-edit-notify.sh` | 編集後 | 編集通知 |
+| `check-release-notes.sh` | セッション開始 | Claude Code のバージョン更新を検出 |
+| `test-git-branch-guard.sh` | 手動 | ガードの通す/止める両方を実測（10ケース） |
+
+### 運用ルール（`.claude/rules/` — 自動読み込み）
+
+| ファイル | 内容 |
+|---|---|
+| `dev-practices.md` | 確認フロー（事前 → 実行 → 事後）、自律度の使い分け、デザインの発酵ループ |
+| `code-quality.md` | 危険変更チェックリスト、スコープ外追加の三条件ガード、ADR-lite テンプレ |
+| `tool-usage.md` | ツールエラー防止、ガード系フックの検証原則、外部連携の全層検証 |
+| `context-management.md` | 毎ターン薄く効かせる文脈管理（意図の汲み取り / 問題の構造化 / 全体での位置付け） |
+| `git.md` | ブランチ構造・命名規則・CI要件 |
+
+### 危険変更チェックリスト
+
+以下を含む変更は自律ループが停止し、人間に明示確認します。
+
+認証・認可 / 決済 / 個人情報 / DBマイグレーション / 権限設定 / 外部API連携 / 削除処理 / 通知・メール送信
 
 ## Gitブランチ運用
 
 ```
-main
-├── sprint/*          ← スプリント単位（CI通過後にmainへマージ）
-│   ├── task/*        ← タスク単位（AI実装）
-│   └── feature_fix/* ← スプリント統合後のバグ修正
-└── hotfix/*          ← 本番緊急修正
+main                    ← 直接 commit/push はフックでブロック
+├── sprint/*            ← スプリント単位（CI通過後にmainへマージ）
+│   ├── task/*          ← タスク単位（AI実装）
+│   └── feature_fix/*   ← スプリント統合後のバグ修正
+└── hotfix/*            ← 本番緊急修正
 ```
 
 詳細は [.claude/rules/git.md](.claude/rules/git.md) を参照（Claude Codeが自動読み込み）。
@@ -138,31 +220,54 @@ main
 ```
 ai-template/
 ├── .claude/
-│   ├── skills/           # スキル（手順系25 + 判断軸16）
-│   ├── hooks/            # フック（Mermaid構文検証等）
+│   ├── skills/           # スキル（自律ループ / 手順系 / 判断軸）
+│   ├── agents/           # 専任サブエージェント（code-reviewer / design-critic / design-drafter）
+│   ├── hooks/            # フック（ブランチガード / Mermaid検証 等）
 │   ├── rules/            # 運用ルール（自動適用）
 │   └── settings.json     # 権限・hooks設定
 ├── doc/
 │   ├── input/            # 【人間が書く】SSOT（rdd.md / architecture.md / design/）
-│   └── generated/        # 【AI生成】上書きOK（manual/ / reverse/）
+│   ├── generated/        # 【AI生成】上書きOK（manual/ / reverse/ / reports/）
+│   └── output/           # 送り状（to-template.md）
 ├── scripts/
 │   ├── apply_template.sh # プロジェクトへの適用
 │   └── apply_global.sh   # ~/.claude への適用
+├── meta/
+│   ├── adr-lite.md       # 設計判断の記録
+│   └── rdd.ai-template.md
 ├── CLAUDE.md             # AI判断基準（普遍ルール）
 └── README.md
 ```
 
-### 判断軸スキル（AIが状況に応じて自動適用）
+## 判断軸スキル（AIが状況に応じて自動適用）
+
+`/command` として明示的に呼ばず、AIが文脈に応じて参照するスキル群です。
 
 | カテゴリ | スキル |
 |---------|--------|
 | 事業 | `biz-researcher` / `persona-designer` / `proposition-reviewer` |
-| デザイン | `ui-designer` / `usability-psychologist` / `sensory-design` |
+| デザイン | `ui-designer` / `usability-psychologist` / `sensory-design` / `animation-principles` |
 | 開発 | `architecture-expert` / `developer-specialist` / `testing` / `security-expert` / `frontend-implementation` / `accessibility-engineer` / `keyboard-shortcuts` |
-| クリエイティブ | `creative-coder` / `animation-principles` |
+| クリエイティブ | `creative-coder` |
+| 工程 | `experience-plan`（状態×見た目×周辺の網羅チェック） / `proto-medium`（Figma かコードか） / `project-design-language`（プロジェクト固有SSOT雛形） |
 | ツール | `agent-browser` |
 
 > 各スキルの詳細は `.claude/skills/*/SKILL.md` を参照
+
+## 主な変更（v1.1.0 → v1.2.0）
+
+| 領域 | 追加・変更 |
+|---|---|
+| 学びの還流 | 送り状モデルを仕組み化。投函箱（`doc/input/from-projects/`）をPCローカル化し、`/template-inbox` を新設 |
+| 判断軸 | `judgment-harness`（レイヤー方法論）・`project-design-language`（プロジェクト固有SSOT雛形）を追加 |
+| プロト工程 | `auto-mvp` を `/proto-loop`（連作ループ）へ置き換え。媒体判断ガイド `proto-medium` を新設 |
+| レビュー | 文脈遮断レビューを水平展開。専任エージェント3種（`code-reviewer` / `design-critic` / `design-drafter`）を追加 |
+| デザイン | `/art-direction`（描く瞬間の規律）・`/design-critique`（レンダリング批評ループ）を新設 |
+| 可視化 | 概念・設計説明を Mermaid 図入り HTML アーティファクトで報告するルールと、レポート一覧の仕組みを追加 |
+| 安全装置 | ブランチガードの3欠陥を修正し fail-closed 化。検証スクリプトを同梱 |
+| 文脈管理 | `context-management.md` を常時ルールとして追加 |
+
+設計判断の経緯は `meta/adr-lite.md` に ADR-lite として記録しています。
 
 ## ライセンス
 

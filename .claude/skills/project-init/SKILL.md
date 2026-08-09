@@ -148,6 +148,8 @@ Phase 1 で決めた技術スタックに基づき、CLI コマンドを提案�
 ボイラーテンプレート作成後:
 1. `package.json` 等を確認して、追加で必要なパッケージを提案する
 2. Phase 1 で決めた技術スタックに基づき、追加インストールを実行する
+3. **Prettier をボイラーテンプレート標準に含める**: `prettier` + 対象スタックの `eslint-config-prettier` 相当を導入し、設定ファイルを配置する。`.claude/hooks/format-on-edit.sh` が編集直後に適用するため、後付けの摩擦を避けるべく最初から導入する
+4. **テストランナーを最初から導入する**: RDD のテスト戦略に従いテストランナー（Vite系なら Vitest 等）を導入し、`package.json` に `test` スクリプトとスモークテスト1本（起動確認レベル）を置く。TDD 前提のためタスク1本目からテストが生まれる。CI の Test ゲート（main 向け PR で実行）を**最初の PR から緑**にするための布石で、「初期開発が終わってからテストを設定する」運用はしない
 
 ---
 
@@ -198,7 +200,57 @@ Phase 1.3 で作成したドラフトを `doc/input/rdd.md` に書き出す。
 # Phase 1 のドラフト内容を doc/input/rdd.md に書き込む
 ```
 
-### 3.3 .gitignore の確認
+### 3.3 project-design-language の初期起票
+
+Phase 3.1 でコピーされた穴埋め雛形 `.claude/skills/project-design-language/SKILL.md` を、`judgment-harness` の発酵ループに従って**このタイミングで対話起票**する（雛形のまま放置しない）:
+
+1. **基本方針（存在設計の核）だけを対話で埋める**: 誰のためのプロダクトか / 何を良しとするか（北極星）/ 単一メタファー宣言。Phase 1 の壁打ち・rdd.md の内容から手がかりを拾い、弱ければ候補提示→人間選定
+2. 固有値レジストリ（色/タイポ/モーション/声）は **TBD のままでよい**。推測で埋めない
+3. UIを持たないプロジェクト（CLI/ライブラリ等）の場合は、その旨を確認してスキップしてよい（スキップした事実を rdd.md に記録する）
+
+> ここで最低限の核を入れておくことで、後続の `auto-build` / `auto-design` / `creative-coder` / `deep-review` がメタファー参照で動ける状態になる。
+
+### 3.4 CI セットアップの確認（ユーザーに聞く）
+
+「GitHub Actions で CI をセットアップしますか？」とユーザーに確認する。YES なら `.claude/rules/git.md` の CI 要件に準拠した `.github/workflows/ci.yml` を生成する:
+
+```yaml
+# CI要件は .claude/rules/git.md に準拠:
+#   task/*, feature_fix/* push  → Lint + TypeCheck
+#   main への PR（sprint/hotfix）→ Lint + TypeCheck + Build + Test
+name: CI
+
+on:
+  push:
+    branches: ['task/**', 'feature_fix/**', 'hotfix/**', 'sprint/**']
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - name: Build（main向けPRのみ）
+        if: github.event_name == 'pull_request'
+        run: npm run build
+      - name: Test（main向けPRのみ）
+        if: github.event_name == 'pull_request'
+        run: npm test
+```
+
+- パッケージマネージャ（npm/pnpm）と scripts 名は、生成したボイラーテンプレートの `package.json` に合わせて調整する
+- 対応する scripts（`lint` / `typecheck` / `build` / `test`）が `package.json` に無い場合は先に追加する（`test` は Phase 2.4 のテストランナー導入とセット。TDD 前提なので Test ステップも最初から有効にし、後から足す運用はしない）
+- プライベートリポジトリでは GitHub Actions の無料枠を超えると**従量課金**になる旨を一言添える
+
+### 3.5 .gitignore の確認
 
 ボイラーテンプレートの `.gitignore` に以下が含まれているか確認し、なければ追記する:
 
@@ -266,6 +318,7 @@ Phase 0 で新たにテンプレートパスを検出/指定した場合:
 
 ## 品質チェックリスト
 - [ ] rdd.md の「AI用事実ブロック」が埋まっている（技術スタック/ターゲット環境/制約）
+- [ ] project-design-language の基本方針（誰のため/北極星/メタファー）が埋まっている（またはスキップ理由が rdd.md に記録済み）
 - [ ] .claude/skills/ がコピーされ、スキル一覧で認識される
 - [ ] CLAUDE.md がプロジェクトルートに存在する
 - [ ] .gitignore にセキュリティ関連（.env等）が含まれている

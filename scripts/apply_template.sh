@@ -118,6 +118,18 @@ for p in "${INCLUDES[@]}"; do
     EXTRA_FLAGS+=("--exclude" "rdd.md")
   fi
 
+  # レポートは ai-template 自身の作業記録。配布先は自分のレポートを置く側なので中身は不要。
+  # ディレクトリ自体は残す（配布先が最初から置き場所を持てるように）
+  if [ "$p" = "doc/generated/" ]; then
+    EXTRA_FLAGS+=("--exclude" "reports/*")
+  fi
+
+  # 投函箱は ai-template 側の受信データ（各PCローカル）。配布先プロジェクトは書く側なので不要。
+  # 受け取った送り状には出典マシンの絶対パスが載るため、配布物に混ぜない。
+  if [ "$p" = "doc/input/" ]; then
+    EXTRA_FLAGS+=("--exclude" "from-projects/")
+  fi
+
   # 送り状はプロジェクト側の蓄積データ（未取込の学び）。force/sync でも既存があれば守る
   # ※ プロジェクト側の蓄積ファイルを配布対象に増やす場合は、ここに同様の保護を足すこと
   if [ "$p" = "doc/output/" ] && [ -f "$TARGET_DIR/doc/output/to-template.md" ]; then

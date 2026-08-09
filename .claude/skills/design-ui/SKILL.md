@@ -43,6 +43,8 @@ description: "デザインSSOT JSONから技術スタック準拠の静的UI骨�
 - `doc/input/design/copy.json`（文言のSSOT。一字一句固定）
  - `doc/input/design/assets/assets.json`（任意。存在する場合は必ず参照して画像を配置する）
 （通常は `/design-ssot` の成果物）
+- **`art-direction` を読み込む**: SSOTの値を骨格に落とす際の描画判断（材質の陰影表現/引き算の禁止則/シグネチャ表現の実装位置）は同スキルの規律に従う。`project-design-language` にAD宣言済みの決定があればそちらを優先する
+- **レイアウト・配置の判断は `design-drafter` サブエージェント**（`.claude/agents/design-drafter.md`）に委譲する: 画面骨格の生成前にワイヤー宣言（グルーピング/優先度/視線の流れ/余白の設計）を出させ、それに従って骨格を組む（SSOTの `design_context.json` にレイアウトが確定している場合はそちらが優先。ワイヤー宣言は矛盾検査に使う）
 
 ### 参照（スキーマ）
 - constraints/resizing/autoLayout の解釈とレスポンシブ対応表は `doc/input/design/ssot_schema.md` を参照する

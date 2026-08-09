@@ -1,0 +1,276 @@
+<title>herdr 差分レビュー環境 セットアップ報告</title>
+<style>
+  :root {
+    --paper: #f5f7f8;
+    --ink: #22303a;
+    --ink-soft: #5a6b76;
+    --line: #d5dde2;
+    --card: #ffffff;
+    --accent: #b35c00;
+    --accent-soft: #fdf3e6;
+    --ok: #2e7d4f;
+    --code-bg: #eceff1;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #141b21;
+      --ink: #dde5ea;
+      --ink-soft: #8fa0ab;
+      --line: #2b3843;
+      --card: #1b242c;
+      --accent: #f0a340;
+      --accent-soft: #2a2118;
+      --ok: #5cb97f;
+      --code-bg: #232e37;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #141b21;
+    --ink: #dde5ea;
+    --ink-soft: #8fa0ab;
+    --line: #2b3843;
+    --card: #1b242c;
+    --accent: #f0a340;
+    --accent-soft: #2a2118;
+    --ok: #5cb97f;
+    --code-bg: #232e37;
+  }
+  :root[data-theme="light"] {
+    --paper: #f5f7f8;
+    --ink: #22303a;
+    --ink-soft: #5a6b76;
+    --line: #d5dde2;
+    --card: #ffffff;
+    --accent: #b35c00;
+    --accent-soft: #fdf3e6;
+    --ok: #2e7d4f;
+    --code-bg: #eceff1;
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+    line-height: 1.75;
+    margin: 0;
+  }
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 3rem 1.25rem 5rem;
+  }
+  .eyebrow {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 0.5rem;
+  }
+  h1 {
+    font-size: 1.7rem;
+    line-height: 1.35;
+    margin: 0 0 0.4rem;
+    text-wrap: balance;
+  }
+  .meta {
+    color: var(--ink-soft);
+    font-size: 0.85rem;
+    margin: 0 0 2.5rem;
+  }
+  h2 {
+    font-size: 1.15rem;
+    margin: 3rem 0 0.8rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--line);
+    text-wrap: balance;
+  }
+  h2 .num {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    color: var(--accent);
+    font-size: 0.9rem;
+    margin-right: 0.6em;
+  }
+  p { margin: 0.7rem 0; }
+  code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.85em;
+    background: var(--code-bg);
+    padding: 0.1em 0.4em;
+    border-radius: 4px;
+  }
+  .lead {
+    font-size: 1.02rem;
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    padding: 0.9rem 1.1rem;
+    border-radius: 0 6px 6px 0;
+  }
+  .diagram {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1.2rem 0;
+    overflow-x: auto;
+  }
+  .diagram figcaption {
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    margin-top: 0.6rem;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    margin: 1rem 0;
+  }
+  th, td {
+    text-align: left;
+    padding: 0.55rem 0.8rem;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  th {
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+    font-weight: 600;
+  }
+  kbd {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.8em;
+    border: 1px solid var(--line);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    padding: 0.1em 0.45em;
+    background: var(--card);
+    white-space: nowrap;
+  }
+  ul { padding-left: 1.3em; margin: 0.7rem 0; }
+  li { margin: 0.35rem 0; }
+  .status-ok { color: var(--ok); font-weight: 600; }
+  .status-skip { color: var(--ink-soft); font-weight: 600; }
+  .note {
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    border: 1px dashed var(--line);
+    border-radius: 6px;
+    padding: 0.8rem 1rem;
+    margin: 1.2rem 0;
+  }
+</style>
+
+<main>
+  <p class="eyebrow">Setup Report</p>
+  <h1>herdr で Claude の変更差分をプロジェクト単位でレビューできるようにした</h1>
+  <p class="meta">2026-07-17 ・ macOS / Homebrew ・ herdr 0.7.1</p>
+
+  <p class="lead">
+    ゴールは「Claude などのエージェントが触ったファイルを、herdr の画面の中でそのまま差分レビューできる」こと。
+    差分ビューア <strong>hunk</strong> とファイルビューアの2つのプラグインを導入し、キーバインドを設定した。
+    Claude 統合はすでに最新だったため追加作業なし。
+  </p>
+
+  <h2><span class="num">01</span>全体の構成 — 何がどう繋がっているか</h2>
+  <p>
+    Claude Code がプロジェクトのファイルを編集すると、その変更は git の worktree（未コミットの作業ツリー）に現れる。
+    hunk がそれを watch し、herdr の split ペインに差分として表示し続ける、という流れ。
+  </p>
+  <figure class="diagram">
+<pre class="mermaid">
+flowchart LR
+    subgraph herdr["herdr（ターミナルワークスペース）"]
+        claude["Claude Code<br/>（左ペイン）"]
+        hunk["hunk 差分ビューア<br/>（右ペイン・watch状態）"]
+        fv["ファイルビューア<br/>（split / タブ）"]
+        panel["エージェントパネル<br/>（Claude の状態表示）"]
+    end
+    repo[("プロジェクト<br/>git worktree")]
+    hook["Claude 統合フック<br/>~/.claude/hooks/"]
+
+    claude -- "ファイルを編集" --> repo
+    repo -- "変更を watch" --> hunk
+    repo -- "ツリーを閲覧" --> fv
+    claude -. "状態を通知" .-> hook
+    hook -.-> panel
+</pre>
+    <figcaption>図1: Claude の編集が worktree 経由で hunk に流れ込み、herdr の画面内で差分がリアルタイムに見える。</figcaption>
+  </figure>
+
+  <h2><span class="num">02</span>実施した作業の流れ</h2>
+  <figure class="diagram">
+<pre class="mermaid">
+flowchart TD
+    a["現状確認<br/>herdr 0.7.1 / config.toml あり / プラグインなし"]
+    b["plugin install<br/>herdr-file-viewer v1.13.0"]
+    c["plugin install<br/>hunk.diff（herdr-plugin-hunk）"]
+    d["hunk CLI 本体がない事が判明<br/>→ brew install hunk（v0.17.1）"]
+    e["config.toml に追記<br/>IME 設定 + キーバインド3つ"]
+    f["Claude 統合を確認<br/>→ すでに最新（v7）"]
+    g["omp 統合はスキップ<br/>（omp 本体が未導入のため）"]
+    h["完了<br/>次回 herdr 起動時に設定が反映"]
+
+    a --> b --> c --> d --> e --> f --> h
+    f --> g --> h
+</pre>
+    <figcaption>図2: セットアップの手順。手順書との差分は「hunk 本体の追加インストール」と「omp 統合のスキップ」の2点。</figcaption>
+  </figure>
+
+  <h2><span class="num">03</span>設定したキーバインド</h2>
+  <p>prefix キーを押して prefix モードに入ってから、以下のキーを押す。</p>
+  <table>
+    <thead>
+      <tr><th>キー</th><th>動作</th><th>用途</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><kbd>prefix</kbd> → <kbd>h</kbd></td>
+        <td>hunk を split で起動（worktree diff・watch状態）</td>
+        <td>Claude が今なにを変更したかをリアルタイムで見る</td>
+      </tr>
+      <tr>
+        <td><kbd>prefix</kbd> → <kbd>f</kbd></td>
+        <td>ファイルビューアを split で起動</td>
+        <td>プロジェクト全体の構成を横目で確認</td>
+      </tr>
+      <tr>
+        <td><kbd>prefix</kbd> → <kbd>Shift</kbd>+<kbd>F</kbd></td>
+        <td>ファイルビューアを新しいタブで起動</td>
+        <td>広い画面でじっくりツリーを見る</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2><span class="num">04</span>作業結果の一覧</h2>
+  <table>
+    <thead>
+      <tr><th>項目</th><th>結果</th><th>備考</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>herdr-file-viewer</td><td class="status-ok">導入済み</td><td>v1.13.0（smarzban/herdr-file-viewer）</td></tr>
+      <tr><td>hunk.diff プラグイン</td><td class="status-ok">導入済み</td><td>edmundmiller/herdr-plugin-hunk</td></tr>
+      <tr><td>hunk CLI 本体</td><td class="status-ok">導入済み</td><td><code>brew install hunk</code>（v0.17.1）— 手順書にない追加作業</td></tr>
+      <tr><td>config.toml 追記</td><td class="status-ok">完了</td><td>IME 関連設定 + キーバインド3つ。TOML 構文チェック済み</td></tr>
+      <tr><td>Claude 統合</td><td class="status-ok">最新 (v7)</td><td>すでに導入済みだったため作業不要</td></tr>
+      <tr><td>omp 統合</td><td class="status-skip">スキップ</td><td>omp 本体（<code>~/.omp/</code>）が未導入のため。必要なら本体導入後に <code>herdr integration install omp</code></td></tr>
+      <tr><td>設定リロード</td><td class="status-skip">不要</td><td>サーバー未起動。次回 <code>herdr</code> 起動時に自動で読み込まれる</td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="num">05</span>補足 — 差分の見方は3モードある</h2>
+  <ul>
+    <li><strong>worktree</strong>（今回キーに割り当てたもの）— コミットしていない変更すべて。Claude の作業を追うならこれ。</li>
+    <li><strong>staged</strong> — <code>git add</code> 済みの変更だけ。コミット前の最終確認向け。</li>
+    <li><strong>branch</strong> — main（または master）との差分全体。ブランチ単位のレビュー向け。</li>
+  </ul>
+  <p>
+    staged / branch もキーに割り当てたい場合は、config.toml の <code>[[keys.command]]</code> に
+    <code>hunk.diff.staged-split</code> や <code>hunk.diff.branch-split</code> のアクションを追加すればよい。
+  </p>
+
+  <div class="note">
+    herdr を介さずに、任意のペインで <code>hunk</code> を直接起動しても同じ差分ビューが使える。
+    エージェントの変更を「レビューして承認する」用途に特化したツールなので、lazygit 等よりこの目的には合っている。
+  </div>
+</main>
