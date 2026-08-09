@@ -592,11 +592,11 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
 
 - **日付**: 2026-07-05
 - **対象**: `.claude/rules/*.md`（tool-usage / code-quality / dev-practices / context-management / git）、`.claude/skills/*/SKILL.md`（image-prep / testing / developer-specialist / creative-coder / basic-review / design-ssot / agent-browser / deep-review / task-run / template-feedback / project-init / auto-build / project-design-language）、新規 `.claude/skills/experience-plan/SKILL.md`・`.claude/skills/auto-mvp/SKILL.md`、新規 `.claude/hooks/git-branch-guard.sh`・`.claude/hooks/format-on-edit.sh`、`.claude/settings.json`
-- **出典**: `../uilab3/doc/output/to-template.md`（項目1-7）、`/Users/mae/fable_test1/doc/output/to-template.md`（項目1-16、発: aqualchemy）
+- **出典**: `../uilab3/doc/output/to-template.md`（項目1-7）、`~/fable_test1/doc/output/to-template.md`（項目1-16、発: aqualchemy）
 
 ### Context
 - `/template-feedback` の定型走査（`ls ../*/doc/output/to-template.md`）で uilab3 の未取込7項目を検出
-- ユーザーから追加で `/Users/mae/fable_test1`（sibling ディレクトリの外、`../` の走査には入らない場所）の送り状を今回のスコープに含める指示があり、16項目を追加で走査
+- ユーザーから追加で `~/fable_test1`（sibling ディレクトリの外、`../` の走査には入らない場所）の送り状を今回のスコープに含める指示があり、16項目を追加で走査
 - 計23項目のスコープ確認を人間に取り、「両方全部を順に検討」で合意
 
 ### Decision
@@ -736,7 +736,7 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
 ## ADR-021: 送り状取り込み（listening-editor）— ガード系フックの fail-closed 化と外部依存の配布方針
 
 - **日付**: 2026-08-09
-- **出典**: `doc/input/from-projects/listening-editor.md`（送り状インボックス）/ `/Users/mae/output/listening-editor-workspace`（解決済み実物）
+- **出典**: `doc/input/from-projects/listening-editor.md`（送り状インボックス）/ `~/output/listening-editor-workspace`（解決済み実物）
 
 ### Context
 - `git-branch-guard.sh` は main への直接 commit/push をブロックする建て付けだったが、**実測すると危険ケース6件すべてが exit 0 で素通り**していた。ガードが無いのに「守られている」と誤認していた状態
@@ -759,3 +759,37 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
 - 送り状の記述だけを頼りにフックを書き直す → 実測で3原因に切り分けた成果が劣化する。実物を写す方を採用
 - 検証スクリプトを同梱せず tool-usage.md に手順を文章で書く → 「書いて終わりにしない」原則が仕組みで担保されない。同梱を採用
 - 原因Aだけ直す → 出典セッションでも同じ失敗をしている（最初の修正はテストで落ちた）。3原因すべてと refspec 側のもう1箇所を同時に直す
+
+---
+
+## ADR-022: 投函箱をPCローカル化し、構築コマンド（/template-inbox）を新設
+
+- **日付**: 2026-08-09
+- **関連**: ADR-021（投函箱経由での初回取り込み）
+
+### Context
+- ADR-021 で `doc/input/from-projects/`（投函箱）を Git 追跡＋コミットしたが、**実測すると配布物にそのまま混入**していた。`apply_template.sh` の配布対象は `doc/input/` 丸ごとで、投函箱を除外していなかった
+- 混入していたのは (1) 他プロジェクトの受信データそのもの (2) `/Users/<user>/...` のローカル絶対パス (3) private リポジトリの URL
+- 投函箱は取り込むたびに増えるため、放置すると配布物が単調に膨らむ
+- 絶対パスは欠陥ではなく**投函箱の価値の源**（取り込み時に実物を読める。ADR-021 で実際にこれが効いた）。相対表記に直すと価値が落ちる
+- 新しいマシンで clone すると、追跡外にした投函箱は空になる
+
+### Decision
+- **投函箱の実体は Git 追跡外**（`.gitignore` で `doc/input/from-projects/*.md`、`README.md` のみ追跡）。仕組みの説明は配布し、受信データは配布しない
+- **配布物からも除外**（`apply_template.sh` で `from-projects/` を exclude）。公開（GitHub）と配布（apply_template）は別経路なので**両方に手当てが要る**
+- 絶対パスはローカル専用ファイル内でそのまま維持する（実物を読める利点を優先）
+- **`/template-inbox` を新設**: sibling を走査し、そのPCの実際の配置から投函箱を materialize する。`/template-feedback` の前段に置き、投函箱が `README.md` だけなら先に実行するよう導線を張った
+- `meta/adr-lite.md` の絶対パスは `~/` 表記に統一（配布対象外だが GitHub では公開されるため）
+
+### Consequences
+- (+) 配布物・公開物から個人固有のパスと受信データが消えた（実測: 配布先に `from-projects/` ディレクトリ自体が作られない）
+- (+) 投函箱が増えても配布物は膨らまない
+- (+) 「ai-template を開けば未処理の学びが目に入る」という投函箱の主目的は維持される（ローカルにファイルは残るため）
+- (−) 「ai-template を push すれば他マシンからも未処理の学びが見える」という副次的利点は失われる。`/template-inbox` で組み直す運用で代替する
+- (−) 工程が1つ増える（構築 → 取り込み）。ただし責務が分かれて各コマンドは薄くなった
+
+### Alternatives
+- `apply_template.sh` の除外だけで済ませる → GitHub 上には残る。公開と配布の両方を塞ぐ必要がある
+- 絶対パスを `~/` 表記に変えて追跡を続ける → ユーザー名は消えるが受信データ自体が配布物に残る。増え続ける問題も解決しない
+- 取込済の送り状を削除して未取込だけ追跡 → 「個人の受信箱を公開物に置く」構造は変わらない
+- `/template-feedback` に構築ステップを内包 → 取り込みの手順が厚くなる。厚いスキルは誤読・過剰実行を誘発するため分割した

@@ -164,3 +164,8 @@ vite.config.ts.timestamp-*
 AGENTS.md
 .agents/
 .codex/
+
+# 投函箱の受信物（各PCローカル。出典マシンの絶対パスを含むため公開・配布しない）
+# README.md は仕組みの説明なので追跡する
+doc/input/from-projects/*.md
+!doc/input/from-projects/README.md

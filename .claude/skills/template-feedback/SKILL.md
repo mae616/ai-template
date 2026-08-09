@@ -22,6 +22,7 @@ description: "siblingプロジェクトの送り状（doc/output/to-template.md�
 ### 1. 走査
 - sibling プロジェクトの送り状を収集する: `ls ../*/doc/output/to-template.md`
 - 自リポジトリのインボックスも収集する: `ls doc/input/from-projects/*.md`（`README.md` は除く）
+- インボックスが `README.md` だけなら、このPCではまだ構築されていない。`/template-inbox` を先に実行する（投函箱の実体はGit追跡外＝PCローカルのため）
 - ai-template 自身の `doc/output/to-template.md`（配布用の空雛形）は対象外
 - 同じ学びが両方にある場合は**インボックス側を正**とする（`解決済みファイル` のパスを持つため）
 
