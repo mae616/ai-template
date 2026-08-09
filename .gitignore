@@ -159,3 +159,8 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Codex向けミラー構成（CLAUDE.md/.claude の写し。ローカル専用で配布物には含めない）
+AGENTS.md
+.agents/
+.codex/
