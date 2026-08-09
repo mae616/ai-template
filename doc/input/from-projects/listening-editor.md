@@ -15,7 +15,7 @@
 - **反映先候補**: `.claude/hooks/git-branch-guard.sh`（修正本体）/ `.claude/rules/tool-usage.md`（原則）
 - **出典リポジトリ**: `/Users/mae/output/listening-editor-workspace`
 - **解決済みファイル**: `/Users/mae/output/listening-editor-workspace/.claude/hooks/git-branch-guard.sh`
-- **状態**: 未取込
+- **状態**: 取込済（2026-08-09 / 4e7d57e）
 
 ### 何が起きていたか
 
@@ -82,7 +82,7 @@ t "判定不能"        'git commit -m x'                     2   # Git管理外
 - **出典リポジトリ**: `/Users/mae/output/listening-editor-workspace`
 - **解決済みファイル**: `/Users/mae/output/listening-editor-workspace/listening-editor/README.md`
   （「使っている外部コンポーネント」「X の投稿を読む場合」の各節）
-- **状態**: 未取込
+- **状態**: 取込済（2026-08-09 / 4e7d57e）
 
 ### 何が問題か
 
