@@ -1,0 +1,416 @@
+<title>送り状の取り込みと投函箱のPCローカル化</title>
+<style>
+  :root {
+    --paper: #f5f7f8;
+    --ink: #22303a;
+    --ink-soft: #5a6b76;
+    --line: #d5dde2;
+    --card: #ffffff;
+    --accent: #b35c00;
+    --pass: #0e6e5c;
+    --pass-bg: #e2f0ec;
+    --fail: #b3341f;
+    --fail-bg: #f7e5e1;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #141b21;
+      --ink: #dde5ea;
+      --ink-soft: #8fa0ab;
+      --line: #2b3843;
+      --card: #1b242c;
+      --accent: #f0a340;
+      --pass: #5ec2ab;
+      --pass-bg: #14322c;
+      --fail: #e8836c;
+      --fail-bg: #38201b;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #141b21;
+    --ink: #dde5ea;
+    --ink-soft: #8fa0ab;
+    --line: #2b3843;
+    --card: #1b242c;
+    --accent: #f0a340;
+    --pass: #5ec2ab;
+    --pass-bg: #14322c;
+    --fail: #e8836c;
+    --fail-bg: #38201b;
+  }
+  :root[data-theme="light"] {
+    --paper: #f5f7f8;
+    --ink: #22303a;
+    --ink-soft: #5a6b76;
+    --line: #d5dde2;
+    --card: #ffffff;
+    --accent: #b35c00;
+    --pass: #0e6e5c;
+    --pass-bg: #e2f0ec;
+    --fail: #b3341f;
+    --fail-bg: #f7e5e1;
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+    line-height: 1.75;
+    margin: 0;
+  }
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 3rem 1.25rem 5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2.75rem;
+  }
+  header { display: flex; flex-direction: column; gap: 0.4rem; }
+  .eyebrow {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0;
+  }
+  h1 {
+    font-size: 1.65rem;
+    line-height: 1.45;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .meta {
+    color: var(--ink-soft);
+    font-size: 0.85rem;
+    margin: 0;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+
+  section { display: flex; flex-direction: column; gap: 1rem; }
+  h2 {
+    font-size: 1.12rem;
+    margin: 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: baseline;
+    gap: 0.7rem;
+  }
+  h2 .num {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.78rem;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+  }
+  h3 {
+    font-size: 0.97rem;
+    margin: 0.6rem 0 0;
+    color: var(--ink);
+  }
+  p { margin: 0; }
+  ul { margin: 0; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 0.35rem; }
+  code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.88em;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 0.05em 0.35em;
+  }
+
+  /* 主題の引き（明朝で1点だけ質感を変える） */
+  .lede {
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
+    font-size: 1.12rem;
+    line-height: 1.9;
+    border-left: 3px solid var(--accent);
+    padding: 0.2rem 0 0.2rem 1.1rem;
+    margin: 0;
+  }
+
+  /* 修正前後の対比 */
+  .verdict {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .stat {
+    flex: 1 1 200px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 0.9rem 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+  .stat .label {
+    font-size: 0.76rem;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  .stat .value {
+    font-size: 1.85rem;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+  }
+  .stat .note { font-size: 0.82rem; color: var(--ink-soft); }
+  .stat.before { border-left: 4px solid var(--fail); }
+  .stat.before .value { color: var(--fail); }
+  .stat.after { border-left: 4px solid var(--pass); }
+  .stat.after .value { color: var(--pass); }
+
+  .table-wrap { overflow-x: auto; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.88rem;
+    background: var(--card);
+  }
+  th, td {
+    border: 1px solid var(--line);
+    padding: 0.5rem 0.7rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: var(--paper);
+    font-weight: 600;
+    font-size: 0.8rem;
+    letter-spacing: 0.03em;
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+  td code { background: transparent; border: none; padding: 0; }
+
+  .chip {
+    display: inline-block;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.74rem;
+    letter-spacing: 0.04em;
+    padding: 0.1em 0.55em;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .chip.ng { background: var(--fail-bg); color: var(--fail); }
+  .chip.ok { background: var(--pass-bg); color: var(--pass); }
+
+  pre.mermaid {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-x: auto;
+    margin: 0;
+  }
+
+  .callout {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--ink-soft);
+    border-radius: 6px;
+    padding: 0.9rem 1.1rem;
+    font-size: 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .callout strong { color: var(--ink); }
+
+  footer {
+    border-top: 1px solid var(--line);
+    padding-top: 1.2rem;
+    font-size: 0.83rem;
+    color: var(--ink-soft);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  a { color: var(--accent); }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<main>
+  <header>
+    <p class="eyebrow">Work Report / template-feedback</p>
+    <h1>送り状を取り込んだら、ガードが最初から機能していなかった</h1>
+    <p class="meta">2026-08-09 &middot; ai-template &middot; ADR-021 / ADR-022 &middot; 4e7d57e → 904b733</p>
+  </header>
+
+  <p class="lede">
+    未取込の送り状を2件取り込んだ。その過程で、<code>main</code> への直接 commit / push を止めるはずのフックが、
+    危険な操作を1件も止めていなかったことが実測で判明した。さらに、取り込みのために作った投函箱そのものが、
+    OSS 配布物に個人のローカルパスを持ち出していた。どちらも「動いているつもり」で見えなくなっていた欠陥だった。
+  </p>
+
+  <section>
+    <h2><span class="num">01</span>送り状の走査結果</h2>
+    <p>5つの sibling プロジェクトと、自リポジトリの投函箱を走査した。未取込は listening-editor の2項目のみだった。</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>発</th><th>状態</th><th>内容</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>listening-editor</td><td><span class="chip ng">未取込 2件</span></td><td>ガード系フックの欠陥修正 / 外部MCPの配布方針</td></tr>
+          <tr><td>mae616-web</td><td><span class="chip ok">取込済 7件</span></td><td>judgment-harness、design TDD ほか（2026-06-11 に処理済み）</td></tr>
+          <tr><td>metacomi2026 / profile-hop / stack-chan</td><td>空雛形</td><td>まだ学びが投函されていない</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">02</span>送り状が流れる仕組み</h2>
+    <p>プロジェクトはテンプレート本体を編集しない。学びは送り状として投函し、ai-template 側で直列に取り込む。判断が1か所に集まるので、複数プロジェクトが並行しても競合しない。</p>
+<pre class="mermaid">
+flowchart LR
+  P["プロジェクトで<br/>学びを得る"] --> S["正本<br/>doc/output/to-template.md"]
+  P --> I["投函箱の写し<br/>doc/input/from-projects/"]
+  S --> F["/template-feedback<br/>（取り込み・直列）"]
+  I --> F
+  F --> R["rules / skills / hooks<br/>へ反映"]
+  F --> L["両方の状態を<br/>取込済に倒す"]
+  R --> ADR["meta/adr-lite.md<br/>に経緯を記録"]
+</pre>
+    <div class="callout">
+      <p><strong>投函箱だけが持つもの</strong>＝<code>解決済みファイル</code>（直した実物の絶対パス）。今回これが効いた。送り状の説明文からフックを書き直すのではなく、実測済みの実物を写せたため、検証済みの内容が劣化しなかった。</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">03</span>ガードは1件も止めていなかった</h2>
+    <p>取り込んだ修正を当てる前後で、同じ10ケースを実測した。修正前は危険な操作6件すべてが <code>exit 0</code> で通過していた。</p>
+
+    <div class="verdict">
+      <div class="stat before">
+        <span class="label">BEFORE</span>
+        <span class="value">4 / 10</span>
+        <span class="note">危険ケース6件すべて素通り</span>
+      </div>
+      <div class="stat after">
+        <span class="label">AFTER</span>
+        <span class="value">10 / 10</span>
+        <span class="note">通す4件・止める6件が期待どおり</span>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>ケース</th><th>期待</th><th>修正前</th><th>修正後</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>ls -la</code>（git 以外）</td><td>通す</td><td><span class="chip ok">通過</span></td><td><span class="chip ok">通過</span></td></tr>
+          <tr><td><code>git -C &lt;task&gt; commit</code></td><td>通す</td><td><span class="chip ok">通過</span></td><td><span class="chip ok">通過</span></td></tr>
+          <tr><td><code>cd &lt;task&gt; &amp;&amp; git commit</code></td><td>通す</td><td><span class="chip ok">通過</span></td><td><span class="chip ok">通過</span></td></tr>
+          <tr><td><code>git -C &lt;task&gt; push origin HEAD</code></td><td>通す</td><td><span class="chip ok">通過</span></td><td><span class="chip ok">通過</span></td></tr>
+          <tr><td><code>git -C &lt;main&gt; commit</code></td><td>止める</td><td><span class="chip ng">素通り</span></td><td><span class="chip ok">ブロック</span></td></tr>
+          <tr><td><code>cd &lt;main&gt; &amp;&amp; git commit</code></td><td>止める</td><td><span class="chip ng">素通り</span></td><td><span class="chip ok">ブロック</span></td></tr>
+          <tr><td><code>git -C &lt;main&gt; push</code></td><td>止める</td><td><span class="chip ng">素通り</span></td><td><span class="chip ok">ブロック</span></td></tr>
+          <tr><td><code>git push origin HEAD:main</code></td><td>止める</td><td><span class="chip ng">素通り</span></td><td><span class="chip ok">ブロック</span></td></tr>
+          <tr><td>ブランチ判定不能</td><td>止める</td><td><span class="chip ng">素通り</span></td><td><span class="chip ok">ブロック</span></td></tr>
+          <tr><td>コミット0件リポジトリの main</td><td>止める</td><td><span class="chip ng">素通り</span></td><td><span class="chip ok">ブロック</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>原因は独立して3つあった</h3>
+    <ul>
+      <li><strong>A. 人間の手癖を前提にした正規表現</strong> — <code>\bgit (commit|push)\b</code> は <code>git -C &lt;path&gt; commit</code> に一致しない。人間は <code>cd</code> してから打つが、AI は作業ディレクトリを動かさずに済む <code>-C</code> 形を好む。入口で <code>exit 0</code> するため、以降の判定に一切到達していなかった。同じ書き方が push 側にもう1箇所あった。</li>
+      <li><strong>B. コミット0件のリポジトリ</strong> — <code>rev-parse --abbrev-ref HEAD</code> は文字列 <code>HEAD</code> を返す。<code>main</code> と一致しないので、<strong>初回コミットの瞬間だけ</strong>ガードが無効になる。最も起こりがちな場面に穴が開いていた。</li>
+      <li><strong>C. cwd が当てにならない</strong> — フックは実行「前」に走る。<code>cd &lt;path&gt; &amp;&amp;</code> はまだ効いておらず、<code>-C</code> は別リポジトリを指す。コマンド文字列からパスを抽出して判定する必要があった。</li>
+    </ul>
+    <div class="callout">
+      <p><strong>あわせて fail-closed 化。</strong> 判定できないときに通す実装は「守られている」誤認を生む。ガードが無い状態より悪い。判定不能は止める側に倒した。</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">04</span>投函箱そのものが配布物を汚していた</h2>
+    <p>取り込みのために作った投函箱を、<code>apply_template.sh</code> が除外していなかった。実際に一時ディレクトリへ配って確認したところ、そのままコピーされていた。</p>
+    <ul>
+      <li>他プロジェクトの受信データが全プロジェクトへ複製される（取り込むたびに増える）</li>
+      <li><code>/Users/&lt;user&gt;/...</code> のローカル絶対パスが5箇所</li>
+      <li>private リポジトリの URL が1行</li>
+    </ul>
+    <p>絶対パスは欠陥ではなく<strong>投函箱の価値の源</strong>なので、相対表記に直すと利点が消える。そこでパスを直すのではなく、受信データ自体をPCローカルへ閉じた。</p>
+<pre class="mermaid">
+flowchart TB
+  IB["doc/input/from-projects/"]
+  IB --> RM["README.md<br/>（仕組みの説明）"]
+  IB --> DATA["受け取った送り状<br/>（個人の受信データ）"]
+  RM --> PUB["GitHub 公開 ✓"]
+  RM --> DIST["apply_template 配布 ✗<br/>（配布先は書く側なので不要）"]
+  DATA --> X1["GitHub 公開 ✗<br/>.gitignore で除外"]
+  DATA --> X2["apply_template 配布 ✗<br/>スクリプトで除外"]
+  DATA --> LOCAL["各PCローカルに保持"]
+  LOCAL --> CMD["/template-inbox<br/>で組み直す"]
+</pre>
+    <div class="callout">
+      <p><strong>公開と配布は別経路。</strong> <code>apply_template.sh</code> の除外だけでは GitHub 上に残る。<code>.gitignore</code> だけでは配布経路が塞がらない。両方に手当てが要る。</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">05</span>作業の流れ</h2>
+<pre class="mermaid">
+flowchart TB
+  A["未push確認<br/>→ コミット漏れと判明"] --> B["Codexミラー構成を<br/>追跡外へ"]
+  B --> C["/template-feedback<br/>送り状を走査"]
+  C --> D["実物を読んでフックを写す<br/>＋ fail-closed 化"]
+  D --> E["検証スクリプトを同梱<br/>10/10 PASS"]
+  E --> F["rules 2件に原則を追記"]
+  F --> G["ADR-021 記録・コミット<br/>台帳を取込済に"]
+  G --> H["配布物を実測<br/>→ 投函箱の混入が発覚"]
+  H --> I["投函箱をPCローカル化<br/>公開・配布の両方を除外"]
+  I --> J["/template-inbox 新設<br/>ADR-022 記録・コミット"]
+</pre>
+  </section>
+
+  <section>
+    <h2><span class="num">06</span>変更したもの</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>ファイル</th><th>種別</th><th>内容</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>.claude/hooks/git-branch-guard.sh</code></td><td>修正</td><td>3欠陥を修正し fail-closed 化。実測済みの実物を写した</td></tr>
+          <tr><td><code>.claude/hooks/test-git-branch-guard.sh</code></td><td>新規</td><td>一時リポジトリを自作して10ケースを叩く検証スクリプト</td></tr>
+          <tr><td><code>.claude/skills/template-inbox/SKILL.md</code></td><td>新規</td><td><code>/template-inbox</code>。そのPCの投函箱を構築する</td></tr>
+          <tr><td><code>.claude/skills/template-feedback/SKILL.md</code></td><td>追記</td><td>投函箱優先の原則、実物を読む手順、構築コマンドへの導線</td></tr>
+          <tr><td><code>.claude/rules/tool-usage.md</code></td><td>追記</td><td>ガード系フックの4原則（AIが打つ形で検証 / fail-closed / 両方向を実測 / 同種欠陥は複数ある前提）</td></tr>
+          <tr><td><code>.claude/rules/code-quality.md</code></td><td>追記</td><td>外部コンポーネント依存の配布方針（同梱せず README で開示）</td></tr>
+          <tr><td><code>scripts/apply_template.sh</code></td><td>修正</td><td><code>from-projects/</code> を配布対象外に</td></tr>
+          <tr><td><code>.gitignore</code></td><td>修正</td><td>Codexミラー構成と投函箱の受信データを追跡外に</td></tr>
+          <tr><td><code>meta/adr-lite.md</code></td><td>追記</td><td>ADR-021 / ADR-022。既存の絶対パスも <code>~/</code> 表記へ統一</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">07</span>引き受けたトレードオフ</h2>
+    <ul>
+      <li><strong>失ったもの</strong>: 「ai-template を push すれば他マシンからも未処理の学びが見える」という副次的な利点。投函箱がローカル専用になったため。<code>/template-inbox</code> で組み直す運用で代替する。</li>
+      <li><strong>残したもの</strong>: 「ai-template を開けば未処理の学びが目に入る」という主目的。ローカルにファイルは残るので影響しない。</li>
+      <li><strong>増えたもの</strong>: 工程が構築 → 取り込みの2段になった。ただし責務が分かれ、各コマンドは薄くなった。</li>
+      <li><strong>副作用</strong>: fail-closed により、Git 管理外ディレクトリからの <code>git commit</code> は止まる。<code>git -C &lt;path&gt;</code> でリポジトリを明示すれば通る。</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="num">08</span>残っていること</h2>
+    <ul>
+      <li>未pushコミットが3件（<code>4e7d57e</code> / <code>922cfe2</code> / <code>904b733</code>）。push は未実施。</li>
+      <li>他のフック（<code>warn-destructive-bash.sh</code> ほか）に同じ「AI が打つコマンド形」の穴がないか未点検。</li>
+      <li><code>dev-practices.md</code> の送り状の記述が、ai-template 自身で作業した場合の行き先に触れていない（本体なので直接反映でよいが、明文化されていない）。</li>
+    </ul>
+  </section>
+
+  <footer>
+    doc/generated/reports/2026-08-09-template-feedback-absorb.html
+  </footer>
+</main>

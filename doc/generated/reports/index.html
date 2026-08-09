@@ -10,8 +10,9 @@
     --card: #ffffff;
     --accent: #b35c00;
   }
+  /* 明示的にライトを選んだ閲覧者がOSのダーク設定に負けないよう :not() で守る */
   @media (prefers-color-scheme: dark) {
-    :root {
+    :root:not([data-theme="light"]) {
       --paper: #141b21;
       --ink: #dde5ea;
       --ink-soft: #8fa0ab;
@@ -128,6 +129,24 @@
   <p class="meta">作業レポート（図解つきHTML）の目次。新しいものが上。</p>
 
   <ol class="reports">
+    <li class="report">
+      <span class="date">2026-08-09</span>
+      <h2><a href="https://claude.ai/code/artifact/7663625a-c0cd-40c4-8ea5-ebe74fe19e0c">送り状を取り込んだら、ガードが最初から機能していなかった</a></h2>
+      <p>listening-editor の送り状2件を取り込み。main への commit/push を止めるはずのフックが危険ケース6件すべて素通りしていた（実測 4/10 → 10/10）。あわせて投函箱が配布物に個人のパスを持ち出していた問題を修正し、/template-inbox を新設。</p>
+      <div class="path">doc/generated/reports/2026-08-09-template-feedback-absorb.html</div>
+    </li>
+    <li class="report">
+      <span class="date">2026-07-31</span>
+      <h2><a href="https://claude.ai/code/artifact/b38c709b-c720-4d7b-aeb1-72d849247603">X 連投スレッドの帰属判定は、いまこうなっている</a></h2>
+      <p>listening-editor の listen スキルで、他人の返信や引用ポストを台本に混ぜないための規則の現状整理。実測2件（型A/型B）、見つかった欠陥「本人に戻れない」の修正案、未解決の引用ポスト問題を含む。</p>
+      <div class="path">doc/generated/reports/2026-07-31-x-thread-handle-filter.html</div>
+    </li>
+    <li class="report">
+      <span class="date">2026-07-24</span>
+      <h2><a href="https://claude.ai/code/artifact/60c8176a-3d9a-4812-ab8c-74a9c6adb46c">Profile Hop: 「マッチング待ち」の処理モデル — OCRは裏取りをしている</a></h2>
+      <p>マッチングという別処理は存在せず、OCRが毎フレーム「同じ答えが連続N回出るか」を裏取りしている時間だと図解。パイプラインのフローチャートと状態遷移図つき。</p>
+      <div class="path">doc/generated/reports/2026-07-24-ocr-matching-pipeline.html</div>
+    </li>
     <li class="report">
       <span class="date">2026-07-18</span>
       <h2><a href="https://claude.ai/code/artifact/9c67ac08-7dad-4682-84d0-69443779251f">プロトタイプ工程の再設計 提案 — 設定集で学びを継ぐ連作ループ</a></h2>
