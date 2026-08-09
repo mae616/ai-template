@@ -780,6 +780,7 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
 - 絶対パスはローカル専用ファイル内でそのまま維持する（実物を読める利点を優先）
 - **`/template-inbox` を新設**: sibling を走査し、そのPCの実際の配置から投函箱を materialize する。`/template-feedback` の前段に置き、投函箱が `README.md` だけなら先に実行するよう導線を張った
 - `meta/adr-lite.md` の絶対パスは `~/` 表記に統一（配布対象外だが GitHub では公開されるため）
+- 同じ構造の問題として **`doc/generated/reports/` も配布対象外**にした（ai-template 自身の作業記録が全プロジェクトへ複製され増え続けるため）。ディレクトリ自体は残し、配布先が最初から置き場所を持てるようにする
 
 ### Consequences
 - (+) 配布物・公開物から個人固有のパスと受信データが消えた（実測: 配布先に `from-projects/` ディレクトリ自体が作られない）
