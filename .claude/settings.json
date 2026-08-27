@@ -18,11 +18,9 @@
       "TaskUpdate",
       "TaskOutput",
       "SendMessage",
-
       "mcp__blender__*",
       "mcp__drawio__*",
       "mcp__ide__*",
-
       "Bash(pwd)",
       "Bash(which *)",
       "Bash(ls *)",
@@ -38,7 +36,6 @@
       "Bash(source *)",
       "Bash(rsync *)",
       "Bash(curl *)",
-
       "Bash(node *)",
       "Bash(npm run *)",
       "Bash(npm list *)",
@@ -54,7 +51,6 @@
       "Bash(npx jest*)",
       "Bash(npx biome*)",
       "Bash(ruff *)",
-
       "Bash(git status*)",
       "Bash(git diff*)",
       "Bash(git log*)",
@@ -72,7 +68,6 @@
       "Bash(git rebase *)",
       "Bash(git tag *)",
       "Bash(git remote -v*)",
-
       "Bash(gh pr view*)",
       "Bash(gh pr list*)",
       "Bash(gh pr diff*)",
@@ -84,7 +79,6 @@
       "Bash(gh api * --method GET *)",
       "Bash(gh run view*)",
       "Bash(gh run list*)",
-
       "Bash(git push *)",
       "Bash(gh issue create *)",
       "Bash(gh issue edit *)",
@@ -104,14 +98,11 @@
       "Bash(brew *)",
       "Bash(docker *)",
       "Bash(rm *)",
-
       "Bash(git branch -D *)",
       "Bash(git reset *)",
       "Bash(git clean *)",
-
       "Bash(gh pr merge *)",
       "Bash(gh pr close *)",
-
       "Bash(npm publish*)",
       "Bash(pnpm publish*)",
       "Bash(wrangler deploy*)",
@@ -176,6 +167,16 @@
             "type": "command",
             "command": ".claude/hooks/format-on-edit.sh",
             "timeout": 15
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/show-ssot-diff.sh",
+            "timeout": 10
           }
         ]
       }

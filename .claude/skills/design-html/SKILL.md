@@ -15,7 +15,8 @@ description: "デザインSSOT JSONからドキュメント・共有用の静的
 - `/design-ssot`・`/design-mock` のいずれかで SSOT が揃っている前提（このコマンドはSSOTを作らない）
 
 ## 次に何をする？
-- 見た目の調整が必要なら、HTMLの差分/変更点を根拠に SSOT（tokens/components/context）へ反映する
+- 見た目の調整が必要なら、HTMLの差分/変更点を根拠に SSOT（tokens/components/context）へ反映する。
+  ⚠️ **反映の前に、SSOTの差分（どのキーをどの値に変えるか）を見せて合意を得る**（ADR-027）
 - 実装に進むなら `/design-ui` → `/design-components` → `/design-assemble`（READMEのフローに合流）
 
 > **旧 `/design-split` の役割はこのスキルが担う**: `/design-mock` が生成したSSOTからページ単位HTMLを生成するため、1枚ペラHTMLを手動で分割する必要はない

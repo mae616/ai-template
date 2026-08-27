@@ -40,7 +40,7 @@ description: "会話からデザインSSOT（JSON）と静的HTML叩き台を同
 - ユーザーとの会話（要件/トーン/主要導線）から、**ページ単位の静的HTML（複数可）**を生成する
 - 実装（状態/データ取得/ルーティング）は入れず、**見た目と情報設計**に集中する
 - 以降の共通ルート（`/design-ui` 等）へ合流できるよう、**SSOT（design JSON）も同時に用意**する
-- 生成したHTMLは、**ユーザーが目で見ながら調整するためのプレビュー**として扱う（調整点は会話で共有し、SSOT（JSON）側にも反映する）
+- 生成したHTMLは、**ユーザーが目で見ながら調整するためのプレビュー**として扱う（調整点は会話で共有し、**SSOTへ反映する差分を見せて合意を得てから** JSON 側に反映する）
 
 ---
 
@@ -78,7 +78,10 @@ description: "会話からデザインSSOT（JSON）と静的HTML叩き台を同
 
 ## 反復（重要）
 - ユーザーが `doc/input/design/html/*.html` を手で編集して調整した場合は、**差分（diff）または変更点の箇条書き**を入力として受け取る（状況で使い分けOK）
-- その調整内容を根拠に、**HTMLだけでなくSSOT（`design-tokens.json` / `components.json` / `design_context.json`）も同時に更新**する
+- その調整内容を根拠に、SSOT（`design-tokens.json` / `components.json` / `design_context.json`）へ反映する。
+  ⚠️ **反映の前に、SSOTの差分（どのキーをどの値に変えるか）を見せて合意を得る**。
+  見た目の調整をどのトークンに落とすかは設計判断であり（共通トークンを動かすのか、その要素固有の値にするのか）、
+  後続の `/design-ui` `/design-components` `/design-assemble` が前提にする。合意なく確定させない（ADR-027）
 - 文言の調整が入った場合は、**必ず `copy.json` も同時に更新**する（後続で一字一句の再現を担保するため）
 - SSOTが古いままだと、後続（`/design-ui` / `/design-components` / `/design-assemble`）で不整合が出るため、**HTML単独修正で終わらせない**
 
