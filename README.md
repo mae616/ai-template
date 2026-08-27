@@ -88,10 +88,11 @@ scripts/apply_global.sh --all-skills   # 手順系スキルも含む
 `main` への直接 commit / push はフックでブロックされます。**入れただけで安心せず、実際に動くか確かめてください**。
 
 ```bash
-bash .claude/hooks/test-git-branch-guard.sh
+bash .claude/hooks/test-git-branch-guard.sh      # PASS=10 FAIL=0 になれば正常
+bash .claude/hooks/test-warn-destructive-bash.sh # PASS=21 FAIL=0 になれば正常
 ```
 
-一時リポジトリを自動生成し、「通すべき4ケース」「止めるべき6ケース」を実測します。`PASS=10 FAIL=0` になれば正常です。
+前者は一時リポジトリを自動生成し、「通すべき4ケース」「止めるべき6ケース」を実測します。後者は破壊的コマンドの検出精度を、**人間形（`cd` してから `git`）とAI形（`git -C <path>`）の両方**、および「誤検知してはいけない普段使い」で測ります。
 
 > ガード系フックは、効いていないことが黙って起こります。「守られているつもり」は穴より危険なので、判定不能なら止める（fail-closed）設計にし、検証を同梱しています。
 
@@ -208,16 +209,17 @@ flowchart LR
 | フック | タイミング | 役割 |
 |---|---|---|
 | `git-branch-guard.sh` | Bash実行前 | `main` / `master` への直接 commit・push をブロック。判定不能なら止める（fail-closed） |
-| `warn-destructive-bash.sh` | Bash実行前 | 破壊的コマンドを警告 |
+| `warn-destructive-bash.sh` | Bash実行前 | 破壊的コマンド（force push / reset --hard / rm -rf 等）を警告 |
 | `validate-mermaid.sh` | 編集後 | Mermaid構文を検証 |
 | `format-on-edit.sh` | 編集後 | フォーマッタを適用 |
 | `post-edit-notify.sh` | 編集後 | 編集通知 |
 | `show-ssot-diff.sh` | 編集後（Write/Edit/**Bash**） | 確定物（`doc/input/` `meta/adr-lite.md` `CLAUDE.md` `.claude/rules/`）が書き換わったら差分を表示。**止めない** |
 | `auto-open-hunk.sh` | 編集後（Write/Edit/**Bash**） | 変更が出たら差分ビューア `hunk` を split で**1回だけ**開く。起動済みなら開き直さず `reload` で中身だけ更新。`CLAUDE_AUTO_HUNK=0` で無効 |
 | `check-release-notes.sh` | セッション開始 | Claude Code のバージョン更新を検出 |
-| `test-git-branch-guard.sh` | 手動 | ガードの通す/止める両方を実測（10ケース） |
+| `test-git-branch-guard.sh` | 手動 | ブランチガードの通す/止める両方を実測（10ケース） |
+| `test-warn-destructive-bash.sh` | 手動 | 破壊的コマンド検出の精度を実測（21ケース。誤検知側も測る） |
 | `test-show-ssot-diff.sh` | 手動 | 見せる/黙るの両方を実測（10ケース） |
-| `test-auto-open-hunk.sh` | 手動 | 開く/開かないの両方を実測（8ケース） |
+| `test-auto-open-hunk.sh` | 手動 | 開く/開かないの両方を実測（11ケース） |
 
 > `show-ssot-diff.sh` は**ツール名で判定しません**。AIは `Write`/`Edit` ではなく `Bash`（`sed` / heredoc / python）でファイルを書き換えることがあり、ツール名で絞ると素通りします。何で書いても差分は git の作業ツリーに出るので、そこを見ています。
 
