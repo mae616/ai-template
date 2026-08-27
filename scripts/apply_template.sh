@@ -69,7 +69,7 @@ need date
 
 # 反映対象（AIテンプレとして必要最小）
 # doc/output/ は送り状（to-template.md）の雛形を新規プロジェクトへ配布するために含める
-INCLUDES=(".mise.toml" "doc/index.md" "doc/input/" "doc/generated/" "doc/output/")
+INCLUDES=(".mise.toml" "doc/index.md" "doc/input/" "doc/draft/" "doc/generated/" "doc/output/")
 [ "$NO_SKILLS" = "false" ] && INCLUDES+=("CLAUDE.md" ".claude/")
 
 # バックアップ
@@ -128,6 +128,13 @@ for p in "${INCLUDES[@]}"; do
   # 受け取った送り状には出典マシンの絶対パスが載るため、配布物に混ぜない。
   if [ "$p" = "doc/input/" ]; then
     EXTRA_FLAGS+=("--exclude" "from-projects/")
+  fi
+
+  # 発酵中のドキュメントはプロジェクト固有の蓄積（未合意の検討物）。
+  # 配布するのは役割を説明する README.md だけにし、中身には触らない。
+  # sync の --delete で各プロジェクトの発酵物を消さないための保護でもある。
+  if [ "$p" = "doc/draft/" ]; then
+    EXTRA_FLAGS+=("--include" "README.md" "--exclude" "*")
   fi
 
   # 送り状はプロジェクト側の蓄積データ（未取込の学び）。force/sync でも既存があれば守る

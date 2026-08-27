@@ -226,7 +226,8 @@ ai-template/
 │   ├── rules/            # 運用ルール（自動適用）
 │   └── settings.json     # 権限・hooks設定
 ├── doc/
-│   ├── input/            # 【人間が書く】SSOT（rdd.md / architecture.md / design/）
+│   ├── input/            # 【合意済み】SSOT。AIが前提として扱う（rdd.md / architecture.md / design/）
+│   ├── draft/            # 【未合意】発酵中。AIは参考にするが前提にしない（設定集・検討中の案）
 │   ├── generated/        # 【AI生成】上書きOK（manual/ / reverse/ / reports/）
 │   └── output/           # 送り状（to-template.md）
 ├── scripts/
@@ -238,6 +239,10 @@ ai-template/
 ├── CLAUDE.md             # AI判断基準（普遍ルール）
 └── README.md
 ```
+
+> **`input/` と `draft/` の違い**: プロトタイプが完走したことと、その中身が要件になることは別の話です。
+> 作業の過程で生まれた判断は `draft/` に貯め、**人間の合意を経てから** `input/` へ上げます。
+> AIは昇格候補を提示するだけで、上げるかどうかは判断しません（`doc/draft/README.md` / ADR-026）。
 
 ## 判断軸スキル（AIが状況に応じて自動適用）
 

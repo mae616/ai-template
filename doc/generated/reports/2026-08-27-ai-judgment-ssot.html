@@ -1,0 +1,427 @@
+<title>要件はどこで増えたのか</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+  :root {
+    --paper: #f5f7f8;
+    --ink: #22303a;
+    --ink-soft: #5a6b76;
+    --line: #d5dde2;
+    --card: #ffffff;
+    --accent: #b35c00;
+    --trace: #1f6f8b;        /* 追跡・実測の色 */
+    --ai: #a8442a;           /* AI由来を示す */
+    --human: #2f6b4f;        /* 人間由来を示す */
+    --shade: #eef2f4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #141b21; --ink: #dde5ea; --ink-soft: #8fa0ab; --line: #2b3843;
+      --card: #1b242c; --accent: #f0a340; --trace: #6fbdd6; --ai: #e8836a;
+      --human: #7fc3a0; --shade: #202b34;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #141b21; --ink: #dde5ea; --ink-soft: #8fa0ab; --line: #2b3843;
+    --card: #1b242c; --accent: #f0a340; --trace: #6fbdd6; --ai: #e8836a;
+    --human: #7fc3a0; --shade: #202b34;
+  }
+  :root[data-theme="light"] {
+    --paper: #f5f7f8; --ink: #22303a; --ink-soft: #5a6b76; --line: #d5dde2;
+    --card: #ffffff; --accent: #b35c00; --trace: #1f6f8b; --ai: #a8442a;
+    --human: #2f6b4f; --shade: #eef2f4;
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Zen Kaku Gothic New", -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif;
+    line-height: 1.85;
+    margin: 0;
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 3.5rem 1.25rem 6rem; }
+
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+    font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 0.6rem;
+  }
+  h1 {
+    font-size: clamp(1.8rem, 4.5vw, 2.5rem); font-weight: 700; line-height: 1.35;
+    text-wrap: balance; margin: 0 0 1rem; letter-spacing: 0.01em;
+  }
+  .lede {
+    font-size: 1.06rem; color: var(--ink); border-left: 3px solid var(--accent);
+    padding-left: 1.1rem; margin: 0 0 2.5rem;
+  }
+  h2 {
+    font-size: 1.22rem; font-weight: 700; margin: 3.2rem 0 0.9rem;
+    padding-bottom: 0.45rem; border-bottom: 1px solid var(--line); text-wrap: balance;
+  }
+  h3 { font-size: 1.02rem; font-weight: 700; margin: 2rem 0 0.6rem; color: var(--ink); }
+  p { margin: 0 0 1.1rem; }
+  strong { font-weight: 700; }
+
+  .meta {
+    display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem;
+    font-family: "IBM Plex Mono", monospace; font-size: 0.76rem;
+    color: var(--ink-soft); margin: 0 0 2.5rem; padding-bottom: 1.2rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .finding {
+    background: var(--card); border: 1px solid var(--line); border-radius: 3px;
+    padding: 1.3rem 1.4rem; margin: 0 0 1rem;
+    display: grid; grid-template-columns: auto 1fr; gap: 0 1.1rem; align-items: start;
+  }
+  .finding .num {
+    font-family: "IBM Plex Mono", monospace; font-size: 0.8rem; font-weight: 600;
+    color: var(--accent); padding-top: 0.25rem;
+  }
+  .finding h3 { margin: 0 0 0.35rem; }
+  .finding p { margin: 0; color: var(--ink-soft); font-size: 0.94rem; }
+
+  .figure {
+    background: var(--card); border: 1px solid var(--line); border-radius: 3px;
+    padding: 1.5rem 1rem; margin: 1.5rem 0 0.6rem; overflow-x: auto;
+  }
+  .figure .mermaid { display: flex; justify-content: center; }
+  .caption {
+    font-size: 0.82rem; color: var(--ink-soft); margin: 0 0 2rem;
+    font-family: "IBM Plex Mono", monospace;
+  }
+
+  .tablewrap { overflow-x: auto; margin: 1.2rem 0 1.8rem; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+  th, td { text-align: left; padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th {
+    font-family: "IBM Plex Mono", monospace; font-size: 0.74rem;
+    letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft);
+    border-bottom: 2px solid var(--line); white-space: nowrap;
+  }
+  td.num { font-family: "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  .tag {
+    display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 0.72rem;
+    padding: 0.1rem 0.5rem; border-radius: 2px; border: 1px solid currentColor; white-space: nowrap;
+  }
+  .tag-ai { color: var(--ai); }
+  .tag-human { color: var(--human); }
+
+  pre.log {
+    background: var(--shade); border: 1px solid var(--line); border-left: 3px solid var(--ai);
+    border-radius: 2px; padding: 1rem 1.1rem; overflow-x: auto;
+    font-family: "IBM Plex Mono", monospace; font-size: 0.82rem; line-height: 1.75;
+    margin: 1.2rem 0 0.5rem; color: var(--ink);
+  }
+  pre.log .who { color: var(--ai); font-weight: 600; }
+
+  .quiet {
+    background: var(--shade); border-radius: 3px; padding: 1.2rem 1.4rem;
+    margin: 1.5rem 0; font-size: 0.94rem;
+  }
+  .quiet p:last-child { margin-bottom: 0; }
+
+  ul { margin: 0 0 1.2rem; padding-left: 1.3rem; }
+  li { margin-bottom: 0.45rem; }
+  code {
+    font-family: "IBM Plex Mono", monospace; font-size: 0.86em;
+    background: var(--shade); padding: 0.1rem 0.35rem; border-radius: 2px;
+  }
+  footer {
+    margin-top: 4rem; padding-top: 1.2rem; border-top: 1px solid var(--line);
+    font-size: 0.8rem; color: var(--ink-soft); font-family: "IBM Plex Mono", monospace;
+  }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<main>
+  <p class="eyebrow">調査レポート / セッションログ解析</p>
+  <h1>要件はどこで増えたのか</h1>
+
+  <p class="lede">
+    「話していないことが、いつのまにか要件になっている」——この違和感の出どころを、
+    このマシンに残る全セッションログ（40件・695ターン）から追跡した。
+    結論は<strong>モデルの変化ではなく、判断が要件へ昇格する経路が工程に組み込まれていること</strong>。
+  </p>
+
+  <div class="meta">
+    <span>調査日 2026-08-27</span>
+    <span>対象 ~/.claude/projects/*.jsonl</span>
+    <span>ログ範囲 2026-07-29 〜 08-27</span>
+    <span>解析 40セッション / 695人間ターン</span>
+  </div>
+
+  <h2>わかったこと</h2>
+
+  <div class="finding">
+    <span class="num">01</span>
+    <div>
+      <h3>モデルの違いでは説明できない</h3>
+      <p>残存ログの全期間が <code>claude-opus-5</code>。Opus 4.8 のログは1件も残っていない。
+      指標を時期で二分しても <span class="tag">〜08-19 : 38%</span> <span class="tag">08-20〜 : 38%</span> で差が出ない。
+      「最近おかしくなった」という体感に対し、数値上の変化点は見つからなかった。</p>
+    </div>
+  </div>
+
+  <div class="finding">
+    <span class="num">02</span>
+    <div>
+      <h3>症状は「先回り」ではなく「判断の昇格」</h3>
+      <p>合意せずに着手する古典的な先回りは、むしろ減っている（宣言なしで編集に入った率は 08-20 以降 0.5%）。
+      実際に起きているのは、<strong>作業の途中で生まれた設計判断が、そのまま要件のSSOTへ書き込まれること</strong>。
+      手続き上は合意されているため、確認や宣言をいくら足しても防げない。</p>
+    </div>
+  </div>
+
+  <div class="finding">
+    <span class="num">03</span>
+    <div>
+      <h3>宣言はしているが、GOを待っていない</h3>
+      <p>「着手前スコープ宣言」を出した24回のうち、<strong>9回（38%）は人間の応答を挟まずにそのまま実行へ入っている</strong>。
+      宣言が承認の関所ではなく、実行の前口上になっている。</p>
+    </div>
+  </div>
+
+  <div class="finding">
+    <span class="num">04</span>
+    <div>
+      <h3>要件に入った設計判断は、追跡できた範囲すべてAI初出</h3>
+      <p>how-we-work の <code>rdd.md</code> に追加された92行のうち、断定形の設計判断6件を全ログで逆引きしたところ、
+      6件すべてが <span class="tag tag-ai">AI初出</span>。ただし多くは人間の曖昧な感想を受けた言語化であり、
+      無から生成されたものではない。<strong>問題は出どころではなく、変換の過程が記録されないまま断定形で確定すること</strong>。</p>
+    </div>
+  </div>
+
+  <h2>何が起きているか</h2>
+
+  <p>
+    違和感の構造は、5つの段で説明がつく。どの段にも明白な違反は無く、
+    <strong>各段が正しく動いた結果として、話していないことが要件になる</strong>。
+  </p>
+
+  <div class="figure">
+    <pre class="mermaid">
+flowchart TD
+    A["人間の曖昧な感想<br/>「情報量が多くて辛い」"] --> B["AIが具体的な規範へ変換<br/>「⚠️ 設定を増やさない。OSに寄せる」"]
+    B --> C["着手前スコープ宣言<br/>（形式は守られる）"]
+    C -->|"GOを待たず 38%"| D["連続実行<br/>実行中に新たな判断が多数発生"]
+    D --> E["SSOTへ書き込み<br/>rdd.md / 設定集"]
+    E --> F["次セッションでは<br/>「決まっていること」として参照"]
+    F --> G["人間が気づく<br/>「そんな話してない」"]
+    G -.->|"すでに要件"| E
+
+    style A fill:#2f6b4f,stroke:#2f6b4f,color:#fff
+    style B fill:#a8442a,stroke:#a8442a,color:#fff
+    style D fill:#a8442a,stroke:#a8442a,color:#fff
+    style E fill:#b35c00,stroke:#b35c00,color:#fff
+    style G fill:#1f6f8b,stroke:#1f6f8b,color:#fff
+    </pre>
+  </div>
+  <p class="caption">緑＝人間由来 / 赤＝AIの変換・実行 / 橙＝SSOTへの定着 / 青＝気づき</p>
+
+  <h3>実際のログ（how-we-work・2026-08-18）</h3>
+
+  <p>ターン52から55まで、<strong>人間の発話が1つも挟まっていない</strong>。宣言の直後から成果物の提示まで連続している。</p>
+
+  <pre class="log"><span class="who">[52] AI</span>  進めるにゃ！ <strong>着手前スコープ宣言</strong>（4つ）:
+        1. doc/input/rdd.md — 設定を「表示と感覚」に統合、v1/v2の線引きを明記
+        2. project-design-language — 感覚の設定に関する原則を追加
+        3. 設定集 — 今回の判断を記録
+        4. Figma — 設定画面とオンボーディング2画面目
+
+<span class="who">[53] AI</span>  記録できたにゃ。Figma で2画面作るにゃ
+
+<span class="who">[54] AI</span>  トグルのつまみがズレたにゃ。直すにゃ
+
+<span class="who">[55] AI</span>  2画面できたにゃ。…
+        <strong>設定を増やすこと自体が負荷なので、OSに寄せられるものは寄せる</strong>にゃ
+        ← ここで生まれた判断が rdd.md へ書き込まれている</pre>
+  <p class="caption">人間のGOが挟まらないまま、宣言 → 実行 → 新しい判断の確定まで到達している</p>
+
+  <h2>なぜプロトタイプ形成で強く出るか</h2>
+
+  <p>
+    体感として <code>how-we-work</code> のプロト形成で違和感が強く、<code>AIAU_Craft_Day</code> では感じなかった——
+    この差も同じ構造で説明できる。
+  </p>
+
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr><th>プロジェクト</th><th>作業の性質</th><th class="num">宣言</th><th class="num">GO無し実行</th><th>判断の余地</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>how-we-work<br><span style="color:var(--ink-soft);font-size:0.85em">プロト形成</span></td>
+          <td>デザイン・体験の連作。1画面ごとに文言・配置・優先度の判断が発生する</td>
+          <td class="num">12</td>
+          <td class="num">7</td>
+          <td>極大</td>
+        </tr>
+        <tr>
+          <td>AIAU_Craft_Day</td>
+          <td>手順が指定された配信作業。「コードの変更は一切不要」と明示されていた</td>
+          <td class="num">0</td>
+          <td class="num">0</td>
+          <td>ほぼ無し</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>
+    さらに <code>proto-loop</code> は工程として
+    <strong>「触った学びを設定集へ蒸留し、rdd へ反映する」</strong>という経路を最初から持っている。
+    判断を要件へ昇格させるパイプが、意図的に設計されている。
+    プロト形成は<strong>判断の密度が最も高い工程であり、かつ昇格経路が開いている唯一の工程</strong>でもある。
+  </p>
+
+  <h2>測った数字</h2>
+
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr><th>指標</th><th class="num">全体</th><th class="num">〜08-19</th><th class="num">08-20〜</th><th>読み取れること</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>宣言後にGOを待たず実行</td>
+          <td class="num">9 / 24（38%）</td>
+          <td class="num">6 / 16（38%）</td>
+          <td class="num">3 / 8（38%）</td>
+          <td>時期差なし。恒常的な構造</td>
+        </tr>
+        <tr>
+          <td>宣言なしで編集に着手</td>
+          <td class="num">32 / 695（4.6%）</td>
+          <td class="num">31 / 507（6.1%）</td>
+          <td class="num">1 / 188（0.5%）</td>
+          <td>むしろ改善している</td>
+        </tr>
+        <tr>
+          <td>rdd.md の設計判断の初出</td>
+          <td class="num">AI 6 / 6</td>
+          <td colspan="2" class="num">（08-18 のセッションに集中）</td>
+          <td>言語化の担い手がAIに偏る</td>
+        </tr>
+        <tr>
+          <td>ログ中のモデル</td>
+          <td class="num">opus-5 のみ</td>
+          <td colspan="2" class="num">07-29 以降 全期間</td>
+          <td>モデル比較は不能</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>設定について（実測）</h2>
+
+  <p>
+    メモリー機能が暗黙のコンテキストを積んでいるのではないか、という見立てについては、
+    設定上はその経路が無い。
+  </p>
+
+  <div class="quiet">
+    <p>
+      <code>~/.claude/settings.json</code> → <code>"autoMemoryEnabled": false</code><br>
+      <code>~/.claude/CLAUDE.md</code> → 存在しない（グローバルメモリなし）
+    </p>
+    <p style="color:var(--ink-soft);font-size:0.9em;margin-top:0.8rem">
+      自動メモリは無効で、グローバルの記憶ファイルも無い。
+      要件が増えて見えるのは、メモリーではなく<strong>リポジトリ内のSSOTファイル自体が書き換わっている</strong>ため。
+      これは意図どおりファイル経由でコンテキストが渡っている状態であり、
+      問題は経路ではなく<strong>そこへ何が、どの合意を経て書き込まれるか</strong>にある。
+    </p>
+  </div>
+
+  <h2>ループ工程との関係</h2>
+
+  <p>
+    昇格経路は、偶発的に生まれたものではなく<strong>工程として明示的に設計されている</strong>。
+    <code>proto-loop/SKILL.md</code> にそのまま書かれている。
+  </p>
+
+  <pre class="log"><span class="who">41行目</span>  設定集＋今回の問いだけを渡して作らせる
+        （<strong>会話履歴は渡さない</strong>。文脈遮断で新鮮な解釈を得る）
+
+<span class="who">55行目</span>  project-design-language に昇格できる確定判断があれば昇格
+
+<span class="who">63行目</span>  選定結果と学びを <strong>doc/input/rdd.md へ反映</strong></pre>
+  <p class="caption">判断を生む工程と、判断を確定させる工程が、人間の関所を挟まずに繋がっている</p>
+
+  <p>
+    41行目の文脈遮断は<strong>品質のための正しい設計</strong>である。
+    作った本人は自分の選択に錨づけされ、違和感を検出できない。
+    しかし同時に、<strong>「なぜその判断になったか」の経緯はそこで切れる</strong>。
+    そして63行目で、経緯が切れた状態の結論だけが要件へ入る。
+  </p>
+
+  <div class="quiet">
+    <p><strong>ループは判断を大量に生む装置であり、SSOTは判断を確定させる装置である。</strong>
+    この2つが工程として直結し、間に人間の関所が無い。</p>
+  </div>
+
+  <h3>ただし、因果は検証できない</h3>
+
+  <p>
+    「ループ導入によって新たに起きるようになった」という時系列の因果は、
+    <strong>手元のデータでは確かめられない</strong>。導入前のログが残っていないため。
+  </p>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>できごと</th><th class="num">日付</th></tr></thead>
+      <tbody>
+        <tr><td><code>auto-task</code> 導入</td><td class="num">2026-06-21</td></tr>
+        <tr><td><code>auto-build</code> / <code>auto-design</code> 導入</td><td class="num">2026-07-04</td></tr>
+        <tr><td><code>proto-loop</code> 導入</td><td class="num">2026-07-18</td></tr>
+        <tr><td><strong>残存ログの最古</strong></td><td class="num"><strong>2026-07-29</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>
+    断定できるのは<strong>経路が存在すること</strong>と<strong>実際にAI初出の判断が要件へ入ったこと</strong>まで。
+    それが導入によって悪化したかどうかは、比較対象が無い。
+  </p>
+
+  <h2>手を入れられる場所</h2>
+
+  <p>
+    どれを採るかは決めていない。構造上、関所を置ける場所は3つある。
+  </p>
+
+  <div class="figure">
+    <pre class="mermaid">
+flowchart LR
+    A["感想"] -->|"関所①<br/>変換を明示する"| B["規範への変換"]
+    B -->|"関所②<br/>宣言とGOを分離"| C["実行"]
+    C -->|"関所③<br/>SSOTを事実に限る"| D["要件への定着"]
+
+    style A fill:#2f6b4f,stroke:#2f6b4f,color:#fff
+    style D fill:#b35c00,stroke:#b35c00,color:#fff
+    </pre>
+  </div>
+  <p class="caption">上流ほど早く止まるが、会話のテンポは落ちる。下流ほど自由に動けるが、戻す作業が増える</p>
+
+  <ul>
+    <li><strong>関所① 変換を明示する</strong>——曖昧な感想を規範に変えたとき、「これは私の解釈です」と出どころを示してから書く。効き目は早いが、毎回の応答が長くなる</li>
+    <li><strong>関所② 宣言とGOを分離する</strong>——宣言を出したら止まる。実行の再開には人間の応答を要する。テンポは落ちるが、38%がここで止まる</li>
+    <li><strong>関所③ SSOTを事実に限る</strong>——<code>rdd.md</code> には事実だけを書き、設計判断は ADR へ回す。これは既存規約に元から書かれているが、運用では守られていない</li>
+  </ul>
+
+  <div class="quiet">
+    <p>
+      ③については、<code>CLAUDE.md</code> の rdd.md 節に
+      <strong>「ここは『判断』ではなく『事実』だけを書く。設計方針・理由・解説は skills / ADR-lite に寄せる」</strong>
+      と既に明記されている。
+      にもかかわらず 08-18 の追加92行は大半が断定形の設計判断だった。
+      <strong>規約が存在しても運用時に参照されない</strong>——ガード系フックで繰り返し確認された構造と同じ形をしている。
+    </p>
+  </div>
+
+  <footer>
+    ai-template / 2026-08-27 ／ 解析対象 ~/.claude/projects/*.jsonl（40セッション）<br>
+    一時解析スクリプトは /tmp 配下・リポジトリには残していない
+  </footer>
+</main>
