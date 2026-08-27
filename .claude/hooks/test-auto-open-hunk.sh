@@ -23,17 +23,19 @@ EOS
   # hunk スタブ: セッション一覧を SESSIONS_JSON で差し替えられる
   cat > "$STUB/hunk" <<'EOS'
 #!/bin/bash
-if [ "$1" = "session" ]; then printf '%s' "${SESSIONS_JSON:-{\"sessions\": []\}}"; fi
+if [ "$1" = "session" ] && [ "$2" = "list" ]; then printf '%s' "${SESSIONS_JSON:-{\"sessions\": []\}}"; fi
+if [ "$1" = "session" ] && [ "$2" = "reload" ]; then echo "$@" >> "$STUB_RELOADED"; fi
 exit 0
 EOS
   chmod +x "$STUB/herdr" "$STUB/hunk"
   export STUB_INVOKED="$SANDBOX/invoked"
+  export STUB_RELOADED="$SANDBOX/reloaded"
 }
 teardown() { cd /tmp && rm -rf "$SANDBOX" "$STUB"; }
 
 run() {
   env PATH="$STUB:$PATH" CLAUDE_PROJECT_DIR="$SANDBOX" STUB_INVOKED="$STUB_INVOKED" \
-      "$@" bash "$HOOK" >/dev/null 2>&1
+      STUB_RELOADED="$STUB_RELOADED" "$@" bash "$HOOK" >/dev/null 2>&1
 }
 opened() { [ -f "$STUB_INVOKED" ]; }
 
@@ -71,7 +73,11 @@ check "変更なし" "開かない"; teardown
 # 5. 既に hunk が起動中 → 開かない
 setup; echo "変更" >> a.txt
 run HERDR_ENV=1 SESSIONS_JSON='{"sessions": [{"id":"x"}]}'
-check "既に起動中" "開かない"; teardown
+check "既に起動中" "開かない"
+# 開き直さない代わりに、差分を読み直させているか（実測で watch は追随しなかった）
+if [ -f "$STUB_RELOADED" ]; then echo "  ✅ 既に起動中 → reload を呼んだ"; PASS=$((PASS+1));
+else echo "  ❌ 既に起動中 → reload を呼んでいない（新しい変更が見えないまま）"; FAIL=$((FAIL+1)); fi
+teardown
 
 # 6. 未追跡ファイルだけの変更 → 開く（新規ファイルも変更）
 setup; echo "新規" > new.txt

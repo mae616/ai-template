@@ -28,9 +28,13 @@ git rev-parse --is-inside-work-tree >/dev/null 2>&1 || exit 0
 # 変更が無ければ開かない（未追跡ファイルも変更として扱う）
 [ -z "$(git status --porcelain 2>/dev/null)" ] && exit 0
 
-# 既に hunk が起動していれば開かない。watch が差分を追い続けている
+# 既に hunk が起動していれば、開き直さず内容だけ更新する。
+# ⚠️ 実測: 開いたセッションは新しい変更を自動では拾わなかった（fileCount が増えない）。
+#    「watch だから追随する」という前提は成立しないため、明示的に reload する。
 SESSIONS="$(hunk session list --json 2>/dev/null || echo '{"sessions": []}')"
 if ! printf '%s' "$SESSIONS" | tr -d ' \n' | grep -q '"sessions":\[\]'; then
+  # 起動済み → 差分を読み直させる（ペインは開き直さないので画面は分割されない）
+  hunk session reload --repo "$PWD" -- diff >/dev/null 2>&1
   exit 0
 fi
 
@@ -38,7 +42,7 @@ fi
 # 投げっぱなし（&）にはしない。結果を確認できない形は「開いたつもり」を生む。
 # 応答しない場合は settings.json の timeout が守る。
 if herdr plugin action invoke worktree-split --plugin hunk.diff >/dev/null 2>&1; then
-  echo "🔍 差分ビューア hunk を split で開きました（watch状態。以降の変更は自動で追随します）"
+  echo "🔍 差分ビューア hunk を split で開きました（以降の変更は自動で読み直します）"
   echo "   閉じたい場合はそのペインを閉じてください。自動起動を止めるには CLAUDE_AUTO_HUNK=0"
 else
   echo "⚠️  hunk の split 起動に失敗しました（herdr plugin action invoke が非0で終了）"
