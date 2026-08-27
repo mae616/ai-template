@@ -55,6 +55,34 @@ scripts/apply_global.sh --all-skills   # 手順系スキルも含む
 
 適用対象: skills / hooks / rules / settings.json / CLAUDE.md
 
+<details>
+<summary>フッターにリンクバッジを出す（任意・手動設定）</summary>
+
+`/build-context-site` や作業レポートのURLを、CLI のフッターにクリックできるリンクとして出せます。
+`apply_global.sh` はこの設定をマージしないため、`~/.claude/settings.json` に手で足してください。
+
+```jsonc
+"footerLinksRegexes": [
+  {
+    "type": "regex",
+    "pattern": "コンテキストサイト: (?<siteurl>https?://[^\\s\"']+)",
+    "url": "{siteurl}",
+    "label": "コンテキストサイト"
+  },
+  {
+    "type": "regex",
+    "pattern": "レポート一覧: https://claude\\.ai/code/artifact/(?<id>[0-9a-f-]{36})",
+    "url": "https://claude.ai/code/artifact/{id}",
+    "label": "レポート一覧"
+  }
+]
+```
+
+対応する出力側のルールは `build-context-site` スキルと `CLAUDE.md`（レポート一覧）にあります。
+**ラベルとコロンの後の半角スペース1つ**まで一致しないと拾われません。
+
+</details>
+
 ### 3. 安全装置が効いているか確認する
 
 `main` への直接 commit / push はフックでブロックされます。**入れただけで安心せず、実際に動くか確かめてください**。
@@ -228,7 +256,8 @@ ai-template/
 │   ├── rules/            # 運用ルール（自動適用）
 │   └── settings.json     # 権限・hooks設定
 ├── doc/
-│   ├── input/            # 【人間が書く】SSOT（rdd.md / architecture.md / design/）
+│   ├── input/            # 【合意済み】SSOT。AIが前提として扱う（rdd.md / architecture.md / design/）
+│   ├── draft/            # 【未合意】発酵中。AIは参考にするが前提にしない（設定集・検討中の案）
 │   ├── generated/        # 【AI生成】上書きOK（manual/ / reverse/ / reports/）
 │   └── output/           # 送り状（to-template.md）
 ├── scripts/
@@ -240,6 +269,10 @@ ai-template/
 ├── CLAUDE.md             # AI判断基準（普遍ルール）
 └── README.md
 ```
+
+> **`input/` と `draft/` の違い**: プロトタイプが完走したことと、その中身が要件になることは別の話です。
+> 作業の過程で生まれた判断は `draft/` に貯め、**人間の合意を経てから** `input/` へ上げます。
+> AIは昇格候補を提示するだけで、上げるかどうかは判断しません（`doc/draft/README.md` / ADR-026）。
 
 ## 判断軸スキル（AIが状況に応じて自動適用）
 

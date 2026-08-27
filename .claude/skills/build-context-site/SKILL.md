@@ -1,6 +1,6 @@
 ---
 user-invocable: true
-description: "doc/input + doc/generated + meta/adr-lite + history の最新を統合し、ローカル閲覧用の HTML サイト（要件・設計・ADR・図を横断）を生成する。「ここ見れば全コンテキスト分かる」プロジェクト現状サイト。"
+description: "doc/input（確定）+ doc/draft（未合意）+ doc/generated + meta/adr-lite + history の最新を統合し、ローカル閲覧用の HTML サイト（要件・設計・ADR・図を横断）を生成する。確定と発酵中を状態バッジで区別して並べる。「ここ見れば全コンテキスト分かる」プロジェクト現状サイト。"
 ---
 
 # [ループ] 全コンテキスト HTML サイト `/build-context-site`
@@ -52,13 +52,18 @@ install 後に /build-context-site を再実行してください。
 ## 対象ドキュメント
 
 ### 既定（`all` または引数省略時）
-| カテゴリ | パス | 用途 |
-|---|---|---|
-| 要件 | `doc/input/rdd.md`, `doc/input/*.md` | プロジェクトのRDD・追加要件 |
-| デザイン | `doc/input/design/**/*.md`, `doc/input/design/**/*.json` | デザイン SSOT・モック |
-| 生成物 | `doc/generated/**/*.md` | マニュアル・自動生成ドキュメント |
-| ADR | `meta/adr-lite.md` | 設計決定ログ |
-| 履歴（任意） | `history/journal.md` の最新7日分 | ローカル閲覧用、配布物には含まない |
+| カテゴリ | パス | 状態 | 用途 |
+|---|---|---|---|
+| 要件 | `doc/input/rdd.md`, `doc/input/*.md` | ✅ 確定 | プロジェクトのRDD・追加要件 |
+| デザイン | `doc/input/design/**/*.md`, `doc/input/design/**/*.json` | ✅ 確定 | デザイン SSOT・モック |
+| **発酵中** | `doc/draft/**/*.md` | 🧪 **未合意** | プロトの学び・設定集・検討中の案 |
+| 生成物 | `doc/generated/**/*.md` | — | マニュアル・自動生成ドキュメント |
+| ADR | `meta/adr-lite.md` | ✅ 確定 | 設計決定ログ |
+| 履歴（任意） | `history/journal.md` の最新7日分 | — | ローカル閲覧用、配布物には含まない |
+
+> ⚠️ **状態はサイト上で必ず見えるようにする**（次節）。
+> 確定と未合意が並列に見えると、閲覧者が未合意のものを決定事項として読む。
+> ディレクトリを分けた意味が画面で消える。
 
 ### 引数による絞り込み
 - `requirements`: 要件のみ
@@ -73,8 +78,9 @@ install 後に /build-context-site を再実行してください。
 ### 1. 対象ドキュメントの収集
 
 ```bash
-# 例: all の場合
+# 例: all の場合（draft も収集するが、状態を分けて保持する）
 find doc/input doc/generated -type f \( -name "*.md" -o -name "*.json" \) 2>/dev/null
+find doc/draft -type f -name "*.md" 2>/dev/null   # ← 未合意として別扱い
 cat meta/adr-lite.md
 # history は最新7日分のみ
 ```
@@ -113,13 +119,27 @@ python3 -m scripts.html_review_workbench.cli render \
 
 ### 4. ナビゲーション生成
 
-`doc/generated/context-site/index.html` を起点に、以下が見渡せる構造:
+`doc/generated/context-site/index.html` を起点に、**確定と発酵中を分けた**構造にする:
 
-- 📋 要件（rdd.md, 追加要件）
-- 🎨 デザイン（SSOT, モック）
-- 🏗 ADR（設計決定の歴史）
-- 📚 生成物（マニュアル等）
-- 📔 履歴（journal の最新分、ローカル閲覧時のみ）
+```
+✅ 確定（合意済み・前提にしてよい）
+   📋 要件（rdd.md, 追加要件）
+   🎨 デザイン（SSOT, モック）
+   🏗 ADR（設計決定の歴史）
+
+🧪 発酵中（未合意・参考）      ← doc/draft/
+   検討中の案・プロトの学び・設定集
+
+📚 生成物（マニュアル等）
+📔 履歴（journal の最新分、ローカル閲覧時のみ）
+```
+
+**必須の表示ルール**:
+- `doc/draft/` 由来のページには、**ページ上部に「未合意」バッジ**を出す
+  （例: `🧪 未合意 — 参考。決定事項ではありません`）
+- 確定側のバッジ（`✅ 合意済み`）も出し、**どちらか分からない状態を作らない**
+- トップの一覧でも、行ごとに状態が分かるようにする
+- 昇格候補の印が付いているものは `⬆️ 昇格候補` として区別する（人間が決める対象）
 
 ### 5. プレビューサーバ起動
 
@@ -132,7 +152,15 @@ python3 -m scripts.html_review_workbench.cli preview \
 cd doc/generated/context-site/ && python3 -m http.server 8765
 ```
 
-起動 URL をユーザーへ案内（例: `http://localhost:8765/`）。
+起動 URL をユーザーへ案内する。このとき、本文の最後に**次の形式の1行を必ず出力する**:
+
+```
+コンテキストサイト: http://localhost:8765/
+```
+
+> CLI のフッターがこの形式を拾ってリンクバッジを出す（`~/.claude/settings.json` の `footerLinksRegexes`）。
+> 形式が崩れると拾われないので、**ラベルとコロンの後に半角スペース1つ**を守る。
+> レポート一覧（`レポート一覧: <URL>`）と同じ仕組み。
 
 ### 6. インライン コメント機能の案内
 
@@ -176,6 +204,8 @@ MCP 経由の drawio / mermaid もローカルレンダリング。
 - 既存 `doc/input/*` や `meta/adr-lite.md` を**書き換える**（サイト生成は read-only）
 - `history/journal.md` を**配布物として含める**（gitignore 配下のローカル閲覧用に留める）
 - 生成サイトを**外部公開**する（個人情報・契約情報が含まれる可能性、ローカルのみ）
+- ⚠️ **確定（`doc/input/`）と発酵中（`doc/draft/`）を、状態表示なしに並べる**。
+  分けた意味が画面で消え、未合意のものが決定事項として読まれる（ADR-026）
 - reviewable-html-workbench 未 install のまま強行（手動 install を案内）
 
 ---
