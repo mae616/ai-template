@@ -65,10 +65,19 @@ setup; echo "変更" >> a.txt
 run HERDR_ENV=1 CLAUDE_AUTO_HUNK=0
 check "CLAUDE_AUTO_HUNK=0" "開かない"; teardown
 
-# 4. 変更なし → 開かない
+# 4. 変更なし・hunk未起動 → 開かない
 setup
 run HERDR_ENV=1
-check "変更なし" "開かない"; teardown
+check "変更なし/未起動" "開かない"; teardown
+
+# 4b. 変更なし・hunk起動中 → 開かないが reload はする
+#     （コミット直後や変更を戻した直後に、消えた差分を表示し続けるのを防ぐ）
+setup
+run HERDR_ENV=1 SESSIONS_JSON='{"sessions": [{"id":"x"}]}'
+check "変更なし/起動中" "開かない"
+if [ -f "$STUB_RELOADED" ]; then echo "  ✅ 変更なし/起動中 → reload を呼んだ（空を反映）"; PASS=$((PASS+1));
+else echo "  ❌ 変更なし/起動中 → reload を呼んでいない（消えた差分が残る）"; FAIL=$((FAIL+1)); fi
+teardown
 
 # 5. 既に hunk が起動中 → 開かない
 setup; echo "変更" >> a.txt

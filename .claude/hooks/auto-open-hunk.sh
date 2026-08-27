@@ -25,8 +25,16 @@ command -v herdr >/dev/null 2>&1 || exit 0
 cd "${CLAUDE_PROJECT_DIR:-.}" 2>/dev/null || exit 0
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 || exit 0
 
-# 変更が無ければ開かない（未追跡ファイルも変更として扱う）
-[ -z "$(git status --porcelain 2>/dev/null)" ] && exit 0
+# 変更が無いとき（コミット直後・変更を戻した直後）
+# ⚠️ 実測: ここで即 exit すると、hunk が消えた差分を表示し続ける。
+#    「まだ変更が残っている」という誤解を生むため、起動中なら空の状態を読み直させる。
+if [ -z "$(git status --porcelain 2>/dev/null)" ]; then
+  SESSIONS="$(hunk session list --json 2>/dev/null || echo '{"sessions": []}')"
+  if ! printf '%s' "$SESSIONS" | tr -d ' \n' | grep -q '"sessions":\[\]'; then
+    hunk session reload --repo "$PWD" -- diff >/dev/null 2>&1
+  fi
+  exit 0
+fi
 
 # 既に hunk が起動していれば、開き直さず内容だけ更新する。
 # ⚠️ 実測: 開いたセッションは新しい変更を自動では拾わなかった（fileCount が増えない）。
