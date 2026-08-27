@@ -253,6 +253,7 @@ ai-template/
 | クリエイティブ | `creative-coder` |
 | 工程 | `experience-plan`（状態×見た目×周辺の網羅チェック） / `proto-medium`（Figma かコードか） / `project-design-language`（プロジェクト固有SSOT雛形） |
 | ツール | `agent-browser` |
+| 情報源 | `official-source-first`（制度・規約・料金は公式一次情報で判断。費用が出る手順の前に必ず適用） |
 
 > 各スキルの詳細は `.claude/skills/*/SKILL.md` を参照
 
