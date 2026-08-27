@@ -152,7 +152,15 @@ python3 -m scripts.html_review_workbench.cli preview \
 cd doc/generated/context-site/ && python3 -m http.server 8765
 ```
 
-起動 URL をユーザーへ案内（例: `http://localhost:8765/`）。
+起動 URL をユーザーへ案内する。このとき、本文の最後に**次の形式の1行を必ず出力する**:
+
+```
+コンテキストサイト: http://localhost:8765/
+```
+
+> CLI のフッターがこの形式を拾ってリンクバッジを出す（`~/.claude/settings.json` の `footerLinksRegexes`）。
+> 形式が崩れると拾われないので、**ラベルとコロンの後に半角スペース1つ**を守る。
+> レポート一覧（`レポート一覧: <URL>`）と同じ仕組み。
 
 ### 6. インライン コメント機能の案内
 

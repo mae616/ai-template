@@ -55,6 +55,34 @@ scripts/apply_global.sh --all-skills   # 手順系スキルも含む
 
 適用対象: skills / hooks / rules / settings.json / CLAUDE.md
 
+<details>
+<summary>フッターにリンクバッジを出す（任意・手動設定）</summary>
+
+`/build-context-site` や作業レポートのURLを、CLI のフッターにクリックできるリンクとして出せます。
+`apply_global.sh` はこの設定をマージしないため、`~/.claude/settings.json` に手で足してください。
+
+```jsonc
+"footerLinksRegexes": [
+  {
+    "type": "regex",
+    "pattern": "コンテキストサイト: (?<siteurl>https?://[^\\s\"']+)",
+    "url": "{siteurl}",
+    "label": "コンテキストサイト"
+  },
+  {
+    "type": "regex",
+    "pattern": "レポート一覧: https://claude\\.ai/code/artifact/(?<id>[0-9a-f-]{36})",
+    "url": "https://claude.ai/code/artifact/{id}",
+    "label": "レポート一覧"
+  }
+]
+```
+
+対応する出力側のルールは `build-context-site` スキルと `CLAUDE.md`（レポート一覧）にあります。
+**ラベルとコロンの後の半角スペース1つ**まで一致しないと拾われません。
+
+</details>
+
 ### 3. 安全装置が効いているか確認する
 
 `main` への直接 commit / push はフックでブロックされます。**入れただけで安心せず、実際に動くか確かめてください**。
