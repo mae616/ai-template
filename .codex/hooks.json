@@ -1,0 +1,44 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "'/Users/mae/output/ai-template/.codex/hooks/warn-destructive-bash.sh'",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "'/Users/mae/output/ai-template/.codex/hooks/post-edit-notify.sh'",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "'/Users/mae/output/ai-template/.codex/hooks/validate-mermaid.sh'",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/Users/mae/output/ai-template/.codex/hooks/check-release-notes.sh'",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
