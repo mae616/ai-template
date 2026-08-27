@@ -223,6 +223,23 @@ flowchart LR
 
 > `show-ssot-diff.sh` は**ツール名で判定しません**。AIは `Write`/`Edit` ではなく `Bash`（`sed` / heredoc / python）でファイルを書き換えることがあり、ツール名で絞ると素通りします。何で書いても差分は git の作業ツリーに出るので、そこを見ています。
 
+### 権限（`.claude/settings.json`）
+
+| 種別 | 件数 | 役割 |
+|---|---:|---|
+| `allow` | 88 | 事前許可。**auto モードでも分類器を経由せず即通る**（近道として働く） |
+| `ask` | 57 | **auto モードでも必ず人間に聞く**。DBマイグレーション / 履歴を壊す git / secret 登録 / デプロイ / 課金 |
+| `deny` | 8 | **どのモードでもブロック**（`bypassPermissions` でも効く）。`.env` の読み取りとルート・ホーム直下の再帰削除のみ |
+
+> **auto モードとの関係**: Pro / Max / Team では auto が既定で、分類器（別モデル）が人間の代わりに審査します。
+> `allow` はそこで不要になるどころか、**マッチすれば分類器を経由せず即座に通る**ので消さないでください。
+> ただし auto に入るとき、任意コード実行を許す広い `allow`（`Bash(*)` / `Bash(python*)` / パッケージマネージャの run / `Agent` / `Monitor`）は
+> **自動的に無効化され、auto を抜けると復活します**。
+
+> ⚠️ **パターンは先頭一致です。** `Bash(git push --force*)` は `git push origin main --force` を捕まえません
+> （公式: "matches everything before the first `*` as written"）。
+> 任意位置の `--force` は `warn-destructive-bash.sh` が正規表現で検出します。**二層で守る前提の設計**です。
+
 ### 運用ルール（`.claude/rules/` — 自動読み込み）
 
 | ファイル | 内容 |

@@ -1040,3 +1040,55 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
   - **キーバインドだけにする**: 導入済みだったが、覚えていないと使われないという実態があった
 
 - **出典**: 2026-08-27 のセッション（ADR-027 の続き）
+
+---
+
+## ADR-029: 権限設定を auto モードの実挙動に合わせて見直す
+
+- **Context**:
+  「auto モードにしたのだから `permissions.allow` は消せるのではないか」という問いから調査した。
+  公式ドキュメント（`code.claude.com/docs/en/permission-modes`）を読み、前提が逆だと分かった。
+
+  - auto モードは **分類器（別モデル）が人間の代わりにアクションを審査**する仕組み。Pro/Max/Team では既定
+  - `allow` にマッチしたアクションは **分類器を経由せず即座に解決**する。つまり allow は auto でも意味を持ち、
+    消すと全アクションが分類器行きになって遅くなり、分類器の判断次第で確認がむしろ増える
+  - ただし auto に入るとき、任意コード実行を許す広い allow（`Bash(*)` / `Bash(python*)` /
+    パッケージマネージャの run / `Agent` / `Monitor`）は**自動的に捨てられ、auto を抜けると復活する**。
+    このプロジェクトでは 88件中15件が該当したが、Manual モードでは有効なので消さない
+  - `ask` は auto でも**必ず人間に聞く**（公式: "Explicit ask rules still force a prompt"）。
+    ＝ **auto を貫通して人間に届く唯一の経路**
+
+  そこで「消す」ではなく「`ask` に本当に止めたいものが入っているか」を点検した。
+  `.claude/rules/code-quality.md` の危険変更チェックリストと突き合わせ、3つの穴が見つかった。
+
+- **Decision**:
+  1. **`ask` を 27 → 57 件に拡張**:
+     - DBマイグレーション（prisma / drizzle / supabase / rails / alembic / knex / flyway 等）
+       — チェックリストに明記されているのに1件も無かった
+     - 履歴を壊す git 操作（force push / --delete / tag -d / filter-branch）
+     - secret 登録（wrangler / gh / fly / vercel / supabase）
+       — 非対話環境で空値が保存される事故が `tool-usage.md` に記録済みなのに未登録だった
+     - 影響がローカルに留まらない破壊操作（gh repo delete / release delete / api -X DELETE）
+  2. **`deny` を新設（8件）**: 「やったら戻せない」ものだけに限定する。
+     `.env` 系の読み取り（`.env.example` は別名なのでマッチせず雛形は読める）と、
+     ルート・ホーム直下の再帰削除
+  3. **`allow` は一切消さない**（上記の理由）
+
+- **Consequences**:
+  - ⚠️ **パターンは先頭一致**（公式: "matches everything before the first `*` as written"）。
+    `Bash(git push --force*)` は `git push origin main --force` を**捕まえない**。
+    近似検証で 12ケース中1件がこの理由で素通りすることを確認した
+  - その穴は `warn-destructive-bash.sh` が正規表現で埋める。実測で
+    `git push origin main --force` と AI形の `git -C <path> push ... --force` の両方を検出し、
+    通常の `git push origin main` は素通りすることを確認済み。**二層で守る前提の設計**
+  - 検証スクリプトは**残していない**。Claude Code の内部マッチャを再現できないため、
+    近似テストを置くと「守られているつもり」を生む（ガード系フックで繰り返した失敗と同じ構造）。
+    代わりに前提と限界を README / ADR に明文化した
+
+- **Alternatives**:
+  - **`Bash(git push *)` で全 push を ask にする**: 取りこぼしは無くなるが、通常の push まで毎回止まる。
+    フックが任意位置を見ているため不採用
+  - **deny を厚くする**: 事故は減るが、ask で人間が判断する余地を奪う。
+    「判断は人間が握る」（CLAUDE.md）に反するため、戻せないものだけに限定した
+
+- **出典**: 2026-08-27 のセッション（公式ドキュメントの調査＋危険変更チェックリストとの照合）
