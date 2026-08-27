@@ -213,9 +213,11 @@ flowchart LR
 | `format-on-edit.sh` | 編集後 | フォーマッタを適用 |
 | `post-edit-notify.sh` | 編集後 | 編集通知 |
 | `show-ssot-diff.sh` | 編集後（Write/Edit/**Bash**） | 確定物（`doc/input/` `meta/adr-lite.md` `CLAUDE.md` `.claude/rules/`）が書き換わったら差分を表示。**止めない** |
+| `auto-open-hunk.sh` | 編集後（Write/Edit/**Bash**） | 変更が出たら差分ビューア `hunk` を split で**1回だけ**開く（watch状態。以降は自動追随）。`CLAUDE_AUTO_HUNK=0` で無効 |
 | `check-release-notes.sh` | セッション開始 | Claude Code のバージョン更新を検出 |
 | `test-git-branch-guard.sh` | 手動 | ガードの通す/止める両方を実測（10ケース） |
 | `test-show-ssot-diff.sh` | 手動 | 見せる/黙るの両方を実測（10ケース） |
+| `test-auto-open-hunk.sh` | 手動 | 開く/開かないの両方を実測（8ケース） |
 
 > `show-ssot-diff.sh` は**ツール名で判定しません**。AIは `Write`/`Edit` ではなく `Bash`（`sed` / heredoc / python）でファイルを書き換えることがあり、ツール名で絞ると素通りします。何で書いても差分は git の作業ツリーに出るので、そこを見ています。
 

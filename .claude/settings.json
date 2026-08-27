@@ -177,6 +177,11 @@
             "type": "command",
             "command": ".claude/hooks/show-ssot-diff.sh",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/auto-open-hunk.sh",
+            "timeout": 10
           }
         ]
       }
