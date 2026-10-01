@@ -15,6 +15,7 @@ description: "依存解決済みのIssueを選択して実装を実行し、進�
 - 指定されたIssue（または選択したIssue）に従って実装を行う
 - **組み込みTask** と **GitHub Issue** の進捗を同期する
 - 完了時に両方を更新（Task: completed、Issue: close）
+- 組み込みTask が無い環境（Claude Code 以外）では、TaskUpdate の手順を飛ばして GitHub Issue 側だけを同期する
 
 ---
 

@@ -15,6 +15,7 @@ description: "Sprint配下のIssueに実装詳細と依存関係を設定し、r
 - 組み込みTaskの **依存関係（blocks/blockedBy）** を設定する
 - 実装前の調査・準備を明示的に行い、品質を担保する
 - GitHub Issue と 組み込みTask の両方に依存関係を反映する
+- 組み込みTask が無い環境（Claude Code 以外）では、依存関係は Issue 本文だけに書く
 
 ---
 

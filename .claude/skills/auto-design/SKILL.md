@@ -7,6 +7,8 @@ description: "Figma または会話を起点に、デザインSSOT抽出 → 確
 
 > Loop Engineering の Inner Loop 親スキル（デザイン専用）。既存デザインスキル（design-ssot / design-mock / design-html / design-ui / design-components / design-assemble）を**連鎖呼び出し**して、Figma や会話から再利用可能な UI コンポーネントまで自律で運ぶ。スキル本体は触らない（Harness 層不可侵）。
 >
+> **開始前に `.claude/skills/auto-loop-core/SKILL.md` を読み込み、共通手順はそれに従う**（読み込めなければ開始しない。ループ状態・ブランチ・ローカル検証・bug-* 連鎖・レビュー反復・マージの関所・課金前停止・中断再開）。ここにはデザイン固有の手順だけを書く。
+>
 > 設計根拠: `meta/adr-lite.md` の **ADR-008 / ADR-014 / ADR-015**
 >
 > 最後の関所は **人間の Vibe Coding**（触って「違う」を出す確認）。デザインは仕組みで拾えない感覚判断が本質のため、コード品質の収束までを AI が担い、体験の判断は人間に返す。
@@ -34,40 +36,33 @@ description: "Figma または会話を起点に、デザインSSOT抽出 → 確
 ## 前提（必ず確認）
 
 - **モードA**: Figma MCP が接続済みであること（未接続なら中止してユーザーに案内）
-- `task/*` ブランチ上で動く前提。`sprint/*` 上で起動されたら task ブランチを自動作成（`/auto-task` と同じ）。`main` 直下は中止
+- ブランチの前提は `auto-loop-core` の「2. ブランチの前提」に従う
 - 技術スタック（UI フレームワーク）・ターゲット表示環境は `doc/input/rdd.md` に従う。**未定義・未記入なら推測せず短問で確認**し、回答を rdd.md に反映してから進む（⚠️ **書き込む文面を見せて合意を得てから書く**。会話での一言を、AIが作った文面のまま要件として定着させない）（rdd.md 自体が無い場合も同様）
 - **`project-design-language` を読み込む**: 基本方針（誰のため/北極星/単一メタファー）と固有値レジストリを SSOT 抽出・生成の前提にする
   - **雛形のまま**（基本方針が `{...}` / TBD）なら、`judgment-harness` の発酵ループに従い、**基本方針だけを質問して人間と埋めてから**ステップ1（SSOT 準備）へ進む（固有値レジストリは TBD のままでよく、SSOT 確定に合わせて同期する）
 - **`art-direction` を読み込む**: ステップ2（確認用HTML）・ステップ3（静的UI骨格）の描画前に**AD宣言**を出し、描画後は `design-critique` の批評ループ（レンダリング→文脈遮断批評→修正を must-fix 0 まで、最大3周）を通す。確定した宣言は `project-design-language` の固有値レジストリへ同期する
-- 課金が発生しうる操作は事前確認（`/auto-task` と同じ方針）
+- 課金前停止は `auto-loop-core` の「7. 課金前停止」に加えて、Figma の有料 API / プラン変更を要する操作も事前確認する
 
 ---
 
 ## 実行手順
 
-### 0. ループ状態ファイルの初期化
+### 0. ループ状態の初期化
 
-`history/loop-state.md` を以下で開始（既存なら追記）:
+`auto-loop-core` の「1. ループ状態の記録」で、`steps` を次のとおりにして開始する:
 
 ```markdown
-## YYYY-MM-DD HH:MM /auto-design <入力の要約>
-- branch: <現在ブランチ>
-- status: in_progress
-- steps:
   - [ ] ssot (design-ssot / design-mock / 既存読込)
   - [ ] preview-html (design-html)
   - [ ] ui-skeleton (design-ui)
   - [ ] components (design-components)
   - [ ] assemble (design-assemble)
   - [ ] local-checks (lint/typecheck/test)
-  - [ ] basic-review (致命指摘0まで)
-  - [ ] deep-review (全指摘0まで)
+  - [ ] basic-review (Must Fix 0まで)
+  - [ ] deep-review (Critical・Warning 0まで)
   - [ ] pr-create + label + auto-merge (task→sprint)
   - [ ] vibe-handoff (人間へ引き渡し)
-- last_action: ループ開始
 ```
-
-各ステップ完了時に `[x]` 更新と `last_action` 書き換え（ADR-012）。
 
 ---
 
@@ -107,34 +102,24 @@ description: "Figma または会話を起点に、デザインSSOT抽出 → 確
 
 ---
 
-### 6. ローカル検証
+### 6. ローカル検証 → bug-* 連鎖
 
-```bash
-npm run lint
-npm run typecheck
-npm test   # コンポーネントテスト（描画・variants の分岐）を含む
-```
+`auto-loop-core` の「3. ローカル検証」を実行する。デザイン固有の点:
 
-- コンポーネントの**テストが存在しない場合は作成**する（variants ごとの描画確認を最低限）
-- 失敗したら **bug-* スキル連鎖**（`/auto-task` ステップ3と同じ問題解決志向: 複数案→試行→効果検証→ロールバック）で自己修復し、直ったらここに復帰
+- コンポーネントテスト（描画・variants の分岐）を含める。**テストが存在しない場合は作成**する（variants ごとの描画確認を最低限）
+- 失敗したら「4. bug-* 連鎖」で自己修復し、直ったらここに復帰する
 
 ---
 
-### 7. basic-review / deep-review 反復
+### 7. レビュー反復
 
-`/auto-task` のステップ4-5と同じ:
-- `basic-review` を致命指摘0まで（最大5周）
-- `deep-review` を全指摘0まで（最大3周）
-- 超えたら中断してユーザー確認
+`auto-loop-core` の「5. レビュー反復」に従う。
 
 ---
 
-### 8. PR 作成 → ラベル → 自律マージ（task → sprint）
+### 8. PR → ラベル → 自律マージ（task → sprint）
 
-`/auto-task` のステップ6-8と同じ:
-- `gh pr create` で `task/* → sprint/*` の PR（本文に SSOT の出典 = Figma URL / 会話要約、確認用 HTML のパスを記載）
-- `ai-merged-unreviewed` ラベル付与
-- task → sprint のみ自律マージ。**sprint → main はしない**
+`auto-loop-core` の「6. PR → ラベル → 自律マージ」に従う。PR 本文には SSOT の出典（Figma URL / 会話要約）と確認用 HTML のパスを書く。
 
 ---
 
@@ -148,27 +133,20 @@ npm test   # コンポーネントテスト（描画・variants の分岐）を�
 
 ---
 
-## 課金前停止ポイント
-
-`/auto-task` と同じ。加えて:
-- Figma の有料 API / プラン変更を要する操作は事前確認
-
----
-
 ## 中断・再開
 
-`/auto-task` と同じ仕組み。`history/loop-state.md` の `last_action` から再開判定。SSOT が生成済みならモードCとして再起動すれば続きから走る。
+`auto-loop-core` の「8. 中断・再開」に従う。SSOT が生成済みならモードCとして再起動すれば続きから走る。
 
 ---
 
 ## やってはいけない
 
+`auto-loop-core` の共通項目に加えて:
+
 - Figma MCP 未接続のままモードAを推測で進める
 - 技術スタック未定義のまま UI 骨格を推測で生成する
 - SSOT を経由せず Figma から直接コードを書く（SSOT が唯一の起点。トレーサビリティを壊さない）
 - Vibe Coding の関所を省略して「完成」と報告する
-- sprint → main の自律マージ
-- `history/loop-state.md` の更新を怠る
 
 ---
 

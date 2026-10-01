@@ -14,6 +14,7 @@ description: "rdd.mdからSprint計画を作成し、GitHub MilestoneとIssueを
 - **doc/input/rdd.md** を根拠に、Sprint（Milestone）とタスク（Issue）を一括作成する
 - 組み込みTask（TaskCreate）にも登録し、セッション中の並行・依存管理を可能にする
 - GitHub と 組み込みTask の対応関係を維持する
+- 組み込みTask が無い環境（Claude Code 以外）では、組み込みTask の手順を飛ばして GitHub の Milestone と Issue だけで管理する
 
 ---
 

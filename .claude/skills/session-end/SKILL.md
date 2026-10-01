@@ -171,7 +171,7 @@ mkdir -p history
 2. **最新エントリの `status` を判定**
    - `status: completed` → 正常終了。次の手順はスキップして良い。完了済みエントリはアーカイブ（ファイル末尾に "completed" セクションへ移動）または削除して構わない
    - `status: in_progress` → **中断**。下記の引き継ぎ追記を行う
-   - `status: blocked_by_bug` / `blocked_by_user_confirm` → ブロック中。原因を journal へ転記
+   - `status: blocked_by_*`（種類は `auto-loop-core` の「1. ループ状態の記録」）→ ブロック中。原因を journal へ転記
 
 3. **journal.md の「翌日への引き継ぎ」に明示**
 
