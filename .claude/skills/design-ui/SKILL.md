@@ -83,6 +83,8 @@ description: "デザインSSOT JSONから技術スタック準拠の静的UI骨�
 ### ゲート
 - 見た目一致（主要variantsのプレビュー/Story）
 - tokens外の値0件 / Lint/Type green
+- `design-audit` で、骨格の実物（描画された画面）と値のファイル・ドックを照合して外れ0件（直さないものは `undecided` かタスクボードのカード）。描画された画面は、Agent Browser が使えればそれで、使えなければブラウザで開いたスクリーンショットと開発者ツールの計算値で測る
+- 人間が骨格を見て直した場合、直した理由はデザインドックに書く（`design-doc`）
 
 **Agent Browser利用可能時（自律確認）:**
 ```bash

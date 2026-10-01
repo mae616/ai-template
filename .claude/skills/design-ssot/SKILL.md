@@ -17,7 +17,7 @@ Figma MCPから設計情報を抽出し、AI/人間が参照するSSOTを作る�
 - ドキュメント/共有用の静的HTMLが欲しい → `/design-html`（任意）
 
 ## 前提（SSOTを作る前に必ず確認）
-- **書き込みの関所**: `doc/input/design/` への書き込みは `.claude/rules/dev-practices.md`「一時と確定を分ける」に従う（差分を見せて合意を取る。自律ループ中は `doc/draft/` に候補として置く）
+- **書き込みの関所**: `doc/input/design/` への書き込みは `.claude/rules/dev-practices.md`「一時と確定を分ける」に従う（差分を見せて合意を取る。自律ループ中は `doc/draft/` に候補として置く。値のファイルの仮の値は同節の「例外」に従う）
 - 出力する JSON には `meta.decision`（初回は `"provisional"`）と `undecided`（決めていない項目。空にしない）を入れる（`doc/input/design/ssot_schema.md`「0) 全 JSON 共通」）
 
 - **`doc/input/rdd.md` を読み込む**: ターゲット表示環境・技術スタック・制約をSSOT抽出の前提にする。実装判断に必要な項目が**未記入なら推測で埋めず短問で確認**し、回答を rdd.md に反映してから進む（⚠️ **書き込む文面を見せて合意を得てから書く**。会話での一言を、AIが作った文面のまま要件として定着させない）

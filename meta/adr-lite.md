@@ -1341,3 +1341,27 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
   - **AI の可否を1問で聞く**: 各社でボットが分かれているので、答えから設定が1つに決まらない。不採用
 
 - **出典**: 2026-10-02 のセッション。一次情報は `.claude/skills/web-discoverability/SKILL.md` の「出典」（Google 5本・ogp.me・OpenAI・Anthropic、同日に読み直し）
+
+---
+
+## ADR-038: F2〜F5 を「作る → 批評する」の組でつなぐ（P3-c。段ごとに追記）
+
+- **Context**:
+  判断盤（2026-10-01）で F0〜F5 のフローを採用し、各工程を「作る → 批評する」の組にすると決めた。P2 で design-consistency・design-doc・design-audit を入れたが、描く工程（design-mock / design-ui / auto-design）からは呼ばれておらず、P3 へ送られていた
+
+- **Decision**（段1: F2・F3）:
+  1. F2・F3 の「作る → 批評する」は `design-consistency` の「フローの中の位置」に1か所で書く。F2 は昇格候補を値・ドック・screen-map に書き、決めごとどうしの矛盾・抜けを design-audit で数える。F3 は描いたあと design-critique（見る）と design-audit（数える）を、それぞれの収束条件まで回す
+  2. 描く工程（design-mock / auto-design）は、描く前に design-consistency 第1部のどのレベルまで決まっているかを確かめる。足りないとき、自律ループの外では聞く。**自律ループの中では仮の値で描き進め**、仮の値の印（`provisional` のファイルはそのまま、`confirmed` のファイルは `meta.provisional` にキーを足す）と `undecided` に記録して最後にまとめて聞く（人間の決定）。扱いの正は design-consistency の「フローの中の位置」1か所。仮の値は値のファイル（`doc/input/design/`）に provisional で書く（dev-practices に例外を追記。人間の決定。写しを `doc/draft/` に作る案は値のファイルが2組になるので不採用）
+  3. design-mock・design-ui のゲートと auto-design の手順2.5に design-audit を足す（auto-design では最大3周、収束しなければ blocked_by_review）。F2 の照合（実物がまだ無いとき、決めごとどうしを数える）を design-audit 手順2に書いた。人間が触って直した理由はデザインドックに書く
+
+- **Consequences**:
+  - (+) 決めた値が、描いた画面と照合されないまま進む経路が減る
+  - (−) 描く工程のゲートが1つ増え、1画面あたりの時間が延びる。design-audit の発火条件にも描く工程のゲートを足した
+  - (−) 自律ループの中で仮の値で描いた画面は、値が決まったあとに描き直しになることがある。仮に置いた値は `meta.provisional`・`undecided` に残るので、auto-design 手順9（auto-build ではエビデンスレポートの「判断待ち」）でまとめて拾える
+  - (−) ループが手順9の前に止まると、仮の値が `doc/input/design/` に残る。印（`meta.provisional`・`undecided`）は付いているが、後ろの工程が確定度を見ずに読むと確定として扱われる。止まったループは /setup の引き継ぎ（loop-state）で拾い、止まったのが auto-design なら印の付いた値も一覧にして見せる（setup の手順2に追記）
+
+- **Alternatives**:
+  - **各スキルに F2・F3 の手順を全文で書く**: 同じ文が3か所になり、直し漏れが出る（ADR-031 で auto-loop-core を作ったのと同じ理由）。不採用
+  - **auto-loop-core に「決めていない項目で止まる」状態を足して止まる**: 推測で描かれることは無くなるが、auto-build の Sprint ループが止まる。人間が「仮の値で描き進める」を選んだ
+
+- **出典**: 2026-10-02 のセッション（判断盤 F2・F3、P2 で P3 へ送った項目）

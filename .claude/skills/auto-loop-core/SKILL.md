@@ -33,7 +33,7 @@ description: "自律ループ（auto-task / auto-bug / auto-design / auto-build�
 | `in_progress` | 実行中（この状態のまま止まっていたら中断） |
 | `completed` | 呼び出し元の全手順が完了 |
 | `blocked_by_bug` | bug-* 連鎖が上限を超えた |
-| `blocked_by_review` | レビュー反復が上限を超えた |
+| `blocked_by_review` | レビュー反復（basic-review / deep-review、デザインでは design-critique / design-audit）が上限を超えた。どのレビューかを理由に書く |
 | `blocked_by_danger_check` | 危険変更に該当し、マージを人間に委ねた |
 | `blocked_by_main_base` | PR のベースが main で、マージを人間に委ねた |
 | `blocked_by_user_confirm` | 課金前停止で確認待ち |

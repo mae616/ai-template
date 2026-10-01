@@ -40,7 +40,8 @@ description: "Figma または会話を起点に、デザインSSOT抽出 → 確
 - 技術スタック（UI フレームワーク）・ターゲット表示環境は `doc/input/rdd.md` に従う。**未定義・未記入なら推測せず短問で確認**し、回答を rdd.md に反映してから進む（⚠️ **書き込む文面を見せて合意を得てから書く**。会話での一言を、AIが作った文面のまま要件として定着させない）（rdd.md 自体が無い場合も同様）
 - **`project-design-language` を読み込む**: 基本方針（誰のため/北極星/単一メタファー）と固有値レジストリを SSOT 抽出・生成の前提にする
   - **雛形のまま**（基本方針が `{...}` / TBD）なら、`judgment-harness` の発酵ループに従い、**基本方針だけを質問して人間と埋めてから**ステップ1（SSOT 準備）へ進む（固有値レジストリは TBD のままでよい。値は SSOT（値のファイル）が正で、確定したらレジストリには決定の一言と置き場だけを書く）
-- **`art-direction` を読み込む**: ステップ2（確認用HTML）・ステップ3（静的UI骨格）の描画前に**AD宣言**を出し、描画後は `design-critique` の批評ループ（レンダリング→文脈遮断批評→修正を must-fix 0 まで、最大3周）を通す。確定した宣言は `project-design-language` の固有値レジストリへ同期する
+- **`design-consistency` の「フローの中の位置」を読む**: ステップ1の前に、第1部のどのレベルまで決まっているかを確かめる。足りないときの扱いは同節に従う（`/auto-design` は単独で起動しても自律ループなので、ここは「自律ループの中」に当たる。仮の値で描き進め、手順9でまとめて聞く。`auto-build` から呼ばれたときは、auto-build のエビデンスレポートの「判断待ち」にも載る）
+- **`art-direction` を読み込む**: ステップ2（確認用HTML）・ステップ3（静的UI骨格）の描画前に**AD宣言**を出し、描画後は `design-critique` の批評ループ（レンダリング→文脈遮断批評→修正を must-fix 0 まで、最大3周）を通す（ステップ2・3の検品は下の「2.5」）。確定した宣言は `project-design-language` の固有値レジストリへ同期する
 - 課金前停止は `auto-loop-core` の「7. 課金前停止」に加えて、Figma の有料 API / プラン変更を要する操作も事前確認する
 
 ---
@@ -54,7 +55,9 @@ description: "Figma または会話を起点に、デザインSSOT抽出 → 確
 ```markdown
   - [ ] ssot (design-ssot / design-mock / 既存読込)
   - [ ] preview-html (design-html)
+  - [ ] critique-audit (design-critique / design-audit)
   - [ ] ui-skeleton (design-ui)
+  - [ ] critique-audit-skeleton (骨格に design-critique / design-audit)
   - [ ] components (design-components)
   - [ ] assemble (design-assemble)
   - [ ] local-checks (lint/typecheck/test)
@@ -80,6 +83,12 @@ description: "Figma または会話を起点に、デザインSSOT抽出 → 確
 
 - `design-html` の手順で SSOT から静的 HTML を生成し `doc/input/design/html/` に保存
 - これが**人間の Vibe 確認とエビデンスの土台**になる（モードBで叩き台が既にある場合はスキップ可）
+
+### 2.5. 数える検品（design-audit）
+
+- 確認用 HTML（とステップ3のあとは骨格）を、`design-audit` で値のファイル・ドックと照合する。通過の条件は同スキルの「収束条件」
+- 直さないもの（正に無い・人間に聞くもの）は、止まらずに `undecided` かタスクボードのカードにして進み、手順9でまとめて人間に聞く
+- 直して再走査するのは最大3周（design-critique と同じ）。収束しなければ `auto-loop-core` の `blocked_by_review` で止まる
 
 ---
 
@@ -126,10 +135,10 @@ description: "Figma または会話を起点に、デザインSSOT抽出 → 確
 
 ### 9. Vibe Coding への引き渡し（人間の関所）
 
-1. 確認用 HTML（`doc/input/design/html/`）と実装済みコンポーネントの確認方法（起動コマンド等）を提示
+1. 確認用 HTML（`doc/input/design/html/`）と実装済みコンポーネントの確認方法（起動コマンド等）を提示。仮の値で描いた項目と、design-audit で `undecided` に回したものを一覧にして、まとめて聞く
 2. モードAの場合は **Figma 原本との対応関係**（どのフレーム → どのコンポーネント）を一覧で示す
 3. 「触って『違う』を出してほしい」と明示して人間の Vibe 確認を待つ
-4. Vibe フィードバックが出たら: タスク化 → SSOT / スキル側の修正 → このループを該当ステップから再実行（design TDD の発酵ループ。`dev-practices.md` 参照）
+4. Vibe フィードバックが出たら: タスク化 → SSOT / スキル側の修正（直した理由はデザインドックに書く。`design-doc`）→ このループを該当ステップから再実行（design TDD の発酵ループ。`dev-practices.md` 参照）
 5. `history/loop-state.md` を `status: completed` に更新
 
 ---

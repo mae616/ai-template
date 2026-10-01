@@ -134,10 +134,10 @@ description: "プロンプト文または既存成果物（要件定義・設計
 |---|---|
 | 要件・設計 | rdd.md の要約と全文リンク、AI判断で埋めた箇所の一覧、アーキテクチャ概要（構成図） |
 | Sprint / タスク | Sprint一覧、各 Issue と対応 PR、依存関係グラフ |
-| レビュー履歴 | basic-review / deep-review の**反復回数と指摘数の推移**（例: basic 3周 8→2→0件）、主要指摘と対応内容 |
+| レビュー履歴 | basic-review / deep-review（デザイン系 Issue では design-critique / design-audit も）の**反復回数と指摘数の推移**（例: basic 3周 8→2→0件）、主要指摘と対応内容 |
 | テスト結果 | 単体 / 結合 / E2E の実行結果・件数・カバレッジ。実行コマンドと生ログへの参照 |
 | bug 対応記録 | bug-* 連鎖の発動回数、試した修正案と採否、ロールバック履歴 |
-| 判断待ち | sprint → main の PR 一覧（リンク）、`ai-merged-unreviewed` ラベルの残数 |
+| 判断待ち | sprint → main の PR 一覧（リンク）、`ai-merged-unreviewed` ラベルの残数、`auto-design` が仮の値で描いた項目と design-audit で `undecided` に回したもの（値のファイルの `meta.provisional`・`undecided` から抜き出す） |
 
 > 原則: **「AIがやったと言っている」ではなく「人間が検証できる」**形で載せる。テスト結果は実行ログ由来、レビュー履歴はコミット・PR コメント由来で、出典を辿れるようにする。
 

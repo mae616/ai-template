@@ -30,7 +30,7 @@ rdd の先頭の「AI用：事実ブロック」を読み、技術スタック�
 |---|---|
 | `.claude/session-context.md` | 前回 `/session-end` が残した再開用の要約 |
 | `history/journal.md` の最新の日付エントリ | 前回やったこと・翌日への引き継ぎ |
-| `history/loop-state.md` | 止まっている自律ループ。`in_progress`（中断）と `blocked_by_*`（人間の判断待ち）を拾う（種類は `auto-loop-core`） |
+| `history/loop-state.md` | 止まっている自律ループ。`in_progress`（中断）と `blocked_by_*`（人間の判断待ち）を拾う（種類は `auto-loop-core`）。止まったのが `auto-design`（`auto-build` から呼ばれたときも含む）なら、値のファイル（`doc/input/design/*.json`）の `meta.provisional` と `undecided` も一覧にして見せる（仮の値が確定の顔で残っているため） |
 | タスクボード（rdd の「運用環境」に書いてあるもの） | いまやっていること・次にやること |
 
 止まっている自律ループや判断待ちがあれば、今日のゴールの候補として最初に示す。
