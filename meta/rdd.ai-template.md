@@ -36,7 +36,7 @@ paginate: true
 
 ## 運用環境（事実）
 > `/setup` が記録の無い項目だけ聞いて埋める。未記入は「決めていない」。ai-template 自身の値はここに書く（`doc/input/rdd.md` は配布用の雛形なので書かない）。
-- タスクボード: Linear
+- タスクボード: Linear（プロジェクト: ai-template）
 - デザインツール: Figma MCP（公式プラグイン）が使える
 - 参考事例: Mobbin MCP が使える
 - 判断盤の出し方: Artifact が使える

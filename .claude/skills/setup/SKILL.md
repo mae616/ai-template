@@ -41,7 +41,7 @@ rdd の「運用環境」に**記録が無い項目だけ**聞く（記録があ
 
 | 項目 | 聞くこと | 既定 |
 |---|---|---|
-| タスクボード | GitHub Projects / Orca / Linear / 使わない | **置かない**（未設定なら必ず聞く） |
+| タスクボード | GitHub Projects / Orca / Linear / 使わない。Linear・Orca などを選んだら、このリポジトリのプロジェクトがあるかも確かめる（無ければ作る。作れなければ人間に頼む）。プロジェクト名は「運用環境」に書く（`.claude/rules/dev-practices.md`「可視性の確保」） | **置かない**（未設定なら必ず聞く） |
 | デザインツール | Figma MCP が使えるか（Claude Code なら `claude mcp list` で確かめてから聞く） | — |
 | 参考事例 | Mobbin MCP が使えるか。使えなければ Design Inspiration 系のサイトから集める | — |
 | 判断盤の出し方 | Artifact が使えるか。使えなければローカルの HTML を開き、判断をコピーして貼る形にする | — |
