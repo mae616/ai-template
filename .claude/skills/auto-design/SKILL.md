@@ -85,6 +85,7 @@ description: "Figma または会話を起点に、デザインSSOT抽出 → 確
 
 ### 3. 静的UI骨格（design-ui）
 
+- 着手前に、`task-run` の「体験の網羅」のチェックリストを宣言する（auto-design は task-run を通らないため、ここで当てる）
 - `design-ui` の手順で、技術スタック準拠の静的UI骨格（見た目のみ）を生成
 
 ---

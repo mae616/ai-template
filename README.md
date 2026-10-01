@@ -308,7 +308,7 @@ ai-template/
 | デザイン | `ui-designer` / `usability-psychologist` / `sensory-design` / `animation-principles` |
 | 開発 | `architecture-expert` / `developer-specialist` / `testing` / `security-expert` / `frontend-implementation` / `accessibility-engineer` / `keyboard-shortcuts` |
 | クリエイティブ | `creative-coder` |
-| 工程 | `experience-plan`（状態×見た目×周辺の網羅チェック） / `project-design-language`（プロジェクト固有SSOT雛形） |
+| 工程 | `project-design-language`（プロジェクト固有SSOT雛形） |
 | ツール | `agent-browser` |
 | 情報源 | `official-source-first`（制度・規約・料金は公式一次情報で判断。費用が出る手順の前に必ず適用） |
 

@@ -1298,7 +1298,7 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
   - (+) 人間が答えを持っていなくても、「どれが近いか」で選べる。事例が引用元つきで残る
   - (+) 不採用の理由（判断の材料）が設定集に残る
   - (−) proto-loop のステップ8（磨きラウンド）は持ち込んでいない。F5 を作る P3-c までは、auto-build のあとの「もう少し」を polish タスクとして起票し `auto-task` で回す（着手前のチェックリストは task-run の手順4）。P3-c で F5 に置き換える
-  - (−) proto-medium は `user-invocable: false` だったため、`apply_global.sh` の既定でグローバル（`~/.claude/skills/`）に配られていた可能性がある。配布先の proto-loop / proto-medium は、apply_template の safe / force では残る（消えるのは --sync だけ）。**apply_global はどのモードでも消さない**（テンプレートにあるスキルしか回さない）ので、`~/.claude/skills/proto-medium` は手で消す
+  - (−) proto-medium は `user-invocable: false` だったため、`apply_global.sh` の既定でグローバル（`~/.claude/skills/`）に配られていた可能性がある。配布先の proto-loop / proto-medium は、apply_template の safe / force では残る（消えるのは --sync だけ）。**apply_global はどのモードでも消さない**（テンプレートにあるスキルしか回さない）ので、配っていた場合は `~/.claude/skills/proto-medium` を手で消す（このマシンには無いことを確認済み）
   - (−) design-language-options は `user-invocable: true` なので、apply_global の既定では配られない
 
 - **Alternatives**:
@@ -1306,5 +1306,10 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
   - **設定集を廃止し、決定ログ（doc/draft）に書く**: 置き場は1つ減るが、採用・不採用を画像つきで並べた一覧が無くなる。人間が「残す」を選んだ
   - **proto-medium を独立した判断軸として残す**: 使い道が F1 の媒体選びに限られていた（ログ上の呼び出し0回）。参照の形で残せば足りる
 
+- **追記（段2）**: 判断盤 O2 のもう1本、experience-plan は task-run の手順4「体験の網羅」に吸収して削除した。名前で呼んでいたのは task-run だけで、内容が着手前のチェックリスト1枚だったため
+  - 旧スキルは説明文から自動で効く判断軸だったので、UI の Issue が流れる auto-design（task-run を通らない）でも効き得た。その経路を残すため、auto-design の手順3に「task-run 手順4 の体験の網羅を宣言する」を足した
+  - (−) 判断軸（`user-invocable: false`）から手順系の task-run に移ったので、apply_global の既定では配られなくなる
+  - (−) 配布先の experience-plan は apply_template の safe / force では残る（消えるのは --sync だけ）。apply_global で配っていた場合は `~/.claude/skills/experience-plan` を手で消す（このマシンには無いことを確認済み）
+  - (−) 「Issue の実装詳細で固定した宣言」を書く手順が task-detail に無い（旧スキルからの持ち越し）。後続の候補
 - **関係**: ADR-020（auto-mvp → proto-loop・proto-medium 新設）をこの ADR で置き換えた
 - **出典**: 2026-10-02 のセッション（判断盤 F1・O2、人間の決定: 設定集を残す）

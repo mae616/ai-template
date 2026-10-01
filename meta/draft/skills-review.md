@@ -79,6 +79,8 @@
 - 人間の決定: ai-template のタスクボードは **Linear**（`meta/rdd.ai-template.md` の運用環境に記入）。このセッションでは Linear MCP が未認証で読めない
 - 人間の決定: 1ラウンドに並べる案は「比較軸を1行で言える2〜3案」。dev-practices.md の「1案ごと／比較軸が明確なときだけ2案」を F1 に合わせて書き換えた
 - 段1: `design-language-options` を新設し、proto-loop の連作（問い必須・1案1エージェントの文脈遮断・統合プロト・auto-build への引き継ぎ）と proto-medium（`references/medium.md`）を吸収して削除。F1 の「作る → 批評する」は、匿名テスト・導出線・比較軸の3問で入れた
+- 段2: experience-plan のチェックリスト（5項目・宣言は契約・落とし穴）を task-run の手順4「体験の網羅」に移して削除。auto-task は task-run を通る。task-run を通らない auto-design には、手順3に宣言の1行を足した
+- **後続の候補**: task-detail で UI の Issue に「体験の網羅」の欄を持たせるか（自律ループ中の宣言の拠り所）— **決めていない**
 - **P3-c へ送る**: proto-loop のステップ8（磨きラウンド: experience-plan → auto-task）は持ち込んでいない。F5（人間が触って磨く）で受け持つ。それまでは、auto-build のあとの「もう少し」を polish タスクとして起票し auto-task で回す（着手前チェックは task-run の手順4）
 - **後続の候補**: プロトの置き場 `proto/*` ブランチが `.claude/rules/git.md` のブランチ構造に無い（旧 proto-loop から引き継いだ）。git.md に足すか `samples/proto-N/` に一本化するか — **決めていない**
 
@@ -119,7 +121,7 @@
 | ui-designer / usability-psychologist | 残す | design-fundamentals と重なる。群3（判断軸系）の見直しで再判断 |
 | session-start | **削除**（P3-a） | /setup に吸収 |
 | proto-loop / proto-medium | **吸収して削除**（P3-b 段1） | design-language-options へ。媒体の判断は `references/medium.md` |
-| experience-plan | **吸収して削除**（P3-b 段2 予定） | task-run へ |
+| experience-plan | **吸収して削除**（P3-b 段2） | task-run の手順4「体験の網羅」へ |
 | pr-respond | **決めていない** | O4 |
 
 ## 群2: デザイン系 — 着手（2026-10-01）
