@@ -63,7 +63,7 @@
 ### 追加の決定（2026-10-02・人間）: Web の公開設定をフローに入れる
 - Web のプロジェクトでは、**OGP と SEO（Google 公式ガイドラインに沿う）を必ず設定する**
 - **検索に出すか／ロボットを避けるか／AI の学習・検索に使わせるか**を人間に聞き、その答えで自動設定する
-- 置き場（案）: 新規スキル `web-discoverability`（名前は**決めていない**）。F0 /setup で聞く → F4 で自動設定 → 数えるレビューで照合
+- 置き場: 新規スキル `web-discoverability`（名前は P3-a で人間が決定）。F0 /setup で聞く → F4 で自動設定 → 数えるレビューで照合
 - 書くときは公式一次情報で裏を取る（Google Search Central / ogp.me / 各社クローラーの公式ドキュメント）。P3 で実装
 - 確認済みの一次情報（2026-10-02 取得。書く前に再確認する）:
   - Google SEO スターターガイド（最終更新 2025-12-10）: ページごとに固有の title・meta description、意味のある URL、canonical、構造化データ、画像の alt。サイトマップと robots.txt は任意。meta keywords は使われない — https://developers.google.com/search/docs/fundamentals/seo-starter-guide
@@ -80,6 +80,11 @@
 - 人間の決定: 1ラウンドに並べる案は「比較軸を1行で言える2〜3案」。dev-practices.md の「1案ごと／比較軸が明確なときだけ2案」を F1 に合わせて書き換えた
 - 段1: `design-language-options` を新設し、proto-loop の連作（問い必須・1案1エージェントの文脈遮断・統合プロト・auto-build への引き継ぎ）と proto-medium（`references/medium.md`）を吸収して削除。F1 の「作る → 批評する」は、匿名テスト・導出線・比較軸の3問で入れた
 - 段2: experience-plan のチェックリスト（5項目・宣言は契約・落とし穴）を task-run の手順4「体験の網羅」に移して削除。auto-task は task-run を通る。task-run を通らない auto-design には、手順3に宣言の1行を足した
+- 段3: `web-discoverability` を新設。一次情報は書く直前（2026-10-02）に読み直し、決定ログの内容と食い違いが無いことを確認（Google の一般的なクローラーのページは 2026-07-14 更新）。/setup の「Web の公開範囲」から答えを使う形でつないだ
+- **P3-c へ送る**: F4（実装）のどこで web-discoverability を呼ぶか、照合をどのレビューに入れるか
+- 利用者の操作で来る AI を塞ぐかは、/setup の4項目に入れず、web-discoverability が初めて使われたときに聞き、rdd の同じ行に5つ目として書く（効き方が会社ごとに違い、説明してから聞く必要があるため）
+- Google の AI 機能（AI Overviews 等）だけを止める手段は無い（Googlebot が兼ねる）。その答えのときは、nosnippet・noindex で通常の検索結果も変わるトレードオフを説明して聞き直す（レビューで判明、公式の原文で確認）
+- OGP の値の置き場: copy.json の `site.*` と `<ページキー>.meta.*`（og:image:alt も文言として持つ）、OGP 画像は assets.json の `assets[]` の `key: "SiteOgImage"`。無ければ合意を取って `undecided` に足し、聞く
 - **後続の候補**: task-detail で UI の Issue に「体験の網羅」の欄を持たせるか（自律ループ中の宣言の拠り所）— **決めていない**
 - **P3-c へ送る**: proto-loop のステップ8（磨きラウンド: experience-plan → auto-task）は持ち込んでいない。F5（人間が触って磨く）で受け持つ。それまでは、auto-build のあとの「もう少し」を polish タスクとして起票し auto-task で回す（着手前チェックは task-run の手順4）
 - **後続の候補**: プロトの置き場 `proto/*` ブランチが `.claude/rules/git.md` のブランチ構造に無い（旧 proto-loop から引き継いだ）。git.md に足すか `samples/proto-N/` に一本化するか — **決めていない**
