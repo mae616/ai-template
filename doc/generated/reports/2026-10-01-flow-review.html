@@ -1,0 +1,199 @@
+<title>ai-template フロー全図</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* レイアウト: 760px の1カラム読み物。図だけ横スクロール可の箱に入れる */
+  :root {
+    --paper: #f5f7f8;
+    --ink: #22303a;
+    --ink-soft: #5a6b76;
+    --line: #d5dde2;
+    --card: #ffffff;
+    --accent: #b35c00;
+    --human: #2f6b4f;   /* 人間の関所 */
+    --ai: #1f6f8b;      /* AI が自律で進める区間 */
+    --shade: #eef2f4;
+    --font-body: "Zen Kaku Gothic New", -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #141b21; --ink: #dde5ea; --ink-soft: #8fa0ab; --line: #2b3843;
+      --card: #1b242c; --accent: #f0a340; --human: #7fc3a0; --ai: #6fbdd6; --shade: #202b34;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #141b21; --ink: #dde5ea; --ink-soft: #8fa0ab; --line: #2b3843;
+    --card: #1b242c; --accent: #f0a340; --human: #7fc3a0; --ai: #6fbdd6; --shade: #202b34;
+    color-scheme: dark;
+  }
+
+  body { background: var(--paper); color: var(--ink); font-family: var(--font-body); line-height: 1.85; }
+  main { max-width: 760px; margin: 0 auto; padding-inline: 16px; padding-block: 3.5rem 6rem; }
+
+  .eyebrow { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin: 0 0 0.6rem; }
+  h1 { font-size: clamp(1.8rem, 4.5vw, 2.4rem); line-height: 1.35; text-wrap: balance; margin: 0 0 1rem; }
+  .lede { font-size: 1.05rem; border-left: 3px solid var(--accent); padding-left: 1.1rem; margin: 0 0 2rem; }
+  .meta { display: flex; flex-wrap: wrap; gap: 0.4rem 1.5rem; font-family: var(--font-mono); font-size: 0.76rem; color: var(--ink-soft); margin: 0 0 2.5rem; padding-bottom: 1.2rem; border-bottom: 1px solid var(--line); }
+  h2 { font-size: 1.22rem; margin: 3.2rem 0 0.9rem; padding-bottom: 0.45rem; border-bottom: 1px solid var(--line); text-wrap: balance; }
+  h3 { font-size: 1.02rem; margin: 2rem 0 0.6rem; }
+  p { margin: 0 0 1.1rem; }
+  code { font-family: var(--font-mono); font-size: 0.86em; background: var(--shade); padding: 0.05em 0.35em; border-radius: 3px; }
+
+  .figure { background: var(--card); border: 1px solid var(--line); border-radius: 4px; padding: 1rem; overflow-x: auto; margin: 0 0 0.6rem; }
+  .figure pre.mermaid { margin: 0; background: transparent; }
+  .caption { font-size: 0.85rem; color: var(--ink-soft); margin: 0 0 1.8rem; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 0.5rem 1.2rem; font-size: 0.85rem; margin: 0 0 1rem; }
+  .legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
+  .swatch { width: 0.8rem; height: 0.8rem; border-radius: 2px; display: inline-block; }
+  .swatch.human { background: var(--human); }
+  .swatch.ai { background: var(--ai); }
+
+  .table-wrap { overflow-x: auto; margin: 0 0 1.5rem; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+  th, td { text-align: left; vertical-align: top; padding: 0.55rem 0.7rem; border-bottom: 1px solid var(--line); }
+  th { font-weight: 700; color: var(--ink-soft); font-size: 0.8rem; letter-spacing: 0.04em; }
+  td.id { font-family: var(--font-mono); color: var(--human); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+  .issues { display: grid; gap: 0.9rem; margin: 0 0 1.5rem; }
+  .issue { background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 3px; padding: 0.9rem 1.1rem; min-width: 0; }
+  .issue h3 { margin: 0 0 0.35rem; }
+  .issue p { margin: 0; font-size: 0.93rem; }
+  .src { font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink-soft); margin-top: 0.45rem !important; }
+</style>
+
+<main>
+  <p class="eyebrow">Flow Review · 2026-10-01</p>
+  <h1>ai-template のフロー全図</h1>
+  <p class="lede">いまのテンプレートの流れを、<strong>(a) 工程のつながり</strong>と<strong>(b) 人間の関所</strong>の2枚に描き起こした。見直しの論点は、ファイルから読み取れた事実だけを並べている。どれを直すかはまだ決めていない。</p>
+  <div class="meta">
+    <span>出典: README.md / .claude/rules/dev-practices.md / .claude/skills/*</span>
+    <span>ブランチ: task/2026-10-skills-review</span>
+  </div>
+
+  <h2>(a) 工程のつながり</h2>
+  <p>入口は4つあり、どれも最後は <code>auto-build</code> の Sprint ループに合流する。Sprint ループの中で、タスクは <code>auto-task</code>、画面は <code>auto-design</code> が担当する。両者はマージまでの共通手順を <code>auto-loop-core</code> から借りる。</p>
+  <div class="legend">
+    <span><i class="swatch human"></i>人間が決める</span>
+    <span><i class="swatch ai"></i>AI が自律で進める</span>
+  </div>
+  <div class="figure">
+<pre class="mermaid">
+flowchart TD
+  S["/setup<br/>rdd.md とスキルの前提を読む"] --> Q{"状況は？"}
+  Q -->|新規| PI["/project-init<br/>壁打ち → rdd.md → 雛形 → テンプレ適用"]
+  Q -->|既存を把握| RT["/repo-tour → /docs-reverse"]
+  Q -->|体験を探る| PL
+  Q -->|要件が固まっている| AB
+
+  subgraph PL["/proto-loop（連作）"]
+    P1["問いを決める"] --> P2["媒体を選ぶ<br/>proto-medium"] --> P3["制作"] --> P4["Vibe 確認"] --> P5["設定集へ蒸留"]
+    P5 -->|次の問い| P1
+    P5 -->|収束| P6["統合プロト"] --> P7["要件に上げるものを決める"]
+  end
+  PI --> AB
+  P7 -->|--from-proto| AB
+
+  subgraph AB["/auto-build"]
+    B1["rdd.md 準備"] --> B2["デザイン先行 / 後行の判定"] --> B3["task-list<br/>Sprint 計画"]
+    B3 --> B4["task-detail<br/>Issue 詳細化"]
+    B4 --> B5{"Issue の種類"}
+    B5 -->|機能| AT["auto-task"]
+    B5 -->|画面| AD["auto-design"]
+    AT --> CORE["auto-loop-core<br/>検証 → bug 連鎖 → レビュー → PR → マージ関所"]
+    AD --> CORE
+    CORE --> B6["sprint → main PR 作成"] --> B7["エビデンス HTML"]
+  end
+
+  B7 --> V["Vibe Coding<br/>人間が触って確かめる"]
+  V -->|もう少しこうしたい| EP["experience-plan → auto-task"]
+  V -->|不具合| BG["auto-bug"]
+  EP --> CORE
+  BG --> CORE
+
+  classDef human fill:#2f6b4f,color:#fff,stroke:#2f6b4f
+  classDef ai fill:#1f6f8b,color:#fff,stroke:#1f6f8b
+  class Q,P1,P4,P7,B2,V human
+  class AT,AD,CORE,B3,B4,B6,B7,P3,P5,P6,EP,BG ai
+</pre>
+  </div>
+  <p class="caption">手動で1段ずつ進める経路（<code>task-list → task-detail → task-run</code>、<code>bug-new → … → bug-fix</code>、<code>design-mock / design-ssot → design-ui → …</code>）は、図の自律ループと同じ部品を人間が順に呼ぶ形なので省いた。</p>
+
+  <h2>(b) 人間の関所</h2>
+  <p>人間が判断する点を、流れの順に並べた。<strong>常時かかるもの</strong>（rules による事前確認と事後確認）と、<strong>条件付きでかかるもの</strong>（スキルの中の停止条件）の2種類がある。</p>
+  <div class="figure">
+<pre class="mermaid">
+flowchart LR
+  subgraph PRE["事前確認（rules・常時）"]
+    G1["G1 スコープ宣言と GO"]
+  end
+  subgraph EXP["探索（proto-loop）"]
+    G2["G2 問いを決める<br/>毎ラウンド"] --> G3["G3 Vibe 確認<br/>毎ラウンド"] --> G4["G4 要件に上げるか<br/>draft → input"]
+  end
+  subgraph BUILD["構築（auto-build / auto-*）"]
+    G5["G5 rdd.md の確認<br/>プロンプト起点のみ"] --> G6["G6 デザイン先行 / 後行<br/>デザイン資料が無いとき"] --> G7["G7 体験の基本方針<br/>雛形のままのとき"]
+    G7 --> G8["G8 停止で呼ばれる<br/>課金前 / 危険変更 / 上限超過"]
+    G8 --> G9["G9 sprint → main マージ"]
+  end
+  subgraph POST["事後確認（rules・常時）"]
+    G10["G10 Vibe Coding<br/>触って違うを出す"]
+  end
+  PRE --> EXP --> BUILD --> POST
+  G10 -->|タスク化して再投入| BUILD
+</pre>
+  </div>
+  <p class="caption">G8 だけは「起きたときだけ」の関所。それ以外は、該当する工程を通れば必ず人間が判断する。</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>関所</th><th>何を決めるか</th><th>定義している場所</th></tr></thead>
+      <tbody>
+        <tr><td class="id">G1</td><td>触るファイルと変更の要点を見て GO を出す</td><td>rules/dev-practices.md「事前確認」</td></tr>
+        <tr><td class="id">G2</td><td>このプロトで確かめたい問い</td><td>proto-loop 手順1</td></tr>
+        <tr><td class="id">G3</td><td>触った結果の採否</td><td>proto-loop 手順4</td></tr>
+        <tr><td class="id">G4</td><td>設定集のどれを要件（rdd.md）に上げるか。書き込む文面まで確認</td><td>proto-loop 手順7 / dev-practices「一時と確定を分ける」</td></tr>
+        <tr><td class="id">G5</td><td>AI が起こした rdd.md の要約で GO を出す</td><td>auto-build 手順2</td></tr>
+        <tr><td class="id">G6</td><td>デザインを先に固めるか、機能を先に回すか</td><td>auto-build 手順3 / dev-practices</td></tr>
+        <tr><td class="id">G7</td><td>project-design-language の基本方針を埋める</td><td>auto-build 手順3 / auto-task・auto-design の前提</td></tr>
+        <tr><td class="id">G8</td><td>課金前・危険変更・bug 連鎖3周・レビュー上限・Sprint 内で2件 blocked のときに判断する</td><td>auto-loop-core / auto-build 手順4</td></tr>
+        <tr><td class="id">G9</td><td>Sprint をまとめて main に入れるか</td><td>auto-task 手順5 / rules/git.md</td></tr>
+        <tr><td class="id">G10</td><td>使い勝手と体験の確認。違和感はタスクに起こして再投入</td><td>dev-practices「事後確認」/ auto-design 手順9</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>見直しの論点（候補）</h2>
+  <p>ファイル同士を突き合わせて見つかった、ずれや重なり。直すかどうかは未定。</p>
+  <div class="issues">
+    <div class="issue">
+      <h3>1. 「関所は最小限の2箇所」と書いてあるが、実際は5〜6箇所ある</h3>
+      <p>auto-build の冒頭には「人間の関所は最小限の2箇所」（G5・G9）とある。本文を読むと、G6・G7・G8 でも止まる。説明と実際の挙動が合っていない。</p>
+      <p class="src">auto-build/SKILL.md 冒頭と手順3・4</p>
+    </div>
+    <div class="issue">
+      <h3>2. セッションの入口が2つある</h3>
+      <p>README は「すべてのセッションは /setup で開始」と書いている。一方で、引き継ぎの確認・ゴール・完了条件を決めるのは /session-start で、中断からの再開も session-start が拾う前提になっている。どちらを先に、どういう場面で使うのかがはっきりしない。</p>
+      <p class="src">README.md「使いはじめ」/ session-start / auto-loop-core 8</p>
+    </div>
+    <div class="issue">
+      <h3>3. 自律ループと手動フローの使い分けが書かれていない</h3>
+      <p>同じ部品を、auto-* は連鎖で、手動フローは人間が1段ずつ呼ぶ。dev-practices は「既定は Human in the Loop、実装ループだけ Human on the Loop」と書いている。ただ、どの時点で自律に切り替えるかの基準はどこにも無い。</p>
+      <p class="src">dev-practices「自律度の使い分け」/ README「手動フロー」</p>
+    </div>
+    <div class="issue">
+      <h3>4. Vibe 確認のあとの戻り先が、複数のファイルに分かれて書かれている</h3>
+      <p>「もう少しこうしたい」は proto-loop 手順8（experience-plan → auto-task）、不具合は auto-build 手順6（auto-bug）、見た目は auto-design 手順9（該当手順から再実行）に書かれている。G10 のあとどこへ戻るかを、1か所で見渡せない。</p>
+      <p class="src">proto-loop 8 / auto-build 6 / auto-design 9</p>
+    </div>
+    <div class="issue">
+      <h3>5. proto-loop から auto-build への受け渡しで、要件化の関所が2回ある</h3>
+      <p>proto-loop 手順7で「要件に上げるもの」を合意して rdd.md に書く（G4）。続く auto-build の --from-proto も、取り込み時に rdd.md を準備する手順2を通る。同じ合意を二度取るのか、一度で済ませるのかが決まっていない。</p>
+      <p class="src">proto-loop 7 / auto-build 入力モードC と手順2</p>
+    </div>
+  </div>
+
+  <h2>次に決めること</h2>
+  <p>上の5点のうち、使っていて引っかかっているもの、または「そもそもこの流れを変えたい」という所から順に決める。決まった内容は <code>doc/draft/skills-review.md</code> に記録し、そのあとスキルの群2〜4の見直しに反映する。</p>
+</main>
