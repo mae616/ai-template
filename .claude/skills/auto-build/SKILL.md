@@ -94,6 +94,7 @@ description: "プロンプト文または既存成果物（要件定義・設計
 - **project-design-language の起票確認**（UI を持つプロジェクトのみ）: `.claude/skills/project-design-language/SKILL.md` が**雛形のまま**（基本方針が `{...}` / TBD）なら、デザイン実装に入る前に埋める工程を計画へ組み込む:
   - **先行**の場合 → この場で `judgment-harness` の発酵ループに従い、基本方針（誰のため/北極星/単一メタファー）を人間と対話で埋めてから design 系 Issue へ進む
   - **後行**の場合 → デザイン Sprint の先頭に「project-design-language 起票」Issue を作成する（機能 Sprint 中は TBD のままでよい）
+- **Web の公開範囲の確認**（Web のプロジェクトのみ）: rdd の「運用環境」の「Web の公開範囲」が決まっているかを見る。決まっていない項目は、モードAなら要件の関所（手順2）で一緒に聞く。それ以外の扱いは `web-discoverability` の「入力」の自律ループの中の決まりに従う
 - `task-list` の手順に従い、rdd.md から Milestone（Sprint）と Issue を一括作成
 - `--scope mvp` の場合は **MVP に必要な Sprint のみ**計画する。`--scope product` は要件全体を Sprint に分割
 - 組み込み Task にも登録（並行・依存管理）。組み込み Task が無い環境では GitHub の Issue とマイルストーンだけで管理する
@@ -109,7 +110,7 @@ description: "プロンプト文または既存成果物（要件定義・設計
    - **デザイン系 Issue**（画面・UIコンポーネント実装。Figma 参照や SSOT を持つもの）は `auto-task` の代わりに **`auto-design`** を連鎖する
    - 実装（SOLID 遵守）→ テストピラミッド全層（単体/結合/E2E）→ bug 検知時は問題解決志向の bug-* 連鎖で自己修復して復帰 → basic-review 収束 → deep-review 収束 → task→sprint 自律マージ
    - 依存が独立な Issue はサブエージェントで並行実行してよい（結果の整合は統合時に確認）。サブエージェントが無い環境では依存関係順に1件ずつ実行する
-3. **Sprint 完了検知**: 全タスクマージ後、`auto-task` の「5. Sprint 完了検知」に従い **sprint → main の PR を作成**（マージはしない）
+3. **Sprint 完了検知**: 全タスクマージ後、`auto-task` の「5. Sprint 完了検知」に従い **sprint → main の PR を作成**（マージはしない）。Web のプロジェクトでは PR 本文に公開範囲の未決の件数を書く（決まりは `auto-task` の「5. Sprint 完了検知」）
 
 **Sprint 単位で `history/loop-state.md` に進捗を追記**（`sprint-1: completed (PR #42)` の形式）。
 
@@ -136,8 +137,9 @@ description: "プロンプト文または既存成果物（要件定義・設計
 | Sprint / タスク | Sprint一覧、各 Issue と対応 PR、依存関係グラフ |
 | レビュー履歴 | basic-review / deep-review（デザイン系 Issue では design-critique / design-audit も）の**反復回数と指摘数の推移**（例: basic 3周 8→2→0件）、主要指摘と対応内容 |
 | テスト結果 | 単体 / 結合 / E2E の実行結果・件数・カバレッジ。実行コマンドと生ログへの参照 |
+| Web の見え方（Web のときだけ） | `web-discoverability` の照合結果（ページごとの title・description・canonical・OGP、robots.txt・noindex と公開範囲の答えの突き合わせ）。外れと未決の件数 |
 | bug 対応記録 | bug-* 連鎖の発動回数、試した修正案と採否、ロールバック履歴 |
-| 判断待ち | sprint → main の PR 一覧（リンク）、`ai-merged-unreviewed` ラベルの残数、`auto-design` が仮の値で描いた項目と design-audit で `undecided` に回したもの（値のファイルの `meta.provisional`・`undecided` から抜き出す） |
+| 判断待ち | sprint → main の PR 一覧（リンク）、`ai-merged-unreviewed` ラベルの残数、`auto-design` が仮の値で描いた項目と design-audit で `undecided` に回したもの（値のファイルの `meta.provisional`・`undecided` から抜き出す）、web-discoverability の未決の項目（Web のとき。公開の前に人間が答える） |
 
 > 原則: **「AIがやったと言っている」ではなく「人間が検証できる」**形で載せる。テスト結果は実行ログ由来、レビュー履歴はコミット・PR コメント由来で、出典を辿れるようにする。
 
@@ -148,7 +150,7 @@ description: "プロンプト文または既存成果物（要件定義・設計
 1. エビデンスレポートのパスを提示し、内容の要約（3〜5行）を添える
 2. sprint → main の PR 一覧と「マージ判断をお願いする」旨を明示
 3. `history/loop-state.md` を `status: completed` に更新
-4. Vibe Coding（人間が実際に触る確認）を促す。フィードバックが出たら通常フロー（タスク化 → `/auto-task` or `/auto-bug`）で受ける
+4. Vibe Coding（人間が実際に触る確認）を促す。画面の見た目・体験の「もう少し」は F5（`/auto-design --polish`。判断盤で画面ごとに「直す／残す」→ 指示文 → タスク化 → F4 に戻る）で受ける。F5 は別のループとして auto-design 側の loop-state で管理する（auto-build の completed とは別）。機能の追加は `/auto-task`、不具合は `/auto-bug` で受ける
 
 ---
 

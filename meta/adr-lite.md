@@ -1298,6 +1298,7 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
   - (+) 人間が答えを持っていなくても、「どれが近いか」で選べる。事例が引用元つきで残る
   - (+) 不採用の理由（判断の材料）が設定集に残る
   - (−) proto-loop のステップ8（磨きラウンド）は持ち込んでいない。F5 を作る P3-c までは、auto-build のあとの「もう少し」を polish タスクとして起票し `auto-task` で回す（着手前のチェックリストは task-run の手順4）。P3-c で F5 に置き換える
+    - → ADR-038 段2で F5（`/auto-design --polish`）に置き換えた
   - (−) proto-medium は `user-invocable: false` だったため、`apply_global.sh` の既定でグローバル（`~/.claude/skills/`）に配られていた可能性がある。配布先の proto-loop / proto-medium は、apply_template の safe / force では残る（消えるのは --sync だけ）。**apply_global はどのモードでも消さない**（テンプレートにあるスキルしか回さない）ので、配っていた場合は `~/.claude/skills/proto-medium` を手で消す（このマシンには無いことを確認済み）
   - (−) design-language-options は `user-invocable: true` なので、apply_global の既定では配られない
 
@@ -1365,3 +1366,16 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
   - **auto-loop-core に「決めていない項目で止まる」状態を足して止まる**: 推測で描かれることは無くなるが、auto-build の Sprint ループが止まる。人間が「仮の値で描き進める」を選んだ
 
 - **出典**: 2026-10-02 のセッション（判断盤 F2・F3、P2 で P3 へ送った項目）
+
+- **Decision（段2: F4・F5）**:
+  1. F4 は `auto-design` の手順1〜8で、全画面をレスポンシブ・部品化まで一気に作ってから人間が触る。手順7で実装画面に design-critique（見る）と design-audit（数える）を回す
+  2. F5 は `auto-design` 手順9（入口は新しいモードD `/auto-design --polish`）: 判断盤で画面ごとに「直す／残す」を選び、修正の指示文をコピーして渡す → タスク化 → 該当手順から再実行。磨いた画面にも F3・F4 の批評を通す。auto-build のあとの見た目の「もう少し」もここで受ける（ADR-036 の仮の経路を置き換えた）
+  3. Web のプロジェクトでは `auto-design` 手順5.5で `web-discoverability` を設定・照合し、auto-build のエビデンスレポートに照合結果を載せる。自律ループの中で公開範囲が決まっていない項目は、その項目の robots.txt・noindex を書かずに進め、未決として手順9・「判断待ち」に載せる。公開の前には必ず人間が答える（正は web-discoverability の「入力」）
+  4. README に F0〜F5 と使うスキルの表を置く。動き（F6）は決めていない
+- **Consequences（段2）**:
+  - (+) 磨きの経路が1つ（F5）になり、ADR-036 で残っていた仮の経路が無くなった
+  - (−) F4 で全画面を一気に作るため、人間が触るまでの時間が長くなる。方向のずれは F1〜F3 で先に潰しておく前提
+  - (−) 判断盤の「F4 の素材は Figma → SSOT（Figma が無ければスクリーンショット）」のうち、スクリーンショットから SSOT を起こす手順は、受け手のスキルに無いので**決めていない**
+- **Alternatives（段2）**:
+  - **Web の照合を手順7のレビュー（basic / deep-review）に入れる**: レビュアーは差分を読む立場で、配信された HTML や robots.txt を取得して数える手順を持たない。照合は web-discoverability の手順で手順5.5に置き、ページが変わったら手順8の前に回し直す。判断盤の「数えるレビューで照合」は、この照合（外れ0件）に当たる
+  - **F5 の入口を auto-task に残す**（ADR-036 の仮の経路）: 画面ごとの「直す／残す」と、磨いた画面への批評（F3・F4）が通らない。auto-design にモードD として入口を置いた

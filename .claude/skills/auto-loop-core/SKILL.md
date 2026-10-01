@@ -35,7 +35,7 @@ description: "自律ループ（auto-task / auto-bug / auto-design / auto-build�
 | `blocked_by_bug` | bug-* 連鎖が上限を超えた |
 | `blocked_by_review` | レビュー反復（basic-review / deep-review、デザインでは design-critique / design-audit）が上限を超えた。どのレビューかを理由に書く |
 | `blocked_by_danger_check` | 危険変更に該当し、マージを人間に委ねた |
-| `blocked_by_main_base` | PR のベースが main で、マージを人間に委ねた |
+| `blocked_by_main_base` | main ベースになる（PR のベースが main、または進行中の sprint が無い）ため、マージやブランチの切り方を人間に委ねた |
 | `blocked_by_user_confirm` | 課金前停止で確認待ち |
 | `blocked_by_sprint` | Sprint 内で blocked が重なり、Sprint ループ全体を止めた（auto-build） |
 

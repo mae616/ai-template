@@ -12,6 +12,8 @@ description: "Figma または会話を起点に、デザインSSOT抽出 → 確
 > 設計根拠: `meta/adr-lite.md` の **ADR-008 / ADR-014 / ADR-015**
 >
 > 最後の関所は **人間の Vibe Coding**（触って「違う」を出す確認）。デザインは仕組みで拾えない感覚判断が本質のため、コード品質の収束までを AI が担い、体験の判断は人間に返す。
+>
+> **フローの中の位置（F4・F5）**: F4 は、1画面ずつではなく、**対象の全画面をレスポンシブ・部品化まで一気に作り、終わってから人間が触る**（手順1〜8）。F5 は、人間が触って磨く（手順9）。F2・F3 は `design-consistency` の「フローの中の位置」
 
 ## 入力: $ARGUMENTS
 
@@ -22,6 +24,7 @@ description: "Figma または会話を起点に、デザインSSOT抽出 → 確
 | **A: Figma** | `/auto-design <FigmaのURL/refs>` | `design-ssot` で SSOT（tokens/components/context/assets）を抽出 |
 | **B: 会話** | `/auto-design "ダッシュボード画面。落ち着いたトーンで"` | `design-mock` で SSOT + HTML叩き台を生成 |
 | **C: 既存SSOT** | `/auto-design doc/input/design/` | 既存のSSOT一式を読み込み、SSOT準備をスキップしてステップ2から開始 |
+| **D: 磨き（F5）** | `/auto-design --polish` | 実装済みの画面がある状態から、手順9（F5）で始める。`auto-build` のあとの見た目の「もう少し」もここから入る。新しいループとして loop-state を作る（steps は下の「モードDの steps」）。前提の確認は同じく行う |
 
 ---
 
@@ -60,12 +63,25 @@ description: "Figma または会話を起点に、デザインSSOT抽出 → 確
   - [ ] critique-audit-skeleton (骨格に design-critique / design-audit)
   - [ ] components (design-components)
   - [ ] assemble (design-assemble)
+  - [ ] web-discoverability (Web のときだけ)
   - [ ] local-checks (lint/typecheck/test)
+  - [ ] critique-audit-implemented (実装画面に design-critique / design-audit)
   - [ ] basic-review (Must Fix 0まで)
   - [ ] deep-review (Critical・Warning 0まで)
   - [ ] pr-create + label + auto-merge (task→sprint)
   - [ ] vibe-handoff (人間へ引き渡し)
 ```
+
+**モードDの steps**（手順0の代わりにこれで始める）:
+
+```markdown
+  - [ ] polish-board (手順9の判断盤で「直す／残す」)
+  - [ ] polish-tasks (指示文をタスクにする)
+  - [ ] rerun (直す画面ごとに、該当手順から手順8まで)
+  - [ ] vibe-handoff (「残す」だけになるまで手順9に戻る)
+```
+
+ブランチ: 進行中の `sprint/*` があれば、そこから `task/*` を切る（`.claude/rules/git.md`）。sprint が main にマージ済みで進行中の sprint が無いときは、新しい `sprint/*` を切るかを人間に聞いて止まる（main ベースで作業しない。止まるときの status は `blocked_by_main_base`。`auto-loop-core`「2. ブランチの前提」）
 
 ---
 
@@ -112,6 +128,13 @@ description: "Figma または会話を起点に、デザインSSOT抽出 → 確
 
 ---
 
+### 5.5. Web の見え方（Web のプロジェクトのときだけ）
+
+- `web-discoverability` の手順で、作ったページに title・description・canonical・OGP を入れ、rdd の「Web の公開範囲」の答えから robots.txt・noindex を設定する。答えが決まっていない項目の扱いは、同スキルの「入力」の自律ループの中の決まりに従う
+- 同スキルの「照合する」で外れ0件にする。手順6・7でページや head が変わったら、手順8の前にもう一度照合する
+
+---
+
 ### 6. ローカル検証 → bug-* 連鎖
 
 `auto-loop-core` の「3. ローカル検証」を実行する。デザイン固有の点:
@@ -123,7 +146,7 @@ description: "Figma または会話を起点に、デザインSSOT抽出 → 確
 
 ### 7. レビュー反復
 
-`auto-loop-core` の「5. レビュー反復」に従う。
+`auto-loop-core` の「5. レビュー反復」に従う。あわせて、実装した画面（主要な画面幅ごと）で F4 の批評を回す: スクリーンショットで `design-critique`（見る）、描画された画面と値のファイル・ドックの照合で `design-audit`（数える）。通過の条件はそれぞれの「収束条件」。収束しなければ `blocked_by_review`
 
 ---
 
@@ -135,11 +158,12 @@ description: "Figma または会話を起点に、デザインSSOT抽出 → 確
 
 ### 9. Vibe Coding への引き渡し（人間の関所）
 
-1. 確認用 HTML（`doc/input/design/html/`）と実装済みコンポーネントの確認方法（起動コマンド等）を提示。仮の値で描いた項目と、design-audit で `undecided` に回したものを一覧にして、まとめて聞く
+1. 確認用 HTML（`doc/input/design/html/`）と実装済みコンポーネントの確認方法（起動コマンド等）を提示。仮の値で描いた項目、design-audit で `undecided` に回したもの、web-discoverability の未決の項目（Web のとき）を一覧にして、まとめて聞く
 2. モードAの場合は **Figma 原本との対応関係**（どのフレーム → どのコンポーネント）を一覧で示す
 3. 「触って『違う』を出してほしい」と明示して人間の Vibe 確認を待つ
-4. Vibe フィードバックが出たら: タスク化 → SSOT / スキル側の修正（直した理由はデザインドックに書く。`design-doc`）→ このループを該当ステップから再実行（design TDD の発酵ループ。`dev-practices.md` 参照）
-5. `history/loop-state.md` を `status: completed` に更新
+4. **F5 磨く**: 画面ごとに「直す／残す」を選ぶ判断盤を出す（出し方は rdd の「運用環境」。Artifact が使えなければローカルの HTML を開き、選んだ結果をコピーして貼ってもらう）。「直す」の画面には、人間が直したい点を書ける欄と、その内容から作った**修正の指示文（コピーしてそのまま渡せる形）**を置く
+5. 渡された指示文をタスクにする（タスクボードが決まっていればそこに積む）→ SSOT / スキル側を直す（直した理由はデザインドックに書く。`design-doc`）→ このループを該当ステップから再実行する。**磨いた画面にも F3・F4 の批評（design-critique・design-audit・コードのレビュー、Web なら web-discoverability の照合）を通す**
+6. 「残す」だけになったら `history/loop-state.md` を `status: completed` に更新
 
 ---
 
@@ -164,6 +188,7 @@ description: "Figma または会話を起点に、デザインSSOT抽出 → 確
 
 - `/auto-build` の Sprint ループ内で、**デザイン系の Issue**（画面・UI コンポーネント実装）は `/auto-task` の代わりにこのスキルを連鎖してよい
 - 単独でデザインだけ回したいときの入口がこのスキル
+- `/auto-build` のあとの見た目の「もう少し」は、モードD（`/auto-design --polish`）で受ける
 
 ---
 

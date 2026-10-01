@@ -111,6 +111,21 @@ React / Svelte / Tailwind / GSAP / Three.js / Blender 等は **[ai-tech-knowledg
 | まず体験を探りたい | `/design-language-options` |
 | 要件が固まっている | `/auto-build "作りたいものの説明"` |
 
+### 作る流れ（F0〜F5）
+
+各工程は「作る → 批評する」の組です。人間が画面を触って確かめるのは F1（選ぶ）・F4 の終わり・F5 です（決めごとを上げる・`doc/input/` に書く合意は、どの工程でも人間が決めます）。
+
+| 工程 | 作る | 批評する |
+|---|---|---|
+| F0 入口 | `/setup`（前提・引き継ぎ・環境・Web の公開範囲・今日のゴール） | — |
+| F1 方向を選ぶ | `/design-language-options`（問いから選択肢を作り、事例とプロトを並べて人間が選ぶ） | 匿名テスト・導出線・比較軸 |
+| F2 決めごとにする | `/design-consistency` ＋ `/design-doc`（値・デザインドック・画面一覧） | `/design-audit`（決めごとどうしの矛盾・抜け） |
+| F3 画面を描く | Figma、または `/design-mock` | `/design-critique`（見る）＋ `/design-audit`（数える） |
+| F4 作る | `/auto-design`（全画面をレスポンシブ・部品化まで一気に。Web なら `/web-discoverability`）。全体は `/auto-build` | コードの basic / deep-review ＋ 実装画面で `/design-critique` ＋ `/design-audit` |
+| F5 磨く | `/auto-design --polish`（判断盤で画面ごとに「直す／残す」→ 指示文 → タスク化 → F4 に戻る） | 磨いた画面にも F3・F4 の批評 |
+
+動き（Figma フレームの動き・状態遷移）をつなぐ工程は**決めていない**。
+
 ## コマンド
 
 ### 自律ループ（Loop Engineering）
@@ -121,7 +136,7 @@ React / Svelte / Tailwind / GSAP / Three.js / Blender 等は **[ai-tech-knowledg
 |---------|--------------|-----------|
 | `/auto-build "プロンプト文"` or `成果物パス` | 要件定義 → Sprint計画 → 全タスク自律実装 → エビデンスHTML提示 | rdd.md確認（プロンプト起点時）/ sprint→main マージ |
 | `/auto-task #123` | 1タスクの実装 → テスト → レビュー収束 → task→sprint 自律マージ | 危険変更該当時のマージ判断 |
-| `/auto-design <Figma URL/会話/SSOT>` | デザインSSOT → UI骨格 → 型付きコンポーネント → マージ | Vibe Coding（触って確認） |
+| `/auto-design <Figma URL/会話/SSOT>` | デザインSSOT → UI骨格 → 型付きコンポーネント → マージ。`--polish` で磨き（F5）から | Vibe Coding（触って確認） |
 | `/auto-bug #123` | bug調査 → 修正案の試行・効果検証 → マージ | 危険変更該当時のマージ判断 |
 
 **共通の停止条件**: レビュー反復の上限超過 / bug連鎖3周で未解決 / 危険変更チェックリスト該当（`.claude/rules/code-quality.md`）/ 課金発生前。中断時は `history/loop-state.md` から再開できます。

@@ -89,6 +89,8 @@ gh pr create --base main --head sprint/YYYY-MM-機能名 \
   --body "..."  # Sprint内の全task PR一覧・テスト結果サマリ・ai-merged-unreviewed の残数を記載
 ```
 
+- **Web のプロジェクトでは、PR 本文に「Web の公開範囲の未決: n件（項目名）」を必ず書く**（0件でも書く。数え方は `web-discoverability` の「照合する」の未決の一覧。照合を回していなければ、rdd の「Web の公開範囲」の行で未記入の項目を数える）。どの経路で PR を作っても同じ（auto-build・auto-design・人間が手で作る場合も、この項目を書く）。PR を作ったあとに未決が変わったら（F5 の磨き等）、本文の件数も直す
+
 - **マージ判断は人間**（通常フローの最終関所）。AI は PR 作成と判断材料の提示まで
 - `/auto-build` 経由の場合はエビデンスレポート（HTML）へのパスも本文に記載する
 - 確認が済んだら（PR 作成の有無にかかわらず）`status: completed` に更新する
