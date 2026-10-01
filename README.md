@@ -107,7 +107,7 @@ React / Svelte / Tailwind / GSAP / Three.js / Blender 等は **[ai-tech-knowledg
 | 状況 | 最初のコマンド |
 |---|---|
 | 新規プロジェクトを立ち上げる | `/project-init`（壁打ち → rdd.md → テンプレート適用 → CI確認） |
-| 既存プロジェクトを把握する | `/repo-tour` → `/docs-reverse` |
+| 既存プロジェクトを把握する | `/docs-reverse` |
 | まず体験を探りたい | `/proto-loop` |
 | 要件が固まっている | `/auto-build "作りたいものの説明"` |
 
@@ -164,17 +164,15 @@ React / Svelte / Tailwind / GSAP / Three.js / Blender 等は **[ai-tech-knowledg
 | `/judgment-harness` | 「何を良しとするか」をレイヤーで積み上げる方法論。プロジェクト立ち上げ時に最初に回す |
 | `project-design-language`（雛形） | プロジェクト固有の存在設計・体験設計のSSOT。埋めて使う穴埋め雛形 |
 | `/art-direction` | 描く瞬間の規律。コンセプト一語から材質・配色・タイポまでを1本の線で導出し、汎用ダッシュボード化を防ぐ |
+| `/design-fundamentals` | デザインの基本（近接・整列・反復・対比、ゲシュタルト、文字と階層、色とコントラスト、余白とグリッド、操作と使いやすさ、UXの法則、UIの文言）を「当てる問い」で持つ総覧。描く工程（design-drafter / design-mock / design-ui）が読み、批評ルーブリック（design-critique Q11・Q12・Q14・Q15）に反映している |
 
 ### 補助
 
 | コマンド | 用途 |
 |---------|------|
-| `/repo-tour` | リポジトリ構造の案内（初見向け） |
-| `/pair plan\|design\|arch\|dev` | 壁打ち（短い反復で方針を固める） |
 | `/build-context-site` | 要件・設計・ADR・図を横断する現状サイトを生成 |
 | `/manual-gen` / `/manual-guide` | 手順書の生成と、ステップごとの案内 |
 | `/docs-reverse` | コードベースから俯瞰ドキュメントを生成 |
-| `/image-prep` | 生成AI画像を透過レイヤーへ加工（ImageMagick） |
 
 ### テンプレート保守（ai-template 側で使う）
 

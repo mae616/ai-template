@@ -1,0 +1,320 @@
+<title>フロー再設計の判断盤</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* レイアウト: 上に進捗と操作、下に節ごとのカード。カードは1列で、選択ボタンは横並び（狭いと折り返す） */
+  :root {
+    --paper: #f5f7f8;
+    --ink: #22303a;
+    --ink-soft: #5a6b76;
+    --line: #d5dde2;
+    --card: #ffffff;
+    --accent: #b35c00;
+    --adopt: #2f6b4f;
+    --modify: #1f6f8b;
+    --skip: #8a4b3c;
+    --hold: #6b5f8a;
+    --shade: #eef2f4;
+    --font-body: "Zen Kaku Gothic New", -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #141b21; --ink: #dde5ea; --ink-soft: #8fa0ab; --line: #2b3843; --card: #1b242c;
+      --accent: #f0a340; --adopt: #7fc3a0; --modify: #6fbdd6; --skip: #e39a86; --hold: #b4a8e0; --shade: #202b34;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #141b21; --ink: #dde5ea; --ink-soft: #8fa0ab; --line: #2b3843; --card: #1b242c;
+    --accent: #f0a340; --adopt: #7fc3a0; --modify: #6fbdd6; --skip: #e39a86; --hold: #b4a8e0; --shade: #202b34;
+    color-scheme: dark;
+  }
+
+  body { background: var(--paper); color: var(--ink); font-family: var(--font-body); line-height: 1.75; }
+  main { max-width: 820px; margin: 0 auto; padding-inline: 16px; padding-block: 3rem 6rem; }
+  .eyebrow { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin: 0 0 0.5rem; }
+  h1 { font-size: clamp(1.7rem, 4.2vw, 2.3rem); line-height: 1.35; text-wrap: balance; margin: 0 0 0.8rem; }
+  .lede { border-left: 3px solid var(--accent); padding-left: 1rem; margin: 0 0 1.5rem; }
+  h2 { font-size: 1.2rem; margin: 2.8rem 0 0.4rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--line); text-wrap: balance; }
+  .section-note { color: var(--ink-soft); font-size: 0.9rem; margin: 0 0 1rem; }
+  code { font-family: var(--font-mono); font-size: 0.85em; background: var(--shade); padding: 0.05em 0.35em; border-radius: 3px; }
+
+  .bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 2; background: var(--paper); border-bottom: 1px solid var(--line); padding-block: 0.7rem; display: flex; flex-wrap: wrap; gap: 0.6rem 1rem; align-items: center; margin-bottom: 1rem; }
+  .progress { font-family: var(--font-mono); font-size: 0.85rem; font-variant-numeric: tabular-nums; color: var(--ink-soft); }
+  .progress strong { color: var(--ink); }
+  .bar .spacer { flex: 1; }
+  .btn { font: inherit; font-size: 0.88rem; border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 4px; padding: 0.35rem 0.8rem; cursor: pointer; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--paper); font-weight: 700; }
+  .btn:focus-visible, .choice:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .copy-status { font-size: 0.82rem; color: var(--ink-soft); min-width: 7em; }
+
+  .flow { display: grid; gap: 0.5rem; margin: 0 0 1rem; }
+  .flow-step { display: grid; grid-template-columns: 2.4rem 1fr; gap: 0.2rem 0.8rem; align-items: start; }
+  .flow-step .num { font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent); padding-top: 0.15rem; }
+  .flow-step .pair { min-width: 0; font-size: 0.92rem; }
+  .flow-step .pair b { font-weight: 700; }
+  .crit { color: var(--modify); }
+
+  .items { display: grid; gap: 0.8rem; }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 4px; padding: 0.9rem 1rem; min-width: 0; border-left: 4px solid var(--line); }
+  .item[data-state="adopt"] { border-left-color: var(--adopt); }
+  .item[data-state="modify"] { border-left-color: var(--modify); }
+  .item[data-state="skip"] { border-left-color: var(--skip); }
+  .item[data-state="hold"] { border-left-color: var(--hold); }
+  .item-head { display: flex; flex-wrap: wrap; gap: 0.3rem 0.7rem; align-items: baseline; }
+  .item-id { font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink-soft); }
+  .item h3 { font-size: 1rem; margin: 0; flex: 1 1 18rem; min-width: 0; text-wrap: balance; }
+  .tag { font-size: 0.72rem; border: 1px solid var(--line); border-radius: 999px; padding: 0 0.55rem; color: var(--ink-soft); white-space: nowrap; }
+  .item p { margin: 0.35rem 0 0; font-size: 0.9rem; }
+  .item .where { font-family: var(--font-mono); font-size: 0.74rem; color: var(--ink-soft); margin-top: 0.35rem; overflow-wrap: anywhere; }
+  .item .rec { font-size: 0.82rem; color: var(--accent); margin-top: 0.35rem; }
+  .choices { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.7rem; }
+  .choice { font: inherit; font-size: 0.82rem; border: 1px solid var(--line); background: transparent; color: var(--ink); border-radius: 999px; padding: 0.2rem 0.8rem; cursor: pointer; }
+  .choice[aria-pressed="true"][data-v="adopt"] { background: var(--adopt); border-color: var(--adopt); color: var(--card); }
+  .choice[aria-pressed="true"][data-v="modify"] { background: var(--modify); border-color: var(--modify); color: var(--card); }
+  .choice[aria-pressed="true"][data-v="skip"] { background: var(--skip); border-color: var(--skip); color: var(--card); }
+  .choice[aria-pressed="true"][data-v="hold"] { background: var(--hold); border-color: var(--hold); color: var(--card); }
+  textarea { font: inherit; font-size: 0.86rem; width: 100%; box-sizing: border-box; margin-top: 0.5rem; min-height: 2.4rem; border: 1px solid var(--line); border-radius: 4px; background: var(--paper); color: var(--ink); padding: 0.35rem 0.5rem; resize: vertical; }
+
+  .out { margin-top: 2.5rem; }
+  .out pre { background: var(--card); border: 1px solid var(--line); border-radius: 4px; padding: 0.8rem; font-family: var(--font-mono); font-size: 0.78rem; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 24rem; overflow: auto; }
+  @media (prefers-reduced-motion: no-preference) { .item { transition: border-color 120ms ease; } }
+</style>
+
+<main>
+  <p class="eyebrow">Decision Board · 2026-10-01</p>
+  <h1>フロー再設計と how-we-work 取り込みの判断盤</h1>
+  <p class="lede">新しいフローの叩き台と、how-we-work で育った仕組み（送り状20件・送り状外4件）を1枚に並べた。各項目のボタンで判断を選び、必要ならメモを書いて、最後に「判断をコピー」でまとめて Claude に貼る。選んだ内容はこのブラウザにだけ保存される。</p>
+
+  <div class="bar" role="region" aria-label="進捗と操作">
+    <span class="progress" id="progress">判断済み <strong>0</strong> / 0</span>
+    <span class="spacer"></span>
+    <span class="copy-status" id="copy-status" aria-live="polite"></span>
+    <button class="btn" type="button" id="reset-btn">選択をすべて消す</button>
+    <button class="btn primary" type="button" id="copy-btn">判断をコピー</button>
+  </div>
+
+  <h2>1. 新しいフローの叩き台</h2>
+  <p class="section-note">各工程を「作る → 批評する」の組にした。批評は工程ごとに、文脈を切ったレビュアーが回す。</p>
+  <div class="flow" id="flow-summary"></div>
+  <div class="items" id="sec-flow"></div>
+
+  <h2>2. how-we-work から取り込むもの</h2>
+  <p class="section-note">送り状（<code>doc/output/to-template.md</code> 最新ブランチ）の未取込20件と、送り状に書かれていない仕組み4件。⚠️ 送り状の冒頭に「取り込む前に effort とモデルを変えて検証してほしい」という人間の指示がある（項目6・CLAUDE.md の判断根拠に関わるもの）。</p>
+  <div class="items" id="sec-intake"></div>
+
+  <h2>3. まだ決めていないこと</h2>
+  <p class="section-note">フローの形によって答えが変わるもの、今回の決定とぶつかるもの。</p>
+  <div class="items" id="sec-open"></div>
+
+  <section class="out" aria-labelledby="out-h">
+    <h2 id="out-h">コピーされる内容（プレビュー）</h2>
+    <pre id="out"></pre>
+  </section>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  /** 選択肢の定義。表示名と、コピー時の語を1か所で持つ */
+  var CHOICES = [
+    { v: "adopt", label: "取り込む" },
+    { v: "modify", label: "形を変えて取り込む" },
+    { v: "skip", label: "見送る" },
+    { v: "hold", label: "あとで決める" }
+  ];
+
+  /** 1. フローの工程。make=作る、crit=批評する */
+  var FLOW = [
+    { id: "F0", title: "/setup を唯一の入口にする", make: "環境を聞く（タスクボードは GitHub Projects / Orca / Linear のどれか、Figma・Mobbin MCP の有無、Artifact が使えるか）→ 前回の引き継ぎを確認（session-start を吸収）", crit: "—（できないことは最初に聞いて、代替経路を決める）", rec: "取り込む" },
+    { id: "F1", title: "問いからデザイン言語・モーション言語・声の選択肢を作る", make: "問い詰めずに、問いから候補を出す。Mobbin（無ければ Design Inspiration 系サイト）の事例を画像で並べ、判断盤で選ぶ", crit: "選択肢の批評（匿名テスト：他のアプリと区別がつくか、コンセプトから導けるか）", rec: "取り込む" },
+    { id: "F2", title: "決め事に昇格する（アイコン・文字サイズ・画面遷移）", make: "値は tokens.json、考慮と結論はデザインドック、画面の一覧と遷移は screen-map に分けて書く。未決は「決めていない」と書く", crit: "数えるレビュー（決め事どうしの矛盾・抜けを数えて照合）", rec: "取り込む" },
+    { id: "F3", title: "Figma で画面を作る", make: "design-fundamentals を当てて描く（近接・整列・反復・対比）", crit: "見るレビュー（design-critique）＋ 数えるレビュー（design-audit：Figma の実物と決め事を照合）を must-fix 0 まで", rec: "取り込む" },
+    { id: "F4", title: "/loop で 1画面ずつ実装する（auto-build / auto-task）", make: "Figma の実物と突き合わせて1画面ずつ実装", crit: "コードの basic / deep-review ＋ 実装画面のスクリーンショットで design-critique", rec: "取り込む" },
+    { id: "F5", title: "全部作ったあと、人間が触って磨く", make: "判断盤で画面ごとに「直す／残す」を選び、プロンプトをコピーして渡す → タスク化 → F4 に戻る", crit: "磨いた画面にも F3・F4 の批評を回す", rec: "取り込む" },
+    { id: "F6", title: "余白: Figma フレームの動き・XState", make: "今は作らない。モーション言語（F1）と画面遷移（F2）に、将来つなぐ場所だけ空けておく", crit: "—", rec: "取り込む（未決として置く）" }
+  ];
+
+  /** 2. 取り込み候補。no=送り状の項目番号（送り状外は ext） */
+  var INTAKE = [
+    { id: "T4", no: "項目4", title: "フックの実体だけ配って settings.json の登録を配らない", stage: "F0", body: "apply_template.sh が既存の settings.json をスキップするため、hooks・permissions が届かない。差分を一覧で見せる手順と、適用直後にテストを流す手順を足す。", where: "scripts/apply_template.sh / rules/tool-usage.md", rec: "取り込む（最初の依頼。実装方針は合意済み）" },
+    { id: "T5", no: "項目5", title: "複数エージェント（Codex 等）へ SSOT を配る方式", stage: "F0", body: "@参照は展開されない。シンボリックリンクが最有力。rules の共有方法は未検証。", where: "scripts/apply_template.sh / ADR", rec: "取り込む（.agents/skills リンク＋AGENTS.md 生成の方針で合意済み）" },
+    { id: "T6", no: "項目6", title: "書いてあるルールが効いていない原因の切り分け", stage: "全体", body: "仮説A〜D（調べる前に作る／効率が原則を上書き／自分の出力を検算しない／委譲で原則が継承されない）。軸の候補「この一手を決めるのは人間か自分か」。⚠️ 先に切り分けてから決める。", where: "CLAUDE.md / rules（調査結果しだい）", rec: "あとで決める（検証が先）" },
+    { id: "T7a", no: "項目7", title: "未確定の混入を「反映を止める」で防がない", stage: "F2", body: "止めるのは未確定の反映であって反映そのものではない。反映元を限定する。止めるなら期限か再開条件を書く。予定の表と現状の表を混ぜない。", where: "rules/dev-practices.md / proto-loop", rec: "取り込む" },
+    { id: "T7b", no: "項目7", title: "session-end の自己評価を「次の一手」に変える", stage: "全体", body: "自己評価欄が AI に失敗を数え上げさせ、⚠️ の密度を上げていた。ルールを足すより、引っぱる欄を変える。⚠️ 群1で「自己評価は残す」と決めたことと食い違う（節3で決め直す）。", where: "skills/session-end（＋全スキル末尾の自己評価）", rec: "節3 O1 と合わせて決める" },
+    { id: "T8", no: "項目8", title: "読める形をしていないから適用されない（layout-principles・design-consistency・索引）", stage: "F2・F3", body: "layout-principles は design-fundamentals として取り込み済み。残りは design-consistency（定義を作る・当てる・古くさせない工程）と、project-design-language 冒頭の索引。", where: "skills/design-consistency（新規）/ project-design-language", rec: "取り込む（残り分）" },
+    { id: "T9", no: "項目9", title: "古くなった生成物は「凍結」ではなく「初期化」", stage: "F2", body: "残して「使うな」と書くと、古い値を引く経路が生きる。また作れるものは消して、復元先のコミットと再生成の作法を残す。", where: "rules/dev-practices.md", rec: "取り込む" },
+    { id: "T10", no: "項目10", title: "値・判断・履歴を同じファイルに混ぜない", stage: "F2", body: "値は JSON（status と undecided を必ず持つ）、判断は文章、履歴は git。テンプレートに空の tokens.json を同梱する案。", where: "CLAUDE.md / design-consistency / doc/input/design/tokens.json", rec: "取り込む" },
+    { id: "T11", no: "項目11", title: "時系列の記録をデザインドックに置き換える", stage: "F2", body: "主題ごとに「決まっていること／なぜ／まだ決めていない」。project-design-language を薄い案内板にする。proto-loop の学びの置き場も変える。", where: "skills/design-doc（新規）/ doc/input/design/docs/", rec: "取り込む" },
+    { id: "T12", no: "項目12", title: "リポジトリが膨らむと AI は違うものをモデル化する", stage: "全体", body: "重複の実体コピーを消す（symlink を先に試す）、写しを作らない。新規ルール doc-writing.md。", where: "rules/doc-writing.md（新規）", rec: "取り込む（E1 と一緒に）" },
+    { id: "T13", no: "項目13", title: "一貫性の点検で「名前で走査しない」", stage: "F3", body: "名前は揃っていない。並びは座標の順、間隔は差分で測る。", where: "design-fundamentals（取り込み済み）/ design-consistency", rec: "取り込む（大半は済み）" },
+    { id: "T16", no: "項目16", title: "数えるレビューを、目で見るレビューとは別に持つ", stage: "F2・F3", body: "design-audit: 決め事を Figma の実物に機械で照合し、外れ0件まで直す。design-critique とは役割を分ける。", where: "skills/design-audit（新規）", rec: "取り込む" },
+    { id: "T17", no: "項目17", title: "値の SSOT は宣言では保てない。照合する時点を決める", stage: "F2", body: "「SSOT は◯◯」と書くだけでは古い値が残る。作る直前・値を変えたとき・セッション開始時に照合する。", where: "rules/dev-practices.md", rec: "取り込む" },
+    { id: "T18", no: "項目18", title: "表記ゆれは4つに仕分ける", stage: "F3", body: "数えるだけでは判定できない。状態の表示は食い違いではない、など。", where: "design-audit の一節", rec: "取り込む（T16 と一緒に）" },
+    { id: "T19", no: "項目19", title: "数えた件数は条件式ごと書き戻す", stage: "F3", body: "数字だけ残すと、次に数えた人が判定できない。", where: "design-audit 手順1", rec: "取り込む（T16 と一緒に）" },
+    { id: "T20", no: "項目20", title: "ある規則の対象外を、別の規則でも数え直す", stage: "F3", body: "「この規則の対象外」は「すべての規則の対象外」ではない。", where: "design-audit 手順6", rec: "取り込む（T16 と一緒に）" },
+    { id: "T21", no: "項目21", title: "CLI の JSON 出力で非 ASCII のキー名を条件に使わない", stage: "全体", body: "照合コマンドが黙って全部外れる／全部通る。", where: "rules/tool-usage.md", rec: "取り込む" },
+    { id: "T21b", no: "番号なし", title: "色や書式の一括適用は、混在している要素を黙って飛ばす", stage: "F3", body: "「残りは対象外だけ」と報告した時点で、混在要素は数の外にいた。", where: "rules/tool-usage.md", rec: "取り込む" },
+    { id: "T22", no: "項目22", title: "返答は「決めてほしいこと → 結果 → 見るもの」の順。決めることは選択肢の UI で聞く", stage: "全体", body: "出力テンプレ（要約 → 判断 → …）を組み替える。短くすることが省略になる問題。", where: "CLAUDE.md 出力テンプレ", rec: "取り込む" },
+    { id: "T23", no: "項目23", title: "現在値は実体で判断する。ただし写しのずれは直す", stage: "全体", body: "決めごとは2つある。混ぜると逆の誤りになる。名前は役割が一目でわかる成果物。", where: "rules/dev-practices.md", rec: "取り込む" },
+    { id: "E1", no: "送り状外", title: "doc-writing ルール（9節）", stage: "全体", body: "値・判断・履歴を分ける／履歴を積んでよいファイルを名指し／写しを作らない／引ける形／未決を無いと書かない／機械で切り出して検算／止めた判断を残す／読む側の決めごと／定期的に測る。", where: "rules/doc-writing.md", rec: "取り込む" },
+    { id: "E2", no: "送り状外", title: "design-audit スキル（数えるレビューの実体）", stage: "F2・F3", body: "T16・T18〜T20 の受け皿。how-we-work の 236 行版を一般化する。", where: "skills/design-audit", rec: "取り込む" },
+    { id: "E3", no: "送り状外", title: "design-doc スキル（デザインドックの書き方）", stage: "F2", body: "T11 の受け皿。how-we-work の 193 行版を一般化する。", where: "skills/design-doc", rec: "取り込む" },
+    { id: "E4", no: "送り状外", title: "report-publish スキル（レポートの保存・公開・一覧）", stage: "全体", body: "CLAUDE.md に書いてある手順をスキルに出す。Artifact が使えない環境での代替（ローカル HTML を開く等）もここに置ける。", where: "skills/report-publish / CLAUDE.md", rec: "取り込む" }
+  ];
+
+  /** 3. まだ決めていないこと */
+  var OPEN = [
+    { id: "O1", title: "自己評価（成功自信度）を残すか、「次の一手」に変えるか", body: "群1では「残す」と決めた。送り状 項目7 は「失敗を数え上げる原因になるので変える」。どちらにするか、全スキル末尾の欄も含めて決める。", rec: "形を変えて取り込む（次の一手＋引き継ぎの自信度）" },
+    { id: "O2", title: "proto-loop・proto-medium・experience-plan をどうするか", body: "ログ上の使用は proto-loop が1回。新フローの F1〜F3 に吸収するか、残すか、削除するか。", rec: "F1〜F3 に吸収して削除" },
+    { id: "O3", title: "session-start を /setup に吸収して削除するか", body: "ログ上 /setup 65回、/session-start 3回。", rec: "吸収して削除" },
+    { id: "O4", title: "pr-respond を残すか", body: "ログ上の使用は0回。PR コメントへの対応手順。", rec: "あとで決める" },
+    { id: "O5", title: "タスクボードの既定", body: "/setup で GitHub Projects / Orca / Linear のどれを使うかを聞き、未設定なら止まって聞く。既定を置くか、毎回聞くか。", rec: "未設定なら聞く（既定は置かない）" },
+    { id: "O6", title: "Artifact が使えない環境（Codex・Cursor 等）での判断盤", body: "ローカルの HTML を開いて、コピーした判断を貼る形にするか。できないことは最初の /setup で聞くか、最後にまとめて聞くか。", rec: "最初の /setup で聞く" },
+    { id: "O7", title: "ハーネスをモデル非依存で作るか、モデルごとに期待値を変えるか", body: "送り状に書かれた人間の論点（Fable のときは任せる、など）。T6 の切り分けとセット。", rec: "あとで決める" }
+  ];
+
+  var LS_KEY = "flow-intake-dashboard-2026-10-01";
+  var state = { picks: {}, notes: {} };
+
+  /** localStorage は閲覧者ごとの便宜。使えない環境でも画面は動く */
+  function load() {
+    try {
+      var raw = localStorage.getItem(LS_KEY);
+      if (raw) {
+        var s = JSON.parse(raw);
+        state.picks = s.picks || {};
+        state.notes = s.notes || {};
+      }
+    } catch (e) { /* 保存できない環境では何もしない */ }
+  }
+  function save() {
+    try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch (e) { /* 同上 */ }
+  }
+
+  function el(tag, attrs, text) {
+    var n = document.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach(function (k) { n.setAttribute(k, attrs[k]); });
+    if (text != null) n.textContent = text;
+    return n;
+  }
+
+  /** 1項目ぶんのカードを作る */
+  function card(it, meta) {
+    var c = el("article", { "class": "item", "data-id": it.id, "data-state": state.picks[it.id] || "" });
+    var head = el("div", { "class": "item-head" });
+    head.appendChild(el("span", { "class": "item-id" }, it.id));
+    head.appendChild(el("h3", null, it.title));
+    if (meta) head.appendChild(el("span", { "class": "tag" }, meta));
+    c.appendChild(head);
+    if (it.body) c.appendChild(el("p", null, it.body));
+    if (it.make) {
+      c.appendChild(el("p", null, "作る: " + it.make));
+      c.appendChild(el("p", { "class": "crit" }, "批評: " + it.crit));
+    }
+    if (it.where) c.appendChild(el("div", { "class": "where" }, "反映先: " + it.where));
+    if (it.rec) c.appendChild(el("div", { "class": "rec" }, "にゃんこのおすすめ: " + it.rec));
+
+    var ch = el("div", { "class": "choices", role: "group", "aria-label": it.id + " の判断" });
+    CHOICES.forEach(function (o) {
+      var b = el("button", { type: "button", "class": "choice", "data-v": o.v, "aria-pressed": String(state.picks[it.id] === o.v) }, o.label);
+      b.addEventListener("click", function () {
+        state.picks[it.id] = state.picks[it.id] === o.v ? "" : o.v;
+        c.setAttribute("data-state", state.picks[it.id]);
+        Array.prototype.forEach.call(ch.children, function (x) { x.setAttribute("aria-pressed", String(x.getAttribute("data-v") === state.picks[it.id])); });
+        save(); refresh();
+      });
+      ch.appendChild(b);
+    });
+    c.appendChild(ch);
+
+    var ta = el("textarea", { id: "note-" + it.id, "aria-label": it.id + " のメモ", placeholder: "メモ（任意）: 変えたい点・条件など" });
+    ta.value = state.notes[it.id] || "";
+    ta.addEventListener("input", function () { state.notes[it.id] = ta.value; save(); refresh(); });
+    c.appendChild(ta);
+    return c;
+  }
+
+  var ALL = FLOW.concat(INTAKE, OPEN);
+
+  /** コピーされる文面。Claude にそのまま貼れる形にする */
+  function buildText() {
+    var labelOf = {};
+    CHOICES.forEach(function (o) { labelOf[o.v] = o.label; });
+    var lines = ["フロー再設計の判断盤（2026-10-01）の判断です。この内容で進めてください。", ""];
+    [["1. フロー", FLOW], ["2. 取り込み", INTAKE], ["3. 未決", OPEN]].forEach(function (sec) {
+      var rows = sec[1].filter(function (it) { return state.picks[it.id] || (state.notes[it.id] || "").trim(); });
+      if (!rows.length) return;
+      lines.push("## " + sec[0]);
+      rows.forEach(function (it) {
+        var p = state.picks[it.id] ? labelOf[state.picks[it.id]] : "未選択";
+        var n = (state.notes[it.id] || "").trim();
+        lines.push("- " + it.id + " " + it.title + " → " + p + (n ? "（メモ: " + n.replace(/\n/g, " ") + "）" : ""));
+      });
+      lines.push("");
+    });
+    var undecided = ALL.filter(function (it) { return !state.picks[it.id]; }).map(function (it) { return it.id; });
+    if (undecided.length) lines.push("未選択: " + undecided.join(", "));
+    return lines.join("\n");
+  }
+
+  function refresh() {
+    var done = ALL.filter(function (it) { return state.picks[it.id]; }).length;
+    var p = document.getElementById("progress");
+    p.textContent = "";
+    p.appendChild(document.createTextNode("判断済み "));
+    p.appendChild(el("strong", null, String(done)));
+    p.appendChild(document.createTextNode(" / " + ALL.length));
+    document.getElementById("out").textContent = buildText();
+  }
+
+  function render() {
+    var fs = document.getElementById("flow-summary");
+    FLOW.forEach(function (f) {
+      var row = el("div", { "class": "flow-step" });
+      row.appendChild(el("span", { "class": "num" }, f.id));
+      var pair = el("div", { "class": "pair" });
+      pair.appendChild(el("b", null, f.title));
+      row.appendChild(pair);
+      fs.appendChild(row);
+    });
+    var sf = document.getElementById("sec-flow");
+    FLOW.forEach(function (it) { sf.appendChild(card(it, null)); });
+    var si = document.getElementById("sec-intake");
+    INTAKE.forEach(function (it) { si.appendChild(card(it, it.no + " · " + it.stage)); });
+    var so = document.getElementById("sec-open");
+    OPEN.forEach(function (it) { so.appendChild(card(it, null)); });
+  }
+
+  document.getElementById("copy-btn").addEventListener("click", function () {
+    var text = buildText();
+    var status = document.getElementById("copy-status");
+    function fallback() {
+      var r = document.createRange();
+      r.selectNodeContents(document.getElementById("out"));
+      var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+      status.textContent = "選択したので ⌘C でコピーしてにゃ";
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { status.textContent = "コピーしたにゃ"; }, fallback);
+    } else { fallback(); }
+  });
+
+  document.getElementById("reset-btn").addEventListener("click", function () {
+    var b = document.getElementById("reset-btn");
+    if (b.getAttribute("data-armed") !== "1") {
+      b.setAttribute("data-armed", "1"); b.textContent = "もう一度押すと消える";
+      setTimeout(function () { b.removeAttribute("data-armed"); b.textContent = "選択をすべて消す"; }, 3000);
+      return;
+    }
+    state = { picks: {}, notes: {} }; save();
+    ["sec-flow", "sec-intake", "sec-open", "flow-summary"].forEach(function (id) { document.getElementById(id).textContent = ""; });
+    render(); refresh();
+    b.removeAttribute("data-armed"); b.textContent = "選択をすべて消す";
+  });
+
+  load(); render(); refresh();
+})();
+</script>

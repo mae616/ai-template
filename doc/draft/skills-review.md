@@ -43,6 +43,30 @@
 ## 割り込み: フローの見直し（2026-10-01〜）
 群2以降の前に、開発全体の流れ（工程のつながり）と人間の関所の流れを見直す。現状図と論点候補5件はレポート `doc/generated/reports/2026-10-01-flow-review.html`。**どの論点を直すかは決めていない。**
 
-## 群2: デザイン系 — 未着手
+## 使っていないスキルの削除（2026-10-01・人間が選択）
+
+根拠: 全プロジェクトのセッションログ（2026-08-18〜10-01、24プロジェクト）で、人間の `/コマンド` 呼び出し・AI のスキル呼び出しがともに0回のもの。
+
+| スキル | 判断 | 理由・影響 |
+|---|---|---|
+| repo-tour / image-prep | **削除** | 参照は README と、2026-10-01 のフロー図レポート（スナップショットなので更新しない）だけ |
+| pair | **削除** | project-init の壁打ちは手順を自前で持っていたので、見出しの参照2行だけ直した。pair から呼ばれていた判断軸（biz-researcher 等）は残す |
+| docs-reverse | **残す** | 作る設計書（`doc/generated/reverse/modules/`）を task-run・basic-review・deep-review が前提にしている |
+| keyboard-shortcuts / biz-researcher / proposition-reviewer / persona-designer | 残す | 人間が残すと判断 |
+| ui-designer / usability-psychologist | 残す | design-fundamentals と重なる。群3（判断軸系）の見直しで再判断 |
+| proto-loop / proto-medium / experience-plan / session-start / pr-respond | **決めていない** | 新しいフローの形で要否が変わる。フローと一緒に決める（session-start は /setup へ吸収する案） |
+
+## 群2: デザイン系 — 着手（2026-10-01）
+
+| 決定 | 内容 |
+|---|---|
+| 新設 `design-fundamentals` | デザインの基本を「当てる問い」の形で持つ総覧。本体は索引＋4原則（近接・整列・反復・対比）＋自己点検。`references/` にゲシュタルト / 文字と階層 / 色とコントラスト / 余白とグリッド / 操作と使いやすさ / UXの法則 / UIの文言 の7本 |
+| 由来 | how-we-work 送り状 項目8の新規スキル `layout-principles` を一般化して本体に取り込み、有名な本・公式の基本を references に足した（人間の要望「有名なデザインの本の基本を、呼び出せる形で」） |
+| 接続 | design-drafter（描く前に読む・返す前に自己点検）/ design-mock・design-ui（読み込み）/ design-critique（Q11・Q12 に統合、Q14・Q15 を追加、「要実測」の扱いを追加）/ art-direction（一般則を委譲） |
+| 文言 | 一般則は `references/ux-writing.md`。**プロダクト固有の声とトーンは `project-design-language` で決める**（デザイン言語と同じ扱い） |
+
+### 後続の候補（未着手）
+- 送り状 項目8の残り（`design-consistency`・project-design-language の索引・「宣言は照合の代わりにならない」）は、送り状21件の取り込みと一緒に扱う。**項目8の状態はまだ倒さない**（一部だけ取り込んだため）
+- how-we-work の画面を題材に、批評ループ（design-critique の Q14・Q15）を回して効き目を確かめる — **人間の要望あり・未実施**
 ## 群3: 判断軸（専門家）系 — 未着手
 ## 群4: 運用・メタ系 — 未着手
