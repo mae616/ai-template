@@ -108,7 +108,7 @@ React / Svelte / Tailwind / GSAP / Three.js / Blender 等は **[ai-tech-knowledg
 |---|---|
 | 新規プロジェクトを立ち上げる | `/project-init`（壁打ち → rdd.md → テンプレート適用 → CI確認） |
 | 既存プロジェクトを把握する | `/docs-reverse` |
-| まず体験を探りたい | `/proto-loop` |
+| まず体験を探りたい | `/design-language-options` |
 | 要件が固まっている | `/auto-build "作りたいものの説明"` |
 
 ## コマンド
@@ -126,16 +126,15 @@ React / Svelte / Tailwind / GSAP / Three.js / Blender 等は **[ai-tech-knowledg
 
 **共通の停止条件**: レビュー反復の上限超過 / bug連鎖3周で未解決 / 危険変更チェックリスト該当（`.claude/rules/code-quality.md`）/ 課金発生前。中断時は `history/loop-state.md` から再開できます。
 
-### プロトタイプの連作ループ
+### デザイン言語の連作ループ
 
-`/auto-build` の前段。仕様を先に固めず、**1案ごとに「確かめたい問い」を人間と決めてから**作り、触った学びを設定集（Setting Book）へ蒸留して次の案に継ぎます。
+`/auto-build` の前段。仕様を先に固めず、**ラウンドごとに「確かめたい問い」を人間と決めてから**、デザイン言語・モーション言語・声の選択肢を AI が作り、事例（Mobbin、無ければ Design Inspiration 系のサイト）とプロトで並べて人間が選びます。学びは設定集（Setting Book）へ蒸留して次のラウンドに継ぎます。
 
 | コマンド | 用途 |
 |---|---|
-| `/proto-loop` | 連作ループ本体。問いを立てる → 媒体を選ぶ → 作る → Vibe確認 → 設定集へ蒸留 → 反復 |
-| `proto-medium`（自動適用） | 「Figma か、コードか」の判断軸。止まっている絵で判断できるなら Figma、動かさないと分からないならコード |
+| `/design-language-options` | 問いを立てる → 事例を集める → 選択肢を作る（Figma かコードかは `references/medium.md`）→ 批評する → 判断盤で選ぶ → 設定集へ蒸留 → 反復 |
 
-無指示で複数案を並べることはしません。比較軸が明確なラウンドでのみ2案を並行します。
+無指示で案を並べることはしません。1ラウンドに並べるのは、違い（比較軸）を1行で言える2〜3案だけです。
 
 ### 手動フロー（1ステップずつ進めたい場合）
 
@@ -309,7 +308,7 @@ ai-template/
 | デザイン | `ui-designer` / `usability-psychologist` / `sensory-design` / `animation-principles` |
 | 開発 | `architecture-expert` / `developer-specialist` / `testing` / `security-expert` / `frontend-implementation` / `accessibility-engineer` / `keyboard-shortcuts` |
 | クリエイティブ | `creative-coder` |
-| 工程 | `experience-plan`（状態×見た目×周辺の網羅チェック） / `proto-medium`（Figma かコードか） / `project-design-language`（プロジェクト固有SSOT雛形） |
+| 工程 | `experience-plan`（状態×見た目×周辺の網羅チェック） / `project-design-language`（プロジェクト固有SSOT雛形） |
 | ツール | `agent-browser` |
 | 情報源 | `official-source-first`（制度・規約・料金は公式一次情報で判断。費用が出る手順の前に必ず適用） |
 

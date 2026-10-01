@@ -1277,3 +1277,34 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
 
 - **関係**: ADR-022（投函箱・レポートを配布対象外にした判断）の「置き場」は、この ADR で `meta/` に置き換えた
 - **出典**: 2026-10-02 のセッション（人間の指示、deep-review）
+
+---
+
+## ADR-036: 体験探索の入口を `design-language-options`（F1）にし、proto-loop・proto-medium を吸収する
+
+- **Context**:
+  判断盤（2026-10-01）で新しいフロー F0〜F5 を採用し、O2 で「proto-loop・proto-medium・experience-plan を F1〜F3 に吸収して削除」が決まった。
+  proto-loop は「問いを立ててプロトを1案ずつ作る」連作だったが、F1 は「問いから AI がデザイン言語・モーション言語・声の選択肢を作り、事例を画像で並べた判断盤で人間が選ぶ」形で、事例の集め方と批評が無かった。
+  また P2 で、proto-loop を消すときに設定集（setting-book）をどうするかが P3 へ送られていた。
+
+- **Decision**:
+  1. 新規スキル `design-language-options`（F1）を置く。問い → 事例を集める → 2〜3案（比較軸を1行で言えるもの）→ 批評（匿名テスト・導出線・比較軸）→ 判断盤で人間が選ぶ → 設定集へ蒸留 → 昇格候補の提示、を1ラウンドとして回す
+  2. proto-loop の連作の決まり（問い必須・1案1エージェントの文脈遮断・品質ゲート最小・統合プロト・`auto-build --from-proto` への引き継ぎ・`doc/input/` に書かない・昇格を AI が決めない）を吸収し、proto-loop を削除する
+  3. proto-medium（Figma か、コードか）は `design-language-options/references/medium.md` に移し、proto-medium を削除する
+  4. Mobbin の使い方を決める（出典: Mobbin MCP `search_screens` のツール説明、2026-10-02 確認）: `mobbin_url` を必ず引用する／画像は `image_url` からダウンロードする（30日で失効）／検索語は1画面を具体的に書く／`ai_usage_notice` は一字一句そのまま見せる。Mobbin が使えなければ Design Inspiration 系のサイトから集め、引用元を画像ごとに残す。事例の画像は手元の写し（`refs/`）に置き、中に `.gitignore` を置いてコミットしない（第三者の画像で、利用規約を確かめていないため）
+  5. 設定集は残し、このスキルの下書きの置き場を兼ねる（人間の決定）。昇格先は project-design-language ではなく、デザインドックと値のファイル（F2: design-consistency / design-doc）
+
+- **Consequences**:
+  - (+) 人間が答えを持っていなくても、「どれが近いか」で選べる。事例が引用元つきで残る
+  - (+) 不採用の理由（判断の材料）が設定集に残る
+  - (−) proto-loop のステップ8（磨きラウンド）は持ち込んでいない。F5 を作る P3-c までは、auto-build のあとの「もう少し」を polish タスクとして起票し `auto-task` で回す（着手前のチェックリストは task-run の手順4）。P3-c で F5 に置き換える
+  - (−) proto-medium は `user-invocable: false` だったため、`apply_global.sh` の既定でグローバル（`~/.claude/skills/`）に配られていた可能性がある。配布先の proto-loop / proto-medium は、apply_template の safe / force では残る（消えるのは --sync だけ）。**apply_global はどのモードでも消さない**（テンプレートにあるスキルしか回さない）ので、`~/.claude/skills/proto-medium` は手で消す
+  - (−) design-language-options は `user-invocable: true` なので、apply_global の既定では配られない
+
+- **Alternatives**:
+  - **proto-loop を残して、F1 を前段に足す**: 入口が2つになり、どちらから始めるか毎回迷う（ADR-020 で auto-mvp と共存させなかったのと同じ理由）。不採用
+  - **設定集を廃止し、決定ログ（doc/draft）に書く**: 置き場は1つ減るが、採用・不採用を画像つきで並べた一覧が無くなる。人間が「残す」を選んだ
+  - **proto-medium を独立した判断軸として残す**: 使い道が F1 の媒体選びに限られていた（ログ上の呼び出し0回）。参照の形で残せば足りる
+
+- **関係**: ADR-020（auto-mvp → proto-loop・proto-medium 新設）をこの ADR で置き換えた
+- **出典**: 2026-10-02 のセッション（判断盤 F1・O2、人間の決定: 設定集を残す）

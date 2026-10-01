@@ -40,7 +40,7 @@ draft/ に貯める  →  昇格候補として提示  →  人間が決める  
 
 ```
 doc/draft/
-├── design/setting-book/   … プロト連作の設定集（proto-loop）
+├── design/setting-book/   … 連作の設定集（design-language-options）
 └── （検討中の案・調査メモ・未確定の仕様）
 ```
 

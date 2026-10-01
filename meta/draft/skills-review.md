@@ -74,6 +74,14 @@
   - OGP 必須4つ: og:title / og:type / og:image / og:url。推奨: og:description / og:site_name / og:locale / og:image:alt / og:image:width・height — https://ogp.me/
   - → 聞く項目は「学習に使わせるか」と「AI 検索に出すか」を**分ける**（各社でボットが分かれている）
 
+### P3-b で決めたこと（2026-10-02）
+- 人間の決定: 設定集（`doc/draft/design/setting-book/`）は**残し**、design-language-options の下書きの置き場を兼ねる（判断盤の結果・採用と不採用の理由・事例・プロンプト集）。昇格先は project-design-language ではなく、デザインドックと値のファイル（F2）
+- 人間の決定: ai-template のタスクボードは **Linear**（`meta/rdd.ai-template.md` の運用環境に記入）。このセッションでは Linear MCP が未認証で読めない
+- 人間の決定: 1ラウンドに並べる案は「比較軸を1行で言える2〜3案」。dev-practices.md の「1案ごと／比較軸が明確なときだけ2案」を F1 に合わせて書き換えた
+- 段1: `design-language-options` を新設し、proto-loop の連作（問い必須・1案1エージェントの文脈遮断・統合プロト・auto-build への引き継ぎ）と proto-medium（`references/medium.md`）を吸収して削除。F1 の「作る → 批評する」は、匿名テスト・導出線・比較軸の3問で入れた
+- **P3-c へ送る**: proto-loop のステップ8（磨きラウンド: experience-plan → auto-task）は持ち込んでいない。F5（人間が触って磨く）で受け持つ。それまでは、auto-build のあとの「もう少し」を polish タスクとして起票し auto-task で回す（着手前チェックは task-run の手順4）
+- **後続の候補**: プロトの置き場 `proto/*` ブランチが `.claude/rules/git.md` のブランチ構造に無い（旧 proto-loop から引き継いだ）。git.md に足すか `samples/proto-N/` に一本化するか — **決めていない**
+
 ### P3-a で決めたこと（2026-10-02）
 - `/setup` を4段（前提 → 引き継ぎ → 環境 → 今日のゴールと GO）にし、session-start を削除。環境の答えは rdd の事実ブロック「運用環境」に書く（ai-template 自身では `meta/rdd.ai-template.md`。人間の決定）
 - ai-template 自身の記録を `meta/` に集約（人間の指示）: 決定ログ → `meta/draft/`、レポート → `meta/reports/`、投函箱 → `meta/from-projects/`。`doc/` はアプリ用の空の雛形だけにし、`doc/index.md` の構成を今の雛形に合わせた
@@ -110,7 +118,8 @@
 | keyboard-shortcuts / biz-researcher / proposition-reviewer / persona-designer | 残す | 人間が残すと判断 |
 | ui-designer / usability-psychologist | 残す | design-fundamentals と重なる。群3（判断軸系）の見直しで再判断 |
 | session-start | **削除**（P3-a） | /setup に吸収 |
-| proto-loop / proto-medium / experience-plan | **吸収して削除**（P3-b 予定） | proto-loop・proto-medium は design-language-options へ、experience-plan は task-run へ |
+| proto-loop / proto-medium | **吸収して削除**（P3-b 段1） | design-language-options へ。媒体の判断は `references/medium.md` |
+| experience-plan | **吸収して削除**（P3-b 段2 予定） | task-run へ |
 | pr-respond | **決めていない** | O4 |
 
 ## 群2: デザイン系 — 着手（2026-10-01）
