@@ -1,6 +1,15 @@
 {
   "meta": {
-    "version": 1
+    "version": 1,
+    "decision": "provisional",
+    "provisional": [],
+    "usage": "値はここから引く。絵やコードから写さない。なぜその値かは doc/input/design/docs/ に書く"
   },
-  "pages": []
+  "pages": [],
+  "undecided": [
+    {
+      "key": "pages",
+      "note": "まだ画面を決めていない。画面の一覧と採番は screen-map で決める（design-consistency 第2部）"
+    }
+  ]
 }

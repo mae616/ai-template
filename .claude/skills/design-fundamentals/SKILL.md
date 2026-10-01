@@ -40,7 +40,7 @@ description: "デザインの基本（近接・整列・反復・対比、ゲシ
 | 一般則（どのプロダクトでも成り立つ基本） | **ここ** |
 | 何を先に見せるか（情報の優先度） | `ui-designer` / `design-drafter` の情報設計 |
 | 材質・配色・声量（描く瞬間の演出） | `art-direction` |
-| プロジェクト固有の値（実際の px・色） | `project-design-language` と値のファイル（tokens 等） |
+| プロジェクト固有の値（実際の px・色） | 値のファイル（`doc/input/design/design-tokens.json` 等）。方針と索引は `project-design-language` |
 | 認知負荷・学習コストの深掘り | `usability-psychologist` |
 | 読み上げ・キーボード・ARIA | `accessibility-engineer` |
 

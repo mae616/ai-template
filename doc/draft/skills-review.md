@@ -65,6 +65,22 @@
 - **検索に出すか／ロボットを避けるか／AI の学習・検索に使わせるか**を人間に聞き、その答えで自動設定する
 - 置き場（案）: 新規スキル `web-discoverability`（名前は**決めていない**）。F0 /setup で聞く → F4 で自動設定 → 数えるレビューで照合
 - 書くときは公式一次情報で裏を取る（Google Search Central / ogp.me / 各社クローラーの公式ドキュメント）。P3 で実装
+- 確認済みの一次情報（2026-10-02 取得。書く前に再確認する）:
+  - Google SEO スターターガイド（最終更新 2025-12-10）: ページごとに固有の title・meta description、意味のある URL、canonical、構造化データ、画像の alt。サイトマップと robots.txt は任意。meta keywords は使われない — https://developers.google.com/search/docs/fundamentals/seo-starter-guide
+  - noindex は meta か X-Robots-Tag。**robots.txt で塞いだページの noindex はクローラーに読まれない**（検索に出ることがある） — https://developers.google.com/search/docs/crawling-indexing/block-indexing
+  - Google-Extended: Gemini の学習・グラウンディングの制御用トークン。**検索への掲載と順位には影響しない** — https://developers.google.com/search/docs/crawling-indexing/google-common-crawlers
+  - OpenAI: GPTBot（学習）／OAI-SearchBot（ChatGPT の検索に出す）／ChatGPT-User（利用者の操作。robots.txt が効かない場合あり） — https://developers.openai.com/api/docs/bots
+  - Anthropic: ClaudeBot（学習）／Claude-SearchBot（検索品質）／Claude-User（利用者の質問時）。サブドメインごとに robots.txt が要る — https://support.claude.com/en/articles/8896518
+  - OGP 必須4つ: og:title / og:type / og:image / og:url。推奨: og:description / og:site_name / og:locale / og:image:alt / og:image:width・height — https://ogp.me/
+  - → 聞く項目は「学習に使わせるか」と「AI 検索に出すか」を**分ける**（各社でボットが分かれている）
+
+### P2 で決めたこと（2026-10-02）
+- 値の正は既存の `design-tokens.json` 等。出典の `tokens.json` は作らない（値のファイルを2つにしない）
+- 確定度は `meta.decision`、未決は `undecided`（`status` は assets の取得結果と衝突するので使わない）
+- 新規: design-doc / design-audit（＋references/figma-measure.md）/ design-consistency、雛形 design-tokens.json・docs/README.md・screen-map.md
+- **P3 へ送る**: 描く工程（design-mock / design-ui / auto-design）から design-consistency・design-doc・design-audit を呼ぶ接続
+- **P3 へ送る**: proto-loop を吸収・削除するとき、設定集（setting-book）の扱いを決める。dev-practices の「デザイン/表現の発酵ループ」の節も proto-loop を前提にしている
+- 人間の決定: AI が `doc/input/design/` に書くときも合意を取る（判断盤の選択はまとめて書いてよい。自律ループ中は doc/draft/ に候補）
 
 ### P1 で出た、後の段へ送るもの
 - **P2**: 既存の値のファイル（`doc/input/design/copy.json`・`design_context.json`）に、確定か暫定かの区別と `undecided` の節が無い。スキーマの `status`（素材の取得結果 ok / failed）とキー名をぶつけない形で、雛形ごと直す

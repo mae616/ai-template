@@ -1192,3 +1192,32 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
   - **出力テンプレは変えず、追記で対応**: 先頭で拾えない問題が残る。人間が組み替えに合意した
 
 - **出典**: 2026-10-01〜02 のセッション（判断盤の決定、deep-review 1回）
+
+---
+
+## ADR-033: デザインの決めごとを「値・ドック・照合」の3本で回す（design-doc / design-audit / design-consistency）
+
+- **Context**:
+  how-we-work の送り状 項目8・11・13・16・18〜20 と、同プロジェクトで育ったスキル3本（design-doc / design-audit / design-consistency）が未取込だった。
+  共通する問題は「定義が無いから適用されない」のではなく「定義が読める形をしていない／実物と照合されない」こと。テンプレート側も、値のファイルに確定度や未決の欄が無く、project-design-language が値・理由・方針を1ファイルに抱える形だった。
+
+- **Decision**:
+  1. 新規スキル3本を一般化して取り込む。`design-consistency`（何を・いつ決め、どう当て、いつ照合するか）／`design-doc`（主題ごとの「決まっていること／なぜ／まだ決めていない」。古くなったら書き換える）／`design-audit`（決めごとを実物に照合して数える。範囲は条件式で書く・文言の割れは4分類・対象外は別の規則で数え直す）。Figma で測るコード例は `design-audit/references/figma-measure.md` に分ける
+  2. 値の正は**既存の `doc/input/design/design-tokens.json` 等**とし、出典の `tokens.json` は作らない（値のファイルを2つにしない）
+  3. 全 JSON に `meta.decision`（provisional / confirmed）と `undecided` を持たせる（`ssot_schema.md` に「0) 全 JSON 共通」を追加）。既存の `status`（素材の取得結果 ok / failed）とぶつけないため、確定度のキーは `status` にしない
+  4. 雛形を置く: `design-tokens.json`（空）、`docs/README.md`（索引と1本の形）、`screen-map.md`（採番・遷移は「決めていない」）
+  5. `project-design-language` を薄い案内板にする（冒頭に索引、固有値レジストリは決定の一言と置き場だけ）。auto-* が雛形判定に使う `TBD` は残し、「TBD＝決めていない」と定義する
+  6. `design-critique` に `design-audit` との分担を明記（見る批評と数える検品）
+
+- **Consequences**:
+  - (+) 決めたことの行き先（値／ドック／画面一覧）が先にある状態で始められる。昇格し損ね・古い値の読み違いが減る
+  - (+) 目で見ても出ない割れ（サイズ・線幅・文言）を数えて拾える
+  - (−) スキルが3本増える。描く工程からの呼び出しは P3（フロー）でつなぐ
+  - (−) 配布の保護の代償として、テンプレート側で値のファイルの雛形を直しても既存プロジェクトには届かない（例: 今回の `meta.decision` / `undecided` は既存の copy.json 等に入らない。必要なら各プロジェクトで足す）。`--sync` でも、テンプレートから消したファイルは配布先の `doc/input/design/` に残る
+
+- **Alternatives**:
+  - **出典の tokens.json をそのまま足す**: design-ssot / design-mock が作る design-tokens.json と値のファイルが2つになる。不採用
+  - **project-design-language に全部書き続ける**: 出典では550行まで膨らんで引けなくなった。不採用
+
+- **出典**: 2026-10-02 のセッション。how-we-work 送り状の項目8・11・13・16・18・19・20 と、同プロジェクトのスキル design-audit・design-doc（判断盤 `doc/generated/reports/2026-10-01-flow-intake-dashboard.html` では T8・T11・T13・T16・T18〜T20・E2・E3）
+- **追記（レビュー後）**: AI が `doc/input/design/` に書くときは `dev-practices.md`「一時と確定を分ける」に従う（人間の決定）。判断盤で選ばれたものはまとめて書いてよい。自律ループ中は `doc/draft/` に候補を置く。あわせて `apply_template.sh` に保護を足した: 配布先の `doc/input/design/` は削除しない（rsync の protect）、雛形のうち配布先に既にあるものは上書きしない（雛形の実ファイルから除外リストを作る。例外は契約の ssot_schema.md）。修正前は sync で値が上書き・独自ドックが削除、修正後は force / sync とも保持・新規には雛形が届くことを実測

@@ -165,6 +165,9 @@ React / Svelte / Tailwind / GSAP / Three.js / Blender 等は **[ai-tech-knowledg
 | `project-design-language`（雛形） | プロジェクト固有の存在設計・体験設計のSSOT。埋めて使う穴埋め雛形 |
 | `/art-direction` | 描く瞬間の規律。コンセプト一語から材質・配色・タイポまでを1本の線で導出し、汎用ダッシュボード化を防ぐ |
 | `/design-fundamentals` | デザインの基本（近接・整列・反復・対比、ゲシュタルト、文字と階層、色とコントラスト、余白とグリッド、操作と使いやすさ、UXの法則、UIの文言）を「当てる問い」で持つ総覧。描く工程（design-drafter / design-mock / design-ui）が読み、批評ルーブリック（design-critique Q11・Q12・Q14・Q15）に反映している |
+| `/design-consistency` | 何の定義を・いつ決めるかのチェックリストと、全画面へ一律に当てる手順・古くさせない時点 |
+| `/design-doc` | 決めごとを主題ごとのデザインドック（決まっていること／なぜ／まだ決めていない）に書き、書き換えて保つ |
+| `/design-audit` | 決めごとを実物（デザインツール・実装）に照合して数える検品。外れ0件まで直す（`design-critique` の見る批評とは別） |
 
 ### 補助
 

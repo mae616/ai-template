@@ -124,6 +124,19 @@ for p in "${INCLUDES[@]}"; do
     EXTRA_FLAGS+=("--exclude" "reports/*")
   fi
 
+  # デザインの値・ドック・画面一覧・生成物はプロジェクト側の蓄積データ。
+  # 雛形は「配布先に無いものだけ」配り、force/sync でも既存を上書き・削除しない。
+  # 例外は ssot_schema.md（テンプレートが持つ契約なので更新してよい）。
+  # ファイル名を列挙すると漏れるので、雛形側の実ファイルから除外リストを作る
+  if [ "$p" = "doc/input/" ]; then
+    EXTRA_FLAGS+=("--filter" "P /design/***")
+    while IFS= read -r f; do
+      rel="${f#"$TEMPLATE_ROOT/doc/input/"}"
+      [ "$rel" = "design/ssot_schema.md" ] && continue
+      [ -e "$TARGET_DIR/doc/input/$rel" ] && EXTRA_FLAGS+=("--exclude" "/$rel")
+    done < <(find "$TEMPLATE_ROOT/doc/input/design" -type f)
+  fi
+
   # 投函箱は ai-template 側の受信データ（各PCローカル）。配布先プロジェクトは書く側なので不要。
   # 受け取った送り状には出典マシンの絶対パスが載るため、配布物に混ぜない。
   if [ "$p" = "doc/input/" ]; then

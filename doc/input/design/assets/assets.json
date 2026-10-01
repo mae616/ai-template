@@ -1,9 +1,16 @@
 {
   "meta": {
-    "version": 1
+    "version": 1,
+    "decision": "provisional",
+    "provisional": [],
+    "usage": "素材はここから引く。取得できなかった素材は status: failed で残す（status は取得結果。確定度は meta.decision）"
   },
   "baseDir": "public/design-assets",
-  "assets": []
+  "assets": [],
+  "undecided": [
+    {
+      "key": "assets",
+      "note": "まだ素材を決めていない"
+    }
+  ]
 }
-
-

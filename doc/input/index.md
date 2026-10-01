@@ -32,4 +32,7 @@
 - `ssot_schema.md` - SSOT JSONの契約
 - `design_context.json` - コンテキスト情報
 - `copy.json` - 固定テキスト
+- `design-tokens.json` - 値（色・文字・余白）。`meta.decision` と `undecided` を持つ
+- `screen-map.md` - 画面の一覧・採番・遷移
+- `docs/` - デザインドック（主題ごとの決まっていること／なぜ／まだ決めていない）
 - `assets/` - 画像等アセット
