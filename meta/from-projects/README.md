@@ -49,7 +49,7 @@ ai-template を開けば未処理の学びが目に入る状態にする。
 
 受け取った送り状には出典マシンの**絶対パス**が載る。それが価値の源（取り込み時に実物を読める）だが、
 ai-template は OSS として公開・配布されるため、公開物・配布物に個人のパスを混ぜられない。
-`.gitignore` と `scripts/apply_template.sh` の両方で除外している（公開と配布は別経路なので両方いる）。
+公開は `.gitignore` で、配布は「`meta/` を配布対象に含めない」ことで防いでいる（`scripts/apply_template.sh` の配布対象は `doc/`・`.claude/`・`CLAUDE.md` 等だけ。公開と配布は別経路なので両方いる）。
 
 代償として、**新しいマシンで clone すると投函箱は空**になる。
 そのPC用に組み直すコマンドが `/template-inbox`。sibling を走査し、未取込の学びを写しとして materialize する。

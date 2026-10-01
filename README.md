@@ -43,7 +43,7 @@ scripts/apply_template.sh --target /abs/path/to/your-project --safe
 | `--no-skills` | `.claude/` をコピーしない（グローバル適用済みの場合） |
 | `--overwrite-rdd` | `doc/input/rdd.md` を上書き（原則プロジェクト固有なので非推奨） |
 
-配布されないもの: `doc/input/from-projects/`（テンプレート保守者の受信箱）、`doc/generated/reports/` の中身（ai-template 自身の作業記録）、`meta/`、`history/`。
+配布されないもの: `meta/`（ai-template 自身の仕様・ADR・レポート・決定ログ・投函箱）、`history/`。`doc/` はアプリを作るときの空の雛形だけで、配布先にあるものは上書きしない。
 
 ### 2. グローバルへ適用する（任意）
 
@@ -144,7 +144,7 @@ React / Svelte / Tailwind / GSAP / Three.js / Blender 等は **[ai-tech-knowledg
 | タスク | `/task-list` → `/task-detail` → `/task-run` |
 | バグ | `/bug-new` → `/bug-investigate` → `/bug-propose` → `/bug-fix` |
 | デザイン | `/design-mock`（会話起点）or `/design-ssot`（Figma起点）→ `/design-ui` → `/design-components` → `/design-assemble`（任意: `/design-html`） |
-| セッション | `/session-start` → 作業 → `/session-end` |
+| セッション | `/setup` → 作業 → `/session-end` |
 
 ### レビュー（文脈遮断）
 
@@ -191,7 +191,7 @@ React / Svelte / Tailwind / GSAP / Three.js / Blender 等は **[ai-tech-knowledg
 ```mermaid
 flowchart LR
   P["プロジェクトで<br/>学びを得る"] --> S["正本<br/>doc/output/to-template.md"]
-  P --> I["投函箱の写し<br/>doc/input/from-projects/"]
+  P --> I["投函箱の写し<br/>meta/from-projects/"]
   S --> F["/template-feedback<br/>取り込み・直列"]
   I --> F
   F --> R["rules / skills / hooks<br/>へ反映"]
@@ -319,7 +319,7 @@ ai-template/
 
 | 領域 | 追加・変更 |
 |---|---|
-| 学びの還流 | 送り状モデルを仕組み化。投函箱（`doc/input/from-projects/`）をPCローカル化し、`/template-inbox` を新設 |
+| 学びの還流 | 送り状モデルを仕組み化。投函箱（`meta/from-projects/`）をPCローカル化し、`/template-inbox` を新設 |
 | 判断軸 | `judgment-harness`（レイヤー方法論）・`project-design-language`（プロジェクト固有SSOT雛形）を追加 |
 | プロト工程 | `auto-mvp` を `/proto-loop`（連作ループ）へ置き換え。媒体判断ガイド `proto-medium` を新設 |
 | レビュー | 文脈遮断レビューを水平展開。専任エージェント3種（`code-reviewer` / `design-critic` / `design-drafter`）を追加 |

@@ -113,13 +113,23 @@ echo
 for p in "${INCLUDES[@]}"; do
   EXTRA_FLAGS=()
 
+  # テンプレート側で git が無視しているファイル（ai-template 自身の引き継ぎ・ローカル設定・.DS_Store 等）は配らない。
+  # ディスクから丸ごとコピーするため、無視しているものも届いてしまう。名前を列挙すると漏れるので git に聞く。
+  # テンプレートが git 管理下に無い場合に備えて、最低限は固定で除外する
+  EXTRA_FLAGS+=("--exclude" ".DS_Store" "--exclude" "session-context.md" "--exclude" "session-context/" "--exclude" "team-board.md")
+  if [[ "$p" == */ ]] && git -C "$TEMPLATE_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    while IFS= read -r ign; do
+      [ -n "$ign" ] && EXTRA_FLAGS+=("--exclude" "/${ign#"$p"}")
+    done < <(git -C "$TEMPLATE_ROOT" -c core.quotePath=false ls-files --others --ignored --exclude-standard --directory -- "$p" 2>/dev/null)
+  fi
+
   # rdd.md はプロジェクト固有。force/sync でも既存があれば守る（--overwrite-rdd で解除）
   if [ "$p" = "doc/input/" ] && [ "$OVERWRITE_RDD" != "true" ] && [ -f "$TARGET_DIR/doc/input/rdd.md" ]; then
     EXTRA_FLAGS+=("--exclude" "rdd.md")
   fi
 
-  # レポートは ai-template 自身の作業記録。配布先は自分のレポートを置く側なので中身は不要。
-  # ディレクトリ自体は残す（配布先が最初から置き場所を持てるように）
+  # 配布先のレポートはそのプロジェクトの作業記録。雛形は空の置き場だけで、force/sync でも中身を上書き・削除しない。
+  # （ai-template 自身のレポートは meta/reports/ にあり、配布対象外）
   if [ "$p" = "doc/generated/" ]; then
     EXTRA_FLAGS+=("--exclude" "reports/*")
   fi
@@ -135,12 +145,6 @@ for p in "${INCLUDES[@]}"; do
       [ "$rel" = "design/ssot_schema.md" ] && continue
       [ -e "$TARGET_DIR/doc/input/$rel" ] && EXTRA_FLAGS+=("--exclude" "/$rel")
     done < <(find "$TEMPLATE_ROOT/doc/input/design" -type f)
-  fi
-
-  # 投函箱は ai-template 側の受信データ（各PCローカル）。配布先プロジェクトは書く側なので不要。
-  # 受け取った送り状には出典マシンの絶対パスが載るため、配布物に混ぜない。
-  if [ "$p" = "doc/input/" ]; then
-    EXTRA_FLAGS+=("--exclude" "from-projects/")
   fi
 
   # 発酵中のドキュメントはプロジェクト固有の蓄積（未合意の検討物）。

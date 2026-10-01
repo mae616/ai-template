@@ -18,20 +18,33 @@
 ## ディレクトリ構造
 
 ```
-doc/
-├── index.md              # このファイル（総合入口）
+doc/                         # アプリを作るときの雛形（ai-template から配布される）
+├── index.md                 # このファイル（総合入口）
 │
-├── input/                # 【人間が書く】SSOT
-│   ├── index.md          # 索引
-│   ├── rdd.md            # 要件定義
-│   ├── architecture.md   # アーキテクチャ
-│   └── design/           # デザインSSOT
+├── input/                   # 【確定・SSOT】書くときは人間の合意を経る
+│   ├── index.md             # 索引
+│   ├── rdd.md               # 要件定義（先頭に AI 用の事実ブロック・運用環境）
+│   ├── architecture.md      # アーキテクチャ
+│   └── design/              # デザインの決めごと
+│       ├── ssot_schema.md   # JSON の契約（テンプレートが持つ）
+│       ├── design-tokens.json / copy.json / design_context.json / assets/  # 値（meta.decision と undecided を持つ）
+│       ├── docs/            # デザインドック（主題ごとの決まっていること／なぜ／まだ決めていない）
+│       ├── screen-map.md    # 画面の一覧・採番・遷移
+│       └── html/            # 確認用 HTML（design-html の出力）
 │
-└── generated/            # 【AI生成】上書きOK
-    ├── index.md          # 索引
-    ├── manual/           # /manual-gen の出力先
-    └── reverse/          # /docs-reverse の出力先
+├── draft/                   # 【発酵中・未合意】AI が自由に書いてよい置き場
+│
+├── generated/               # 【AI 生成】上書き OK
+│   ├── index.md             # 索引
+│   ├── reports/             # 図解レポート（公開前に保存する場所）
+│   ├── manual/              # /manual-gen の出力先
+│   └── reverse/             # /docs-reverse の出力先
+│
+└── output/
+    └── to-template.md       # 送り状（汎用化できる学びを ai-template へ返す台帳）
 ```
+
+ai-template 自身の記録（仕様・ADR・レポート・決定ログ・投函箱）は `meta/` にあり、配布されない。
 
 `doc/` の外、リポジトリ直下に **`history/`**（`.gitignore` 済み）がある。日々の作業ログ・引き継ぎ日誌の置き場で、セッション間の文脈引き継ぎ・意思決定の経緯記録に使う。クライアントに渡るリポジトリには含まれないので、内部情報も安全に書ける。`doc/input/`（SSOT）や `doc/output/`（送り状）とは役割が異なる「発酵中の思考ログ」。
 

@@ -700,7 +700,7 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
 
 - **日付**: 2026-07-18
 - **対象**: `.claude/skills/proto-loop/`（旧 auto-mvp を改修・リネーム）, `.claude/skills/proto-medium/`（新設）, `.claude/skills/project-design-language/`, `.claude/skills/auto-build/`, `.claude/rules/dev-practices.md`
-- **出典**: `doc/generated/reports/2026-07-18-proto-workflow-proposal.html`（承認済み提案・図解つき）
+- **出典**: `meta/reports/2026-07-18-proto-workflow-proposal.html`（承認済み提案・図解つき）
 
 ### Context
 - auto-mvp の「プロンプト1文 → 無指示で2〜4案並列発散」は、体験設計・世界観にこだわる作り方と噛み合わなかった（「何も命令しないで3つ作って」は違う、という実感）
@@ -794,6 +794,9 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
 - 絶対パスを `~/` 表記に変えて追跡を続ける → ユーザー名は消えるが受信データ自体が配布物に残る。増え続ける問題も解決しない
 - 取込済の送り状を削除して未取込だけ追跡 → 「個人の受信箱を公開物に置く」構造は変わらない
 - `/template-feedback` に構築ステップを内包 → 取り込みの手順が厚くなる。厚いスキルは誤読・過剰実行を誘発するため分割した
+
+
+- **追記（2026-10-02）**: 投函箱とレポートの置き場は ADR-035 で `meta/from-projects/`・`meta/reports/` に移した（配布の除外ではなく、置き場の分離で防ぐ）
 
 ---
 
@@ -940,7 +943,7 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
   - **フックを同時に入れる**: 迂回はすぐ塞がるが、`doc/input/` への書き込みごとに確認が入り、
     日常の確認回数が増える。効き目を見てから判断するため分離
 
-- **出典**: 2026-08-27 のセッションログ解析（`doc/generated/reports/2026-08-27-ai-judgment-ssot.html`）
+- **出典**: 2026-08-27 のセッションログ解析（`meta/reports/2026-08-27-ai-judgment-ssot.html`）
 
 ---
 
@@ -1140,7 +1143,7 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
 ## ADR-031: スキル見直し（2026-10）— 自律ループの共通化・デザイン基本の新設・未使用スキルの削除
 
 - **Context**:
-  スキルを最新の仕様（Agent Skills / Claude Code 公式）に合わせ、中身とラインナップを群ごとに人間と見直している（決定ログは `doc/draft/skills-review.md`）。
+  スキルを最新の仕様（Agent Skills / Claude Code 公式）に合わせ、中身とラインナップを群ごとに人間と見直している（決定ログは `meta/draft/skills-review.md`）。
   その過程で次の3点が判明した。
   1. auto-bug / auto-design のマージ段は「`/auto-task` と同じ」＋要約で書かれていて、要約から**危険変更・main ベースでの停止条件が抜けていた**
   2. 「グループ化されていない」「揃っていない」画面が出続けていた。配置の一般則が判断軸として呼び出せる形で無かった（how-we-work の送り状 項目8 で `layout-principles` として先行実装されていた）
@@ -1219,5 +1222,58 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
   - **出典の tokens.json をそのまま足す**: design-ssot / design-mock が作る design-tokens.json と値のファイルが2つになる。不採用
   - **project-design-language に全部書き続ける**: 出典では550行まで膨らんで引けなくなった。不採用
 
-- **出典**: 2026-10-02 のセッション。how-we-work 送り状の項目8・11・13・16・18・19・20 と、同プロジェクトのスキル design-audit・design-doc（判断盤 `doc/generated/reports/2026-10-01-flow-intake-dashboard.html` では T8・T11・T13・T16・T18〜T20・E2・E3）
+- **出典**: 2026-10-02 のセッション。how-we-work 送り状の項目8・11・13・16・18・19・20 と、同プロジェクトのスキル design-audit・design-doc（判断盤 `meta/reports/2026-10-01-flow-intake-dashboard.html` では T8・T11・T13・T16・T18〜T20・E2・E3）
 - **追記（レビュー後）**: AI が `doc/input/design/` に書くときは `dev-practices.md`「一時と確定を分ける」に従う（人間の決定）。判断盤で選ばれたものはまとめて書いてよい。自律ループ中は `doc/draft/` に候補を置く。あわせて `apply_template.sh` に保護を足した: 配布先の `doc/input/design/` は削除しない（rsync の protect）、雛形のうち配布先に既にあるものは上書きしない（雛形の実ファイルから除外リストを作る。例外は契約の ssot_schema.md）。修正前は sync で値が上書き・独自ドックが削除、修正後は force / sync とも保持・新規には雛形が届くことを実測
+
+---
+
+## ADR-034: `/setup` を唯一の入口にし、各スキルの「自己評価」を「次の一手」に変える
+
+- **Context**:
+  セッションの入口が `/setup`（rdd を読んでスキルを選ぶ）と `/session-start`（引き継ぎ・ゴール）の2つに分かれていた。セッションログ（2026-08-18〜10-01）では `/setup` 65回・`/session-start` 3回で、引き継ぎを読む手順が実質使われていなかった。
+  また、19本のスキル末尾の「自己評価（成功自信度・一言理由）」が、AI に失敗を数え上げさせ、警告の密度を上げていた（how-we-work 送り状 項目7）。CLAUDE.md の「過去の失敗を数え上げない。次の一手を出す」と引っぱり合っていた。
+
+- **Decision**:
+  1. `/setup` を4段にする: ①前提を読む（rdd の事実ブロック）②引き継ぎを読む（session-context・journal・loop-state・タスクボード）③環境を確かめる（タスクボード・デザインツール・参考事例・判断盤の出し方・Web の公開範囲。記録が無いものだけ聞き、rdd の「運用環境」に合意の上で書く）④今日のゴールを決める
+  2. タスクボードの既定は置かない（GitHub Projects / Orca / Linear / 使わない、を聞く）
+  3. `session-start` を削除し、参照（session-end・auto-loop-core・project-init・README・doc-writing §8）を `/setup` に付け替える
+  4. 自己評価の欄を「次の一手」（次に効くこと・引き継ぎの自信度・失敗の一覧を書かない）に置き換える
+
+- **Consequences**:
+  - (+) 入口が1つになり、引き継ぎと環境の確認が毎回通る
+  - (+) できないこと（Artifact が使えない等）を最初に聞くので、作業の途中で詰まりにくい
+  - (−) 既存プロジェクトの rdd.md には「運用環境」の節が無い（rdd.md は配布で上書きしない）。初回の `/setup` で節ごと足す
+  - (−) 既存プロジェクトへの配布: `apply_template.sh` の safe（既定）では新しい setup が届かない。safe / force では削除した session-start が配布先に残る（消えるのは --sync だけ）。`apply_global.sh` で配った `~/.claude/skills/session-start` も残る。必要なら手で消す
+  - ai-template 自身では `meta/rdd.ai-template.md` を読み書きする（`doc/input/rdd.md` は配布用の雛形。人間の決定）
+
+- **Alternatives**:
+  - **session-start を残して /setup から呼ぶ**: 入口が2つのまま残り、どちらを使うか迷う問題が解けない。不採用
+  - **自己評価を残す**（群1の決定）: 判断盤で人間が O1「形を変えて取り込む」を選び、上書きした
+
+- **出典**: 2026-10-02 のセッション（判断盤 F0・O1・O3・O5・O6、セッションログの集計）
+
+---
+
+## ADR-035: ai-template 自身の記録は `meta/` に置き、`doc/` はアプリ用の雛形だけにする
+
+- **Context**:
+  `doc/` は配布されるアプリ用の雛形なのに、ai-template 自身の記録（見直しの決定ログ・レポート・投函箱）が `doc/draft/`・`doc/generated/reports/`・`doc/input/from-projects/` に混ざり、配布スクリプトの個別の除外（ADR-022 で追加）で防いでいた。除外は追加漏れで壊れる。また `.claude/` はディスクから丸ごとコピーされ、git が無視している ai-template 自身の引き継ぎ（`.claude/session-context.md`）まで配布先に届いていた（実測）。
+
+- **Decision**（人間の指示）:
+  1. ai-template 自身の記録は `meta/` に置く: 仕様 `meta/rdd.ai-template.md`・ADR・レポート `meta/reports/`・決定ログ `meta/draft/`・投函箱 `meta/from-projects/`（受信物は .gitignore で追跡外）
+  2. `doc/` はアプリを作るときの空の雛形だけにする（`doc/index.md` の構成図を更新）。`meta/` は配布対象に入っていないので、個別の除外は要らない
+  3. `/setup` は、ai-template 自身では `meta/rdd.ai-template.md` だけを読み書きする
+  4. `apply_template.sh` は、テンプレート側で git が無視しているファイルを配らない（git に聞いて除外を作る。git 管理外のときは `.DS_Store`・`session-context.md`・`team-board.md` を固定で除外）
+  5. 差分の可視化フックの監視に `meta/rdd.ai-template.md` を足す
+
+- **Consequences**:
+  - (+) 配布物に ai-template の記録が混ざる経路が、場所の分離で塞がる（除外の追加漏れに依存しない）
+  - (+) 配布先の引き継ぎが force / sync で上書き・削除されない（実測）
+  - (−) `meta/` は配布されないが公開リポジトリには入る。`meta/rdd.ai-template.md` の運用環境に書く値は公開される
+  - (−) 過去の ADR・レポート本文の中の旧パスは、当時の記録としてそのまま残る
+
+- **Alternatives**:
+  - **`doc/` に置いたまま除外を増やす**: ADR-022 のやり方。追加漏れで壊れる（今回 `.claude/session-context.md` で実際に起きた）。不採用
+
+- **関係**: ADR-022（投函箱・レポートを配布対象外にした判断）の「置き場」は、この ADR で `meta/` に置き換えた
+- **出典**: 2026-10-02 のセッション（人間の指示、deep-review）

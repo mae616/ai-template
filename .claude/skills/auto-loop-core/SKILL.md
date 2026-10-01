@@ -104,7 +104,7 @@ gh CLI / git / lint / typecheck / test などローカルで完結する操作�
 
 ## 8. 中断・再開
 
-- API エラーや usage 切れで止まった場合は、`history/loop-state.md` の最後の `last_action` から再開する（次回の `session-start` でも拾える）
+- API エラーや usage 切れで止まった場合は、`history/loop-state.md` の最後の `last_action` から再開する（次回の `/setup` でも拾える）
 - 手動で再開するときは、同じ引数で親スキルを起動し直す。親スキルは状態ファイルを読んで、完了済みの step を飛ばして続きから進める
 
 ## やってはいけない（全 auto-* 共通）

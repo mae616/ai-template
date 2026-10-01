@@ -42,7 +42,7 @@
 
 ## 判断盤の決定（2026-10-01・人間）
 
-出典: 判断盤 `doc/generated/reports/2026-10-01-flow-intake-dashboard.html` でコピーされた判断。未決の項目で「取り込む」を選んだものは、**にゃんこのおすすめに沿う**意味（人間の補足）。
+出典: 判断盤 `meta/reports/2026-10-01-flow-intake-dashboard.html` でコピーされた判断。未決の項目で「取り込む」を選んだものは、**にゃんこのおすすめに沿う**意味（人間の補足）。
 
 | 区分 | 決定 |
 |---|---|
@@ -74,6 +74,12 @@
   - OGP 必須4つ: og:title / og:type / og:image / og:url。推奨: og:description / og:site_name / og:locale / og:image:alt / og:image:width・height — https://ogp.me/
   - → 聞く項目は「学習に使わせるか」と「AI 検索に出すか」を**分ける**（各社でボットが分かれている）
 
+### P3-a で決めたこと（2026-10-02）
+- `/setup` を4段（前提 → 引き継ぎ → 環境 → 今日のゴールと GO）にし、session-start を削除。環境の答えは rdd の事実ブロック「運用環境」に書く（ai-template 自身では `meta/rdd.ai-template.md`。人間の決定）
+- ai-template 自身の記録を `meta/` に集約（人間の指示）: 決定ログ → `meta/draft/`、レポート → `meta/reports/`、投函箱 → `meta/from-projects/`。`doc/` はアプリ用の空の雛形だけにし、`doc/index.md` の構成を今の雛形に合わせた
+- 自己評価の欄を19本で「次の一手」に置き換え（proto-loop は P3-b で吸収・削除するので触らない）
+- 新スキル名（人間が決定）: `design-language-options`（F1）／`web-discoverability`（Web の公開設定）
+
 ### P2 で決めたこと（2026-10-02）
 - 値の正は既存の `design-tokens.json` 等。出典の `tokens.json` は作らない（値のファイルを2つにしない）
 - 確定度は `meta.decision`、未決は `undecided`（`status` は assets の取得結果と衝突するので使わない）
@@ -84,12 +90,13 @@
 
 ### P1 で出た、後の段へ送るもの
 - **P2**: 既存の値のファイル（`doc/input/design/copy.json`・`design_context.json`）に、確定か暫定かの区別と `undecided` の節が無い。スキーマの `status`（素材の取得結果 ok / failed）とキー名をぶつけない形で、雛形ごと直す
-- **P3**: doc-writing §8 は暫定で「`/setup` ＋ `/session-start`」と書いた。session-start を /setup に吸収したら §8 を直す
+- **後続の候補**: 配布の保護（rdd・送り状・デザインの値とドック・レポート・git が無視するファイル）を、一時ディレクトリで新規・force・sync を流して判定する `test-apply-template.sh` を置く — **決めていない**
+- ~~P3: doc-writing §8 の暫定表記~~ → P3-a で `/setup` に一本化して解消
 - **後続の候補**: doc-writing §4（300行超は主題で割れないか疑う）に当たるもの — `meta/adr-lite.md`（1194行。§2 で積んでよい置き場）、`doc/input/design/ssot_schema.md`（423行）、`project-init/SKILL.md`（350行）、`README.md`（341行）。**割るかは決めていない**
 - **後続の候補**: `meta/rdd.ai-template.md` の「現状スナップショット（2026-06-11時点）」の節が、doc-writing §2 の名指しの外で日付つきの内容を持っている — **決めていない**
 
 ## 割り込み: フローの見直し（2026-10-01〜）
-群2以降の前に、開発全体の流れ（工程のつながり）と人間の関所の流れを見直す。現状図と論点候補5件はレポート `doc/generated/reports/2026-10-01-flow-review.html`。**どの論点を直すかは決めていない。**
+群2以降の前に、開発全体の流れ（工程のつながり）と人間の関所の流れを見直す。現状図と論点候補5件はレポート `meta/reports/2026-10-01-flow-review.html`。**どの論点を直すかは決めていない。**
 
 ## 使っていないスキルの削除（2026-10-01・人間が選択）
 
@@ -102,7 +109,9 @@
 | docs-reverse | **残す** | 作る設計書（`doc/generated/reverse/modules/`）を task-run・basic-review・deep-review が前提にしている |
 | keyboard-shortcuts / biz-researcher / proposition-reviewer / persona-designer | 残す | 人間が残すと判断 |
 | ui-designer / usability-psychologist | 残す | design-fundamentals と重なる。群3（判断軸系）の見直しで再判断 |
-| proto-loop / proto-medium / experience-plan / session-start / pr-respond | **決めていない** | 新しいフローの形で要否が変わる。フローと一緒に決める（session-start は /setup へ吸収する案） |
+| session-start | **削除**（P3-a） | /setup に吸収 |
+| proto-loop / proto-medium / experience-plan | **吸収して削除**（P3-b 予定） | proto-loop・proto-medium は design-language-options へ、experience-plan は task-run へ |
+| pr-respond | **決めていない** | O4 |
 
 ## 群2: デザイン系 — 着手（2026-10-01）
 

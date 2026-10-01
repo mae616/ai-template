@@ -1,6 +1,6 @@
 ---
 user-invocable: true
-description: "このPCの投函箱（doc/input/from-projects/）を構築・更新する。siblingプロジェクトの送り状を走査し、未取込の学びをローカルの写しとして materialize する。新しいマシンでclone直後や、投函箱が空のときに使う。"
+description: "このPCの投函箱（meta/from-projects/）を構築・更新する。siblingプロジェクトの送り状を走査し、未取込の学びをローカルの写しとして materialize する。新しいマシンでclone直後や、投函箱が空のときに使う。"
 ---
 
 # [テンプレート保守] 投函箱の構築（このPC用）
@@ -31,7 +31,7 @@ description: "このPCの投函箱（doc/input/from-projects/）を構築・更�
 - 未取込が0件のプロジェクトは投函箱を作らない（空ファイルを増やさない）
 
 ### 3. 投函箱への materialize
-- `doc/input/from-projects/<プロジェクト名>.md` が
+- `meta/from-projects/<プロジェクト名>.md` が
   - **無ければ**: 雛形を作り、`出典リポジトリ` に**このPCで解決した絶対パス**を埋める
   - **あれば**: 上書きせず、正本にあって投函箱に無い項目だけを追記候補として提示する
 - `解決済みファイル`（直した実物のパス）は**送り状本文からは自動で分からない**。空欄で置き、人間に確認して埋める。ここが投函箱の主価値なので、空のまま放置しない
@@ -43,7 +43,7 @@ description: "このPCの投函箱（doc/input/from-projects/）を構築・更�
 ## 投函箱ファイルの形
 
 冒頭にメタ情報、以降は項目ごとに **種別 / 反映先候補 / 出典リポジトリ / 解決済みファイル / 状態**。
-詳細は `doc/input/from-projects/README.md` を参照する。
+詳細は `meta/from-projects/README.md` を参照する。
 
 ## 落とし穴
 
