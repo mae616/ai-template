@@ -154,6 +154,12 @@ for p in "${INCLUDES[@]}"; do
     EXTRA_FLAGS+=("--include" "README.md" "--exclude" "*")
   fi
 
+  # 配布先の settings.json は各プロジェクトの設定（足した許可・外した規則）。どのモードでも上書き・削除しない。
+  # 無いときだけテンプレートのものを入れる。差分は適用のあとに一覧で見せる（report_settings_diff）
+  if [ "$p" = ".claude/" ] && [ -f "$TARGET_DIR/.claude/settings.json" ]; then
+    EXTRA_FLAGS+=("--exclude" "/settings.json")
+  fi
+
   # 送り状はプロジェクト側の蓄積データ（未取込の学び）。force/sync でも既存があれば守る
   # ※ プロジェクト側の蓄積ファイルを配布対象に増やす場合は、ここに同様の保護を足すこと
   if [ "$p" = "doc/output/" ] && [ -f "$TARGET_DIR/doc/output/to-template.md" ]; then
@@ -178,4 +184,145 @@ if [ "$DRY_RUN" = "true" ]; then
   echo "dry-run 完了（実際の反映は行っていません）"
 else
   echo "反映完了"
+fi
+
+# ---------------------------------------------------------------------------
+# settings.json の差分を見せる（書き換えはしない）
+# フックの実体だけ届いて登録が届かないと、フックは一度も動かないのに「守られている」と見える。
+# 配布先の settings.json は各プロジェクトの設定なので、どのモードでも上書きしない（上のループで除外）。
+# テンプレートにあって配布先に無いものを一覧にして、採否を人間に委ねる。
+# ---------------------------------------------------------------------------
+
+HOOK_TESTS_FAILED="false"
+
+# settings.json を比較用の行に並べる。
+#   hooks       → 「hooks<TAB>イベント<TAB>matcher<TAB>コマンド」
+#   permissions → 「permissions.<種類><TAB>規則」
+# 比べる単位は文字列の完全一致（matcher の並び順やコマンドの書き方が違うだけでも別の行になる）。
+# 並べ替えと比較のロケールは C に固定する（ロケール次第で別の行がまとめられ、差が消えるのを防ぐ）
+settings_lines() {
+  jq -r '
+    ((.hooks // {}) | to_entries[] | .key as $e | .value[] | (.matcher // "") as $m
+      | (.hooks // [])[] | "hooks\t\($e)\t\($m)\t\(.command)"),
+    ((.permissions // {}) | to_entries[] | select(.value | type == "array") | .key as $k
+      | .value[] | "permissions.\($k)\t\(.)")
+  ' "$1" | LC_ALL=C sort -u
+}
+
+# 登録されているフックのコマンドだけを並べる（settings.json と、あれば settings.local.json）。
+# JSON として読めないファイルは、そう表示して対象から外す（set -e で黙って止まらないよう、戻り値は常に0）
+registered_hook_commands() {
+  local f
+  for f in "$TARGET_DIR/.claude/settings.json" "$TARGET_DIR/.claude/settings.local.json"; do
+    [ -f "$f" ] || continue
+    if ! jq -e 'type == "object"' "$f" >/dev/null 2>&1; then
+      echo "  ${f#"$TARGET_DIR/"} が JSON のオブジェクトとして読めないため、登録の確認から外しました" >&2
+      continue
+    fi
+    jq -r '(.hooks // {}) | to_entries[] | .value[] | (.hooks // [])[] | .command // empty' "$f" 2>/dev/null || true
+  done
+  return 0
+}
+
+# テンプレートにあって配布先に無い hooks / permissions と、置かれているのに登録されていないフックを表示する。
+# JSON として読めないファイルは比較しない（読めないまま比べると、全項目が「無い」と誤って出るため）
+report_settings_diff() {
+  local tpl="$TEMPLATE_ROOT/.claude/settings.json"
+  local dst="$TARGET_DIR/.claude/settings.json"
+  [ -f "$tpl" ] || return 0
+  echo
+  echo "== settings.json の確認（どのモードでも書き換えません）=="
+  if ! command -v jq >/dev/null 2>&1; then
+    echo "  jq が無いため比較できません。テンプレートの .claude/settings.json と手で見比べてください"
+    return 0
+  fi
+  if [ ! -f "$dst" ]; then
+    if [ "$DRY_RUN" = "true" ]; then
+      echo "  配布先に settings.json がありません。反映するとテンプレートのものがそのまま入ります"
+    else
+      echo "  配布先に settings.json がありません（コピーに失敗した可能性があります）"
+    fi
+    return 0
+  fi
+  if ! jq -e 'type == "object"' "$dst" >/dev/null 2>&1; then
+    echo "  配布先の .claude/settings.json が JSON のオブジェクトとして読めません（空のファイルを含む）。Claude Code もこの設定を読めていない可能性があります。直してから再実行してください"
+    return 0
+  fi
+  if ! jq -e 'type == "object"' "$tpl" >/dev/null 2>&1; then
+    echo "  テンプレートの .claude/settings.json が JSON として読めません"
+    return 0
+  fi
+  local missing
+  missing="$(LC_ALL=C comm -23 <(settings_lines "$tpl") <(settings_lines "$dst"))"
+  if [ -z "$missing" ]; then
+    echo "  テンプレートにあって配布先に無い hooks / permissions: 0件"
+  else
+    echo "  テンプレートにあって配布先に無い hooks / permissions: $(printf '%s\n' "$missing" | wc -l | tr -d ' ')件"
+    printf '%s\n' "$missing" | sed 's/^/    /'
+    echo "  → 採否を決めて、配布先の .claude/settings.json に手で足してください（足さないと、そのフック・規則は効きません）"
+  fi
+
+  # 置かれているのに登録されていないフック（実体だけ届いた状態）。コマンドの末尾が「/<名前>」のものだけを登録とみなす
+  local unregistered="" cmds f name
+  cmds="$(registered_hook_commands)"
+  if [ -d "$TARGET_DIR/.claude/hooks" ]; then
+    for f in "$TARGET_DIR"/.claude/hooks/*.sh; do
+      [ -e "$f" ] || continue
+      name="$(basename "$f")"
+      case "$name" in test-*) continue ;; esac
+      # 「/名前」の直後が終わり・空白・引用符なら登録とみなす（名前は正規表現ではなく文字列として探す）
+      printf '%s\n' "$cmds" | awk -v n="$name" '{ i = index($0, n); while (i > 0) { pre = (i == 1) ? "" : substr($0, i - 1, 1); post = substr($0, i + length(n), 1); if ((pre == "" || pre == "/") && (post == "" || post ~ /[[:space:]"\047]/)) { found = 1 } j = index(substr($0, i + 1), n); i = (j > 0) ? i + j : 0 } } END { exit(found ? 0 : 1) }' || unregistered="${unregistered}    .claude/hooks/$name"$'\n'
+    done
+  fi
+  if [ -n "$unregistered" ]; then
+    echo "  置かれているのに settings.json / settings.local.json に登録されていないフック:"
+    printf '%s' "$unregistered"
+  fi
+}
+
+# 配布先の .claude/hooks/test-*.sh を流して結果を見せる（実体・登録・テストの3つで接続済み）。
+# 流す検証スクリプトはテンプレートと中身が同じものだけ（検証スクリプトが叩くのは配布先のフック本体）。
+# 入力は閉じ、timeout があれば1本120秒で止める。1本でも FAIL なら HOOK_TESTS_FAILED を立てる（終了コードに反映）
+run_hook_tests() {
+  [ "$DRY_RUN" = "true" ] && return 0
+  local f out rc base tpl_f
+  local found="false" tmo="" skipped=0
+  command -v timeout >/dev/null 2>&1 && tmo="timeout 120"
+  command -v gtimeout >/dev/null 2>&1 && [ -z "$tmo" ] && tmo="gtimeout 120"
+  echo
+  echo "== フックの検証スクリプト =="
+  for f in "$TARGET_DIR"/.claude/hooks/test-*.sh; do
+    [ -e "$f" ] || continue
+    found="true"
+    base="$(basename "$f")"
+    tpl_f="$TEMPLATE_ROOT/.claude/hooks/$base"
+    if [ ! -f "$tpl_f" ] || ! cmp -s "$f" "$tpl_f"; then
+      echo "  SKIP ${base}（中身がテンプレートと異なるので実行しません。必要なら手で流してください）"
+      skipped=$((skipped + 1))
+      continue
+    fi
+    # set -e の下でも失敗を拾えるように、終了コードを分けて受ける
+    if out="$($tmo bash "$f" </dev/null 2>&1)"; then rc=0; else rc=$?; fi
+    if [ "$rc" -eq 0 ]; then
+      echo "  OK   $base"
+    else
+      HOOK_TESTS_FAILED="true"
+      echo "  FAIL ${base}（終了コード ${rc}）"
+      printf '%s\n' "$out" | tail -n 5 | sed 's/^/       /'
+    fi
+  done
+  [ "$found" = "false" ] && echo "  検証スクリプトがありません"
+  [ "$skipped" -gt 0 ] && echo "  ${skipped} 本は検証していません（SKIP）"
+  return 0
+}
+
+if [ "$NO_SKILLS" = "false" ]; then
+  report_settings_diff
+  run_hook_tests
+fi
+
+if [ "$HOOK_TESTS_FAILED" = "true" ]; then
+  echo
+  echo "反映は済みましたが、フックの検証が失敗しました。FAIL の行を見て直してください"
+  exit 3
 fi

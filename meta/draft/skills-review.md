@@ -74,6 +74,10 @@
   - OGP 必須4つ: og:title / og:type / og:image / og:url。推奨: og:description / og:site_name / og:locale / og:image:alt / og:image:width・height — https://ogp.me/
   - → 聞く項目は「学習に使わせるか」と「AI 検索に出すか」を**分ける**（各社でボットが分かれている）
 
+### P4 で決めたこと（2026-10-03）
+- 3段に割る: 段1 settings.json の差分表示とテスト（送り状 項目4）／段2 全スキルに `name`／段3 `.agents/skills` と `AGENTS.md`（送り状 項目5。まだ確かめていない論点があるので、公式の情報で確かめてから決める）
+- 段1: `apply_template.sh` が差分を見せてテストを流す。settings.json は書き換えない（ADR-039）
+
 ### P3-c で決めたこと（2026-10-02）
 - 人間の決定: P3-c は3段に割る（段1 F2・F3 / 段2 F4・F5 と web-discoverability の呼び出し / 段3 report-publish）。段3では CLAUDE.md のレポート手順を report-publish に移し、CLAUDE.md には参照だけを残す方向で文面を作る（書く前に文面を見せて合意を取る）
 - タスクボード: Linear の MAE-5（親）〜MAE-9。ワークツリーは MAE-6（P3-c）に結びつけた

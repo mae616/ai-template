@@ -87,6 +87,10 @@ scripts/apply_global.sh --all-skills   # 手順系スキルも含む
 
 `main` への直接 commit / push はフックでブロックされます。**入れただけで安心せず、実際に動くか確かめてください**。
 
+`apply_template.sh` は適用のあとに、テンプレートにあって配布先の `.claude/settings.json` に無い hooks / permissions と、置かれているのに登録されていないフックを一覧で表示します。**配布先に settings.json があれば、どのモード（safe / force / sync）でも書き換えません**（各プロジェクトの設定を壊さないため）。一覧を見て、採否を決めて手で足してください。
+
+続けて `.claude/hooks/test-*.sh` を流して結果を見せます（`--dry-run` では流しません。`--no-skills` ではこの確認ごと飛ばします）。流すのはテンプレートと中身が同じものだけで、1本でも FAIL なら終了コード 3 で終わります。手で確かめるときは次を流します。
+
 ```bash
 bash .claude/hooks/test-git-branch-guard.sh      # PASS=10 FAIL=0 になれば正常
 bash .claude/hooks/test-warn-destructive-bash.sh # PASS=21 FAIL=0 になれば正常
