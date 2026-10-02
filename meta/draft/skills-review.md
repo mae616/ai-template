@@ -80,6 +80,7 @@
 - 段1: 描く工程（design-mock / design-ui / auto-design）から design-consistency（描く前にどのレベルまで決まっているか）・design-doc（直した理由の書き先）・design-audit（ゲートで外れ0件）を呼ぶ形にした。F2・F3 の「作る → 批評する」は design-consistency の「フローの中の位置」に1か所で書いた
 - 段2: F4（auto-design 手順1〜8で全画面を一気に作る。手順7で実装画面に design-critique と design-audit）、F5（入口はモードD `/auto-design --polish`。手順9の判断盤 → 指示文 → タスク化 → F4 に戻る）、Web（auto-design 手順5.5で web-discoverability、auto-build のエビデンスレポートに照合結果）をつないだ。P3-b から送った「磨きの経路」と「web-discoverability の呼び出し」はこれで閉じた。README に F0〜F5 の表
 - **決めていない**: 判断盤 F4 の「Figma が無ければスクリーンショット」から SSOT を起こす手順（受け手のスキルが無い。他社の画面を素材にするときの扱いも含めて決める）
+- 段3: `report-publish` を新設。CLAUDE.md の「概念・設計説明の可視化」をここへ移し、CLAUDE.md には参照だけ残した（人間が文面に合意）。判断盤の形と、Artifact が使えないときの代わりをここに持つ
 - 人間の決定: 描く前の決めごとが足りないとき、自律ループの中では**仮の値で描き進める**（provisional と undecided に記録し、最後にまとめて聞く）。ループの外では描く前に聞く。正は design-consistency の「フローの中の位置」
 - 人間の決定: 仮の値は値のファイル（`doc/input/design/`）に provisional で書いてよい（dev-practices「一時と確定を分ける」に例外として追記）。doc/draft/ に写しを作る案は、値のファイルが2組になるので取らなかった
 - design-ui は決まった SSOT を骨格に落とす工程なので、描く前のレベル確認はしない（ゲートの design-audit と、直した理由の design-doc だけ）

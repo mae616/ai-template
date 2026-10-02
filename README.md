@@ -190,6 +190,7 @@ React / Svelte / Tailwind / GSAP / Three.js / Blender 等は **[ai-tech-knowledg
 | `/build-context-site` | 要件・設計・ADR・図を横断する現状サイトを生成 |
 | `/manual-gen` / `/manual-guide` | 手順書の生成と、ステップごとの案内 |
 | `/docs-reverse` | コードベースから俯瞰ドキュメントを生成 |
+| `/report-publish` | レポート（説明・作業報告）と判断盤を作り、保存して公開し、レポート一覧を更新する。Artifact が使えなければローカルの HTML ＋ 選んだ結果のコピー |
 | `/web-discoverability` | Web の検索・SNS・AI への見え方。OGP と SEO の基本を全ページに入れ、公開範囲の答え（検索／AI の学習／AI の検索・回答／出さないページ／利用者の操作で来る AI）から robots.txt・noindex を作り、ページごとに数えて照合する |
 
 ### テンプレート保守（ai-template 側で使う）

@@ -11,7 +11,7 @@
 ```
 generated/
 ├── index.md          # このファイル（索引）
-├── reports/          # 図解レポート（CLAUDE.md「概念・設計説明の可視化」。公開前に保存）
+├── reports/          # 図解レポート（`report-publish` スキル。公開前に保存）
 ├── manual/           # /manual-gen の出力先（設定手順書等）
 ├── reverse/          # /docs-reverse の出力先（リバースエンジニアリング）
 └── api/              # 将来のAPIドキュメント等
