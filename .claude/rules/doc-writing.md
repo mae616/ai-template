@@ -25,7 +25,6 @@
 | `meta/adr-lite.md` | 判断の経緯（ADR） |
 | `doc/generated/reports/` | 日付つきのレポート |
 | `doc/draft/` | 発酵中・未合意の検討物（決定ログを含む）。合意したら `doc/input/` や rules へ移し、ここは畳む |
-| `doc/output/to-template.md` | 送り状（項目を積む台帳） |
 | `meta/`（ai-template 自身のときだけ） | ADR・レポート・決定ログ（`meta/draft/`）。ai-template では `doc/` に記録を書かない |
 
 **それ以外は、古くなったら書き換える。積まない。** 「以前はこう、いまはこう」を積んだ時点で、そのファイルは履歴に戻っている。消すのが怖いものは git が持っている。

@@ -56,7 +56,7 @@
 | O5 | タスクボード（GitHub Projects / Orca / Linear）の既定は置かない。未設定なら /setup で聞く |
 | O6 | Artifact が使えるかは /setup で聞く。使えなければローカル HTML＋判断のコピー |
 | T6・O4・O7 | **決めていない**（あとで決める） |
-| 台帳 | how-we-work 側の送り状は「状態」の行だけ書き換えてよい。他のファイルは触らない・コミットしない |
+| 台帳 | how-we-work 側の送り状は「状態」の行だけ書き換えてよい。他のファイルは触らない・コミットしない（→ 2026-10-03 送り状モデルをやめたので、状態の行も触らないことにした。ADR-040） |
 
 進め方: P1 土台のルール → P2 デザインの仕組み → P3 フロー → P4 配布 → P5 台帳。段ごとにコミットとレビュー。
 
@@ -73,6 +73,12 @@
   - Anthropic: ClaudeBot（学習）／Claude-SearchBot（検索品質）／Claude-User（利用者の質問時）。サブドメインごとに robots.txt が要る — https://support.claude.com/en/articles/8896518
   - OGP 必須4つ: og:title / og:type / og:image / og:url。推奨: og:description / og:site_name / og:locale / og:image:alt / og:image:width・height — https://ogp.me/
   - → 聞く項目は「学習に使わせるか」と「AI 検索に出すか」を**分ける**（各社でボットが分かれている）
+
+### P5 の置き換え: 送り状モデルをやめる（2026-10-03・人間の決定）
+- 配布物から送り状の仕組みを全部外す（雛形・template-feedback・template-inbox・投函箱・説明）
+- 学びは作者が Linear の ai-template プロジェクトに積む。積み方は作者のグローバル設定に書いた
+- 他のプロジェクトの送り状のファイルには触らない。未取込のうち、このブランチで取り込んでいないものだけ Linear に積んだ（MAE-10・MAE-11）。元の P5（how-we-work の状態の行を倒す。MAE-8）は不要になった
+- ADR-040
 
 ### P4 で決めたこと（2026-10-03）
 - 3段に割る: 段1 settings.json の差分表示とテスト（送り状 項目4）／段2 全スキルに `name`／段3 `.agents/skills` と `AGENTS.md`（送り状 項目5。まだ確かめていない論点があるので、公式の情報で確かめてから決める）

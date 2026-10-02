@@ -14,7 +14,6 @@ Claude Code 向けの開発プロンプトテンプレート。スキル（`/com
 | **レイヤーで積む** | 普遍ルール（`CLAUDE.md` / `rules`）の上に、プロジェクト固有の判断軸を重ねる（`judgment-harness`） |
 | **関所を仕組みで置く** | 事前確認 → 実行 → 事後レビューの各段でフック・レビューエージェントが機械的に働く |
 | **レビューは文脈遮断で** | 作った本人は自分の選択に錨づけされる。専任サブエージェントが差分だけを見て批評する |
-| **学びを還流させる** | 各プロジェクトで得た汎用的な学びを送り状としてテンプレートへ戻す |
 
 ## 前提条件
 
@@ -43,7 +42,7 @@ scripts/apply_template.sh --target /abs/path/to/your-project --safe
 | `--no-skills` | `.claude/` をコピーしない（グローバル適用済みの場合） |
 | `--overwrite-rdd` | `doc/input/rdd.md` を上書き（原則プロジェクト固有なので非推奨） |
 
-配布されないもの: `meta/`（ai-template 自身の仕様・ADR・レポート・決定ログ・投函箱）、`history/`。`doc/` はアプリを作るときの空の雛形だけで、配布先にあるものは上書きしない。
+配布されないもの: `meta/`（ai-template 自身の仕様・ADR・レポート・決定ログ）、`history/`。`doc/` はアプリを作るときの空の雛形だけで、配布先にあるものは上書きしない。
 
 ### 2. グローバルへ適用する（任意）
 
@@ -197,32 +196,6 @@ React / Svelte / Tailwind / GSAP / Three.js / Blender 等は **[ai-tech-knowledg
 | `/report-publish` | レポート（説明・作業報告）と判断盤を作り、保存して公開し、レポート一覧を更新する。Artifact が使えなければローカルの HTML ＋ 選んだ結果のコピー |
 | `/web-discoverability` | Web の検索・SNS・AI への見え方。OGP と SEO の基本を全ページに入れ、公開範囲の答え（検索／AI の学習／AI の検索・回答／出さないページ／利用者の操作で来る AI）から robots.txt・noindex を作り、ページごとに数えて照合する |
 
-### テンプレート保守（ai-template 側で使う）
-
-| コマンド | 用途 |
-|---|---|
-| `/template-inbox` | このPCの投函箱を構築する。sibling を走査し、未取込の学びをローカルに materialize する |
-| `/template-feedback` | 送り状を走査し、汎用化された学びをテンプレートへ取り込む。取り込み後は台帳を取込済に倒す |
-
-## 学びの還流（送り状モデル）
-
-各プロジェクトで得た汎用的な学びを、テンプレートへ戻す仕組みです。**プロジェクトはテンプレート本体を編集しません**。判断が1か所に集まるので、複数プロジェクトが並行しても競合しません。
-
-```mermaid
-flowchart LR
-  P["プロジェクトで<br/>学びを得る"] --> S["正本<br/>doc/output/to-template.md"]
-  P --> I["投函箱の写し<br/>meta/from-projects/"]
-  S --> F["/template-feedback<br/>取り込み・直列"]
-  I --> F
-  F --> R["rules / skills / hooks<br/>へ反映"]
-  F --> L["両方の状態を<br/>取込済に倒す"]
-```
-
-- 送り状の書式は `doc/output/to-template.md`（各プロジェクトへ配布される雛形）
-- 投函箱だけが `解決済みファイル`（直した実物のパス）を持ちます。取り込み時に**説明文ではなく動いている実物を読む**ためです
-- 投函箱の中身は各PCローカル（Git追跡外）。受信データには出典マシンの絶対パスが載るため、公開・配布物に混ぜません。新しいマシンでは `/template-inbox` で組み直します
-- 「状態」欄が二重取り込み防止の台帳として機能します
-
 ## 安全装置
 
 ### フック（`.claude/hooks/`）
@@ -304,7 +277,7 @@ ai-template/
 │   ├── input/            # 【合意済み】SSOT。AIが前提として扱う（rdd.md / architecture.md / design/）
 │   ├── draft/            # 【未合意】発酵中。AIは参考にするが前提にしない（設定集・検討中の案）
 │   ├── generated/        # 【AI生成】上書きOK（manual/ / reverse/ / reports/）
-│   └── output/           # 送り状（to-template.md）
+│   └── output/           # 人間に渡す成果物（auto-build が作るときにできる。雛形には無い）
 ├── scripts/
 │   ├── apply_template.sh # プロジェクトへの適用
 │   └── apply_global.sh   # ~/.claude への適用
@@ -339,7 +312,7 @@ ai-template/
 
 | 領域 | 追加・変更 |
 |---|---|
-| 学びの還流 | 送り状モデルを仕組み化。投函箱（`meta/from-projects/`）をPCローカル化し、`/template-inbox` を新設 |
+| 学びの還流 | 送り状モデルを仕組み化。投函箱（`meta/from-projects/`）をPCローカル化し、`/template-inbox` を新設（v1.2.0 当時。ADR-040 で廃止） |
 | 判断軸 | `judgment-harness`（レイヤー方法論）・`project-design-language`（プロジェクト固有SSOT雛形）を追加 |
 | プロト工程 | `auto-mvp` を `/proto-loop`（連作ループ）へ置き換え。媒体判断ガイド `proto-medium` を新設 |
 | レビュー | 文脈遮断レビューを水平展開。専任エージェント3種（`code-reviewer` / `design-critic` / `design-drafter`）を追加 |

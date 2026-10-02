@@ -126,7 +126,7 @@ description: "プロンプト文または既存成果物（要件定義・設計
 
 全 Sprint 完了後（または `--scope mvp` の範囲完了後）、人間の判断材料を1つの HTML に集約する。
 
-- **出力先**: `doc/output/evidence/YYYY-MM-DD-<プロジェクト名>.html`
+- **出力先**: `doc/output/evidence/YYYY-MM-DD-<プロジェクト名>.html`（ディレクトリが無ければ作る。配布の雛形には無い）
 - **生成方法**: `build-context-site` の仕組み・スタイルを流用（自己完結 HTML、外部依存なし）
 
 **必須コンテンツ**:

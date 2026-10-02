@@ -1425,3 +1425,30 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
   - **force / sync では上書きし、そう表示する**: 表示と動きは合うが、各プロジェクトが足した設定が消える。人間が「どのモードでも書き換えない」を選んだ
 
 - **出典**: 2026-10-03 のセッション（how-we-work 送り状 項目4）
+
+---
+
+## ADR-040: 送り状モデルをやめ、学びは作者が Linear の ai-template プロジェクトに積む
+
+- **Context**:
+  送り状（`doc/output/to-template.md`）と取り込みスキル（template-feedback・template-inbox）は配布物に入っていたが、実際に使うのは ai-template の作者だけだった。OSS として使う人には、読む量だけが増える。作者はタスクボードを Linear に決め、ai-template のプロジェクトを作った（ADR-038 の P3-c と同じ日）
+
+- **Decision**（人間の決定）:
+  1. 配布物から送り状の仕組みを外す: 雛形 `doc/output/to-template.md`、スキル template-feedback・template-inbox、投函箱 `meta/from-projects/`、ルール・README・`doc/index.md` の説明。`apply_template.sh` は `doc/output/` を配らない（中身が送り状だけだった。エビデンスレポートは作るときにできる）
+  2. 他のプロジェクトで出た汎用の学びは、作者が Linear の ai-template プロジェクトに課題として積む。積み方は作者のグローバル設定（リポジトリの外）に書く
+  3. 他のプロジェクトに残っている送り状のファイルには触らない。未取込の項目のうち、このブランチで取り込んでいないものだけを Linear に積んだ（how-we-work の項目6 → MAE-10、「判断の根拠を示す」節 → MAE-11。項目5 は MAE-7 の P4 に含まれる）。listening-editor は全件取込済み
+
+- **Consequences**:
+  - (+) 配布物から、作者しか使わない仕組みが消える
+  - (+) 学びの置き場が、作業の置き場（Linear）と同じになる
+  - (−) OSS を使う人には「学びをテンプレートへ返す」仕組みが届かない。必要なら各自で作る
+  - (−) 既に配布した先に残るもの: 2本のスキルは apply_template の safe / force では残る（--sync なら消える）。`doc/output/to-template.md` は `doc/output/` を配らなくなったので、どのモードでも残る（中身はそのプロジェクトの蓄積なので、消すかは各プロジェクトで決める）
+  - ai-template のローカルに残った投函箱の受信物（`meta/from-projects/` の中。git の管理外）は、消すかを人間が決めるまで `.gitignore` の除外を残す
+  - (−) how-we-work の送り状の状態の行は倒していない（触らないと決めた）。取り込み済みかどうかは、この ADR と ADR-032〜034・039 で辿る
+
+- **Alternatives**:
+  - **配布だけ止めて仕組みは ai-template に残す**: 使われなくなるので古くなる。不採用
+  - **template-feedback を Linear 版に書き換えて残す**: 取り込みは Linear の課題を見て進めれば足りる。人間が削除を選んだ
+
+- **関係**: ADR-006・016・021・022・025 の送り状モデルと投函箱は、この ADR で廃止した
+- **出典**: 2026-10-03 のセッション（人間の決定）

@@ -165,7 +165,5 @@ AGENTS.md
 .agents/
 .codex/
 
-# 投函箱の受信物（各PCローカル。出典マシンの絶対パスを含むため公開・配布しない）
-# README.md は仕組みの説明なので追跡する
-meta/from-projects/*.md
-!meta/from-projects/README.md
+# 投函箱は廃止済み（ADR-040）。ローカルに残った受信物（出典マシンの絶対パスを含む）を誤って追跡しないため
+meta/from-projects/

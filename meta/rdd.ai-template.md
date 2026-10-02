@@ -129,11 +129,10 @@ paginate: true
 - フック: 4個（check-release-notes / post-edit-notify / validate-mermaid / warn-destructive-bash）
 - ルール: 4個（code-quality / dev-practices / git / tool-usage）
 - スクリプト: apply_template.sh / apply_global.sh
-- 送り状雛形: `doc/output/to-template.md`（配布対象）
 
-## フィードバックループ（送り状モデル）
-- 各プロジェクトは汎用学びを自リポの送り状 `doc/output/to-template.md` に記録するだけ（ai-template を直接編集しない＝競合回避）
-- 取り込みは ai-template 側で `/template-feedback` により直列処理し、反映済み項目は送り状の状態を `取込済` に倒す（二重取り込み防止台帳）
+## 学びの還流
+- 他のプロジェクトで出た汎用の学びは、作者が Linear の ai-template プロジェクトに課題として積み、ai-template で取り込む。これは作者の運用で、**配布物には還流の仕組みを含めない**（使うのが作者だけのため。積み方は作者のグローバル設定に書く）
+- 他のプロジェクトは ai-template を直接編集しない（競合を避ける）
 - テンプレに書くのは**判断軸・優先順位・困ったとき何を疑うか・固有の手順/思想のみ**（AIが既に持つ一般知識・固有例は書かない）
 
 ## ファイル・ディレクトリ命名方針
