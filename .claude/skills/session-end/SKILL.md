@@ -1,4 +1,5 @@
 ---
+name: session-end
 user-invocable: true
 description: "進捗サマリーと再開用プロンプトを生成してsession-context.mdに保存する。作業の区切り、コンテキスト圧縮が近いとき、セッション終了時に使う。"
 ---

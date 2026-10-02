@@ -71,6 +71,14 @@ need date
 INCLUDES=(".mise.toml" "doc/index.md" "doc/input/" "doc/draft/" "doc/generated/")
 [ "$NO_SKILLS" = "false" ] && INCLUDES+=("CLAUDE.md" ".claude/")
 
+# 配る前に、テンプレートのスキルの frontmatter を照合する（name・description は必須。外れがあれば配らない）
+if [ "$NO_SKILLS" = "false" ]; then
+  if ! bash "$TEMPLATE_ROOT/scripts/check_skill_frontmatter.sh" "$TEMPLATE_ROOT/.claude/skills"; then
+    echo "ERROR: テンプレートのスキルに frontmatter の外れがあるため、配布を止めました（上の一覧を直してから再実行）" >&2
+    exit 2
+  fi
+fi
+
 # バックアップ
 timestamp="$(date +%Y%m%d-%H%M%S)"
 backup_dir="$TARGET_DIR/.ai-template-backup/$timestamp"

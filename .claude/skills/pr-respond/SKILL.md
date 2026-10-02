@@ -1,4 +1,5 @@
 ---
+name: pr-respond
 user-invocable: true
 description: "PRのレビューコメントに1件ずつ対応してコミット・pushする。レビュー指摘への対応、PR修正作業で使う。"
 ---

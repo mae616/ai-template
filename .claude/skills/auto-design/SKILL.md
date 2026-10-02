@@ -1,4 +1,5 @@
 ---
+name: auto-design
 user-invocable: true
 description: "Figma または会話を起点に、デザインSSOT抽出 → 確認用HTML → 静的UI骨格 → コンポーネント分離 → 型付き結合 → レビュー収束 → task→sprint マージまでを1コマンドで完結する。デザイン実装の Inner Loop 親スキル。"
 ---

@@ -1,4 +1,5 @@
 ---
+name: project-init
 user-invocable: true
 description: "壁打ちから要件定義、ボイラーテンプレート作成、AIテンプレート適用までを一気通貫で実行する。新規プロジェクトの立ち上げで使う。"
 ---

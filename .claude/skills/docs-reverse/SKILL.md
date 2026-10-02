@@ -1,4 +1,5 @@
 ---
+name: docs-reverse
 user-invocable: true
 description: "既存コードベースをリバースエンジニアリングして俯瞰ドキュメントを生成する。引き継ぎ資料の作成、コードベース理解の促進、技術負債の可視化で使う。"
 ---

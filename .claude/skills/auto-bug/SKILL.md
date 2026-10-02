@@ -1,4 +1,5 @@
 ---
+name: auto-bug
 user-invocable: true
 description: "bug の自律修正ループ。bug-investigate → bug-propose → bug-fix → テスト → basic-review → deep-review → PR → ai-merged-unreviewed ラベル → task→sprint 自律マージ までを1コマンドで完結。Inner Loop の親スキル。"
 ---

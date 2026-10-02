@@ -1,4 +1,5 @@
 ---
+name: bug-fix
 user-invocable: true
 description: "バグ修正をブランチ作成からPR作成まで実行する。恒久対応を段階的に実施し、無効時のロールバック手順も含める。修正の実装とPR化で使う。"
 ---

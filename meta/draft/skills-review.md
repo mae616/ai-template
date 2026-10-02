@@ -83,6 +83,7 @@
 ### P4 で決めたこと（2026-10-03）
 - 3段に割る: 段1 settings.json の差分表示とテスト（送り状 項目4）／段2 全スキルに `name`／段3 `.agents/skills` と `AGENTS.md`（送り状 項目5。まだ確かめていない論点があるので、公式の情報で確かめてから決める）
 - 段1: `apply_template.sh` が差分を見せてテストを流す。settings.json は書き換えない（ADR-039）
+- 段2: `name` の無い30本に `name: <ディレクトリ名>` を足した（Agent Skills 仕様 https://agentskills.io/specification で必須・ディレクトリ名と一致。2026-10-03 確認）。全56本で name の形・description の有無と長さ（1024文字まで）を機械で数えて外れ0件。照合は `scripts/check_skill_frontmatter.sh` として残し、apply_template・apply_global が配る前に流す（テスト21ケース。ADR-039 追記）
 
 ### P3-c で決めたこと（2026-10-02）
 - 人間の決定: P3-c は3段に割る（段1 F2・F3 / 段2 F4・F5 と web-discoverability の呼び出し / 段3 report-publish）。段3では CLAUDE.md のレポート手順を report-publish に移し、CLAUDE.md には参照だけを残す方向で文面を作る（書く前に文面を見せて合意を取る）

@@ -137,6 +137,11 @@ echo
 # --- 1. スキルの適用 ---
 if [ "$SKIP_SKILLS" = "false" ]; then
   echo "--- スキルの適用 ---"
+  # 配る前に frontmatter を照合する（name・description は必須。外れがあれば配らない。apply_template.sh と同じ）
+  if ! bash "$TEMPLATE_ROOT/scripts/check_skill_frontmatter.sh" "$TEMPLATE_ROOT/.claude/skills"; then
+    echo "ERROR: テンプレートのスキルに frontmatter の外れがあるため、スキルの適用を止めました（上の一覧を直してから再実行）" >&2
+    exit 2
+  fi
   TARGET_SKILLS=()
 
   for skill_dir in "$TEMPLATE_ROOT/.claude/skills/"*/; do

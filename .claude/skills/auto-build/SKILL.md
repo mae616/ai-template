@@ -1,4 +1,5 @@
 ---
+name: auto-build
 user-invocable: true
 description: "プロンプト文または既存成果物（要件定義・設計のHTML/MD）から、Sprint計画 → 全タスク自律実装 → sprint→main PR → エビデンスレポート（HTML）生成までを1コマンドで完結する。Loop Engineering の最上位親スキル。"
 ---

@@ -1,4 +1,5 @@
 ---
+name: auto-task
 user-invocable: true
 description: "task の自律実装ループ。task-run → テスト → bug 検知時 bug-* 連鎖 → basic-review → deep-review → PR → ai-merged-unreviewed ラベル → task→sprint 自律マージ までを1コマンドで完結。Inner Loop の親スキル。"
 ---

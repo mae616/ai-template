@@ -1,4 +1,5 @@
 ---
+name: bug-propose
 user-invocable: true
 description: "調査済みのバグに対して修正策を列挙し、根拠・影響・リスクを比較してIssueコメントに追記する。修正方針の決定、環境・設定系バグの対応策検討で使う。"
 ---

@@ -1,4 +1,5 @@
 ---
+name: bug-investigate
 user-invocable: true
 description: "起票済みのバグIssueに対して原因調査を実行し、仮説を絞り込んでIssueコメントに追記する。バグの原因特定、ログ解析、再現確認で使う。"
 ---

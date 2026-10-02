@@ -1,4 +1,5 @@
 ---
+name: design-ssot
 user-invocable: true
 description: "Figma（Dev Mode）からデザインSSOT（tokens/components/context/assets）をJSON形式で抽出する。Figmaのデザインを実装に落とし込む起点として使う。"
 ---

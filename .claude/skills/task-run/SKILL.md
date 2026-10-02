@@ -1,4 +1,5 @@
 ---
+name: task-run
 user-invocable: true
 description: "依存解決済みのIssueを選択して実装を実行し、進捗をIssueと組み込みTaskに同期する。タスクの実装着手で使う。"
 ---

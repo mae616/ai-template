@@ -1,4 +1,5 @@
 ---
+name: deep-review
 user-invocable: true
 description: "設計整合性、セキュリティ、RDD準拠を深掘りチェックする。basic-review後の二次レビュー、sprint→mainマージ前の品質確認で使う。"
 ---

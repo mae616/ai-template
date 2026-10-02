@@ -1399,7 +1399,7 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
 
 ---
 
-## ADR-039: 配布で settings.json を書き換えず、差分を見せてフックのテストを流す（P4 段1）
+## ADR-039: 配布で settings.json を書き換えず、差分を見せてフックのテストを流す（P4。段ごとに追記）
 
 - **Context**:
   how-we-work 送り状 項目4。`apply_template.sh` の safe は既存の `.claude/settings.json` を飛ばすため、フックのスクリプトは届くのに登録が届かず、フックが一度も動いていなかった。permissions の差分（deny・ask）も届いていなかった。ファイルがあるので「守られている」と見える
@@ -1425,6 +1425,8 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
   - **force / sync では上書きし、そう表示する**: 表示と動きは合うが、各プロジェクトが足した設定が消える。人間が「どのモードでも書き換えない」を選んだ
 
 - **出典**: 2026-10-03 のセッション（how-we-work 送り状 項目4）
+
+- **追記（P4 段2）**: 全スキルの frontmatter に `name`（ディレクトリ名と同じ）を入れた。出典は Agent Skills 仕様（https://agentskills.io/specification。`name` と `description` は必須、`name` は小文字・数字・ハイフンで64文字まで・ディレクトリ名と一致、`description` は1024文字まで。2026-10-03 確認）。56本すべてで外れ0件。照合は `scripts/check_skill_frontmatter.sh` に置き、`apply_template.sh` と `apply_global.sh` が配る前に流して、外れがあれば配らない（宣言だけでは次に足すスキルで守られないため）。YAML のパーサ（ruby の標準ライブラリ）があれば frontmatter 全体をパーサで読む。無ければ必須項目の形だけを awk で見て「YAML としては確かめていない」と表示する。パーサが無いことだけでは配布を止めない（簡易判定で見つかった外れでは止める。人間の決定。道具が無いだけで配布が止まるのを避ける）。同じキーが2回ある場合はパーサでも後の値が採られ、検出しない。テスト `scripts/test_check_skill_frontmatter.sh` は両方の経路で52ケース
 
 ---
 
