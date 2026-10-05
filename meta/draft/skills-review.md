@@ -83,7 +83,26 @@
 ### P4 で決めたこと（2026-10-03）
 - 3段に割る: 段1 settings.json の差分表示とテスト（送り状 項目4）／段2 全スキルに `name`／段3 `.agents/skills` と `AGENTS.md`（送り状 項目5。まだ確かめていない論点があるので、公式の情報で確かめてから決める）
 - 段1: `apply_template.sh` が差分を見せてテストを流す。settings.json は書き換えない（ADR-039）
-- 段2: `name` の無い30本に `name: <ディレクトリ名>` を足した（Agent Skills 仕様 https://agentskills.io/specification で必須・ディレクトリ名と一致。2026-10-03 確認）。全56本で name の形・description の有無と長さ（1024文字まで）を機械で数えて外れ0件。照合は `scripts/check_skill_frontmatter.sh` として残し、apply_template・apply_global が配る前に流す（テスト21ケース。ADR-039 追記）
+- 段2: `name` の無い30本に `name: <ディレクトリ名>` を足した（Agent Skills 仕様 https://agentskills.io/specification で必須・ディレクトリ名と一致。2026-10-03 確認）。全56本で name の形・description の有無と長さ（1024文字まで）を機械で数えて外れ0件。照合は `scripts/check_skill_frontmatter.sh` として残し、apply_template・apply_global が配る前に流す（ADR-039 追記）
+- 段3（人間の決定）: `--codex` / `--cursor` / `--antigravity` を付けたときだけ作る。最初の版（AGENTS.md を CLAUDE.md と rules から生成）は deep-review（Critical 1・Warning 10）のあとに作り直した
+- 段3 の作り直し（2026-10-04。ADR-039 追記）:
+  - 実機で確かめた（codex・cursor-agent・agy）: 3つとも AGENTS.md のリンクを辿って読む／スキルごとのリンクを辿る／Cursor は `.cursor/rules` の alwaysApply、Antigravity は `.agents/rules` の always_on を読む／Cursor は `.agents/skills` も読み、同じ名前は1件にまとめて表示
+  - AGENTS.md は CLAUDE.md へのリンク。Codex の1行は CLAUDE.md の参照の優先順位に書いた（人間が文面に合意）
+  - Antigravity の `.agents/rules/` は rules だけ（CLAUDE.md は AGENTS.md から届く。人間の決定）
+  - 人間の要望: 複数の AI を同時に使う人のために、設定が矛盾しないこと・入れ方で結果が変わらないこと → 元は CLAUDE.md と `.claude/` だけ、組み合わせても1つずつでも同じ（テストで確かめる）
+  - rules の効き方は道具ごとに違うまま（Cursor 常に／Antigravity model_decision／Codex 自分で読む）。Antigravity の常時の上限にぎりぎりのため（人間の決定）。README に表で書いた
+  - `.codex/config.toml` は作らない／生成物は配布先の git に入れる（人間の決定）
+  - rdd の非目標に「配布物をほかのエージェントでも読めるようにすることは、この非目標に入らない」を足した（人間が文面に合意）
+  - 作り直し版の deep-review（Critical 1・Warning 6・Suggestion 6）を全部直した: 写し先のファイルがリンクなら触らない／写しの足りなさも知らせる／サブディレクトリの rule も写す／frontmatter つきの rule は SKIP／書けなければ終了コード 4。テストに再現ケースを足した
+  - 2回目の deep-review（Critical 1・Warning 2・Suggestion 4）も直した: 写したあとで frontmatter が付いた rule の古い写しを外す／リンク切れの rule は「失敗:」／上限の警告を毎回出す／名前のぶつかりは「失敗:」／印は5行目の先頭だけ／作り直す前に退避。CLAUDE.md の「読むかは AI 次第」は人間が合意した文面なので残した
+  - 人間の決定（2026-10-06）: deep-review は7回目で Critical・Warning が0なら区切り、残った Suggestion は後続の候補に書く。CLAUDE.md の文面を `.claude/rules/**/*.md`（サブディレクトリも含めて読む）に変えた
+  - 3〜6回目の deep-review も直した（Critical は3回目から0）: bash 3.2 での引用符、リンクのディレクトリの rules、CRLF・BOM、読めない rules で止める、大文字・小文字のぶつかり、ハードリンク、Codex の上限の照合、途中で落ちたときの表示ほか。テストは bash 5.2 と 3.2 の両方で流す
+  - 7回目の deep-review（Critical 0・Warning 1・Suggestion 5）: Warning（大文字・小文字だけの改名で、作り直した写し・リンクを同じ回に消す）を直し、テストに足した。区切りの決定どおり、Suggestion は下の後続の候補に回した
+  - **後続の候補**（7回目の Suggestion。**決めていない**）: ①`.agents` がリンクのとき、選んだのに何も作らず終了コード 0（普通のファイルなら 4）。そろえるか ②選んでいない実行でも、`.claude/rules` に読めないディレクトリがあると終了コード 4 になる。生成物があるときだけ照合するか ③dry-run では退避先のリンクの判定を通らない ④`paths:` を持たない frontmatter（`description:` だけ等）の rule も SKIP する。`paths:` に絞るか ⑤選ばずに流したとき、1つの改名を2件と数える（警告は出る） ⑥大文字・小文字を区別するファイルシステムで `Zed` と `zed` のスキルが同時にあり、`.agents/skills/zed` が `Zed` を指すと張り替える
+  - 7回目の Warning の修正は、見つけたレビュアーが再現手順で確かめて Critical 0・Warning 0。人間の決定どおり、ここで区切った
+  - **後続の候補**: 退避先の名前が秒までなので、同じ秒に2回流すと退避が上書きされる（もとからある仕様）／既存のバックアップの処理も、`.ai-template-backup` がリンクだと外へ書く（この段の差分の外）— **決めていない**
+  - **後続の候補**: 配布先の `.claude/rules` がリンク（共有の形）だと、既存の rsync がリンクを本物のディレクトリに置き換える（2回目のレビューで判明。この段の差分の外）— **決めていない**
+  - **後続の候補**: `paths:` つきの rule を Cursor の globs・Antigravity の `trigger: glob` に変換するか — **決めていない**
 
 ### P3-c で決めたこと（2026-10-02）
 - 人間の決定: P3-c は3段に割る（段1 F2・F3 / 段2 F4・F5 と web-discoverability の呼び出し / 段3 report-publish）。段3では CLAUDE.md のレポート手順を report-publish に移し、CLAUDE.md には参照だけを残す方向で文面を作る（書く前に文面を見せて合意を取る）

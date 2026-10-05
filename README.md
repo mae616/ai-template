@@ -41,6 +41,29 @@ scripts/apply_template.sh --target /abs/path/to/your-project --safe
 | `--sync` | 上書き＋削除で同期。**危険** |
 | `--no-skills` | `.claude/` をコピーしない（グローバル適用済みの場合） |
 | `--overwrite-rdd` | `doc/input/rdd.md` を上書き（原則プロジェクト固有なので非推奨） |
+| `--codex` / `--cursor` / `--antigravity` | ほかのエージェント向けのファイルを作る（下の表）。付けたものだけ作る |
+
+Claude Code・Cursor・Antigravity・Codex を同時に使っても決まりが食い違わないように、どの道具向けのものも **CLAUDE.md と `.claude/rules/`・`.claude/skills/` から作ります**（道具ごとに中身を書き分けない）。組み合わせて流しても、1つずつ流しても、同じものができます。
+
+| 作るもの | 中身 | `--codex` | `--cursor` | `--antigravity` |
+|---|---|:-:|:-:|:-:|
+| `AGENTS.md` | `CLAUDE.md` へのリンク | o | o | o |
+| `.agents/skills/<名前>` | `.claude/skills/<名前>` へのリンク（スキルごと） | o | - | o |
+| `.cursor/rules/ai-template-<名前>.mdc` | `.claude/rules/` の写し（常に読む形） | - | o | - |
+| `.agents/rules/ai-template-<名前>.md` | `.claude/rules/` の写し（AI が要ると判断したときに読む形） | - | - | o |
+
+- **rules の効き方は道具ごとに違います**（中身は同じ）: Claude Code と Cursor は常に読む。Antigravity は AI が要ると判断したときに読む（常に効く決まりの合計に 20,000 トークンの上限があり、CLAUDE.md と rules を合わせるとぎりぎりのため）。Codex は写しを作らず、CLAUDE.md の「自動で読み込まれない環境では作業の前に読む」を見て自分で読む。後の2つは、読むかどうかが AI 次第です
+- **写しは流し直さないと古くなります**。apply_template を流すたびに（`--no-skills` のときを除く）、選ばなかった道具の写しも今の rules と見比べ、ずれていれば「流し直して」と表示します（書き換えはしません）
+- 写しの5行目に「生成物」の印があります。**印の付いた写しを手で直しても、流し直すと元から作り直して上書きします**（直すなら元の rule を直す。上書き・削除する前の写しは `.ai-template-backup/` に退避します。`--no-backup` のときは退避しません）。印の無いファイル、手で置いた `AGENTS.md`、リンク（別の場所を指す `AGENTS.md`・写し先のファイル・`.agents` などの途中のディレクトリ）には触りません。配布先の外へ書かないためです
+- `.claude/rules/` のサブディレクトリ（リンクのディレクトリも含む）の rule も写します（`front/ui.md` → `ai-template-front--ui.mdc`）。frontmatter（`paths:` など）を持つ rule は、写すと効く範囲が変わるので作らず、SKIP と表示します（前に作った写しは外します）。必要なら道具ごとに手で置いてください。読めない rule（リンク切れ）や、写し先の名前がぶつかる rule（`front/ui.md` と `front--ui.md`。大文字・小文字の違いだけでもぶつかりとみなす）は作らず「失敗:」と表示します。`.claude/rules/` の中に読めないディレクトリがあるときは、写しに何も触りません
+- CLAUDE.md が Codex の既定の読み込み上限（32 KiB）を超えると、流すたびに知らせます（超えた分は Codex に読まれません）
+- 書けなかったものがあると「失敗:」と表示し、終了コード 4 で終わります（フックの検証の失敗は 3）
+- dry-run は、反映後の中身をモードから求めて数えます。rsync の除外（`build/`・`dist/` などのディレクトリ名や、テンプレート側で git が無視しているもの）にかかる rule は、dry-run と本番で数え方がずれることがあります
+- 選ばなかった道具の生成物は消しません。要らなければ手で消してください
+- Claude Code は CLAUDE.md があれば AGENTS.md を読みません。両方読む設定にしても、CLAUDE.md へのリンクの AGENTS.md は2回読みません（Claude Code「How Claude remembers your project」）
+- Cursor は `.claude/skills/` と `.agents/skills/` の両方を読みます。cursor-agent では同じ名前を1件にまとめて表示しました（2026-10-04 実測）。エディタで2つ見えたら、どちらも同じスキルです
+- `--no-skills` と一緒に付けたときは作りません（`.claude/` と `CLAUDE.md` を配らないので、リンクと写しの元がありません）
+- **生成物は配布先の git に入れてください**。流し直したときのずれが差分に出ます
 
 配布されないもの: `meta/`（ai-template 自身の仕様・ADR・レポート・決定ログ）、`history/`。`doc/` はアプリを作るときの空の雛形だけで、配布先にあるものは上書きしない。
 

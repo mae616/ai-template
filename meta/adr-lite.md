@@ -1428,6 +1428,36 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
 
 - **追記（P4 段2）**: 全スキルの frontmatter に `name`（ディレクトリ名と同じ）を入れた。出典は Agent Skills 仕様（https://agentskills.io/specification。`name` と `description` は必須、`name` は小文字・数字・ハイフンで64文字まで・ディレクトリ名と一致、`description` は1024文字まで。2026-10-03 確認）。56本すべてで外れ0件。照合は `scripts/check_skill_frontmatter.sh` に置き、`apply_template.sh` と `apply_global.sh` が配る前に流して、外れがあれば配らない（宣言だけでは次に足すスキルで守られないため）。YAML のパーサ（ruby の標準ライブラリ）があれば frontmatter 全体をパーサで読む。無ければ必須項目の形だけを awk で見て「YAML としては確かめていない」と表示する。パーサが無いことだけでは配布を止めない（簡易判定で見つかった外れでは止める。人間の決定。道具が無いだけで配布が止まるのを避ける）。同じキーが2回ある場合はパーサでも後の値が採られ、検出しない。テスト `scripts/test_check_skill_frontmatter.sh` は両方の経路で52ケース
 
+
+
+- **追記（P4 段3）**（人間の決定）: ほかのエージェント向けのファイルを、`apply_template.sh` に `--codex` / `--cursor` / `--antigravity` を付けたときだけ作る。複数の AI を同時に使う人がいるので、**元は CLAUDE.md と `.claude/` だけにし、組み合わせても1つずつ流しても同じものができる**形にする
+  - AGENTS.md: `CLAUDE.md` へのリンク（3つのどれでも）。Codex・Cursor・Antigravity の3つとも、リンクを辿って読むことを実機で確かめた（2026-10-04。codex-cli 0.160.0・cursor-agent・agy。AGENTS.md だけが別の合言葉入りのファイルを指す形でも答えた）
+  - スキル: `.agents/skills/<名前>` → `../../.claude/skills/<名前>`（Codex・Antigravity）。`.agents/skills` そのものをリンクにすると Codex に読まれない（openai/codex#11314）。スキルごとのリンクは3つとも辿った（実機）
+  - rules: Cursor は `.cursor/rules/ai-template-<名前>.mdc`（`alwaysApply: true`。Claude Code と同じく常に効かせる）、Antigravity は `.agents/rules/ai-template-<名前>.md`（`trigger: model_decision`）を生成する。Codex は生成せず、CLAUDE.md の参照の優先順位に「自動で読み込まれない環境では作業の前に全部読む。読むかは AI 次第」と書いた（AGENTS.md が CLAUDE.md そのものなので、置き場所はここしかない）
+  - Antigravity に CLAUDE.md の写しは入れない（AGENTS.md から届く）。rules を常に効く形にしないのは、CLAUDE.md と rules で約 1.8 万文字（2026-10-05 実測 17,720 文字）あり、常に効く決まりの合計 20,000 トークンの上限にぎりぎりのため（人間の決定。超えると大きいものから参照だけに格下げされる）。1ファイルの上限は 24,000 バイトで、超えた分は切り捨てられる（Antigravity「Rules」、2026-10-05 再確認）。超える写しは表示で知らせる
+  - 写しの5行目に生成物の印を置き、見分けるときもこの位置だけを見る。印の無いもの・手書きの AGENTS.md・別の場所を指すリンク・よそのリンク・写し先のファイルがリンクのもの・途中のディレクトリがリンクのものには触らない（配布先の外へ書くため）
+  - `.claude/rules/` のサブディレクトリの rule も写す（Claude Code は rules を再帰的に読む。`/` は `--` にして平たく置く）。frontmatter（`paths:` など）を持つ rule は、写すと常に効く形に変わるので作らず SKIP と表示し、前に作った写しは外す（古い中身が別の効き方で残ると、道具の間で決まりが食い違うため。道具の glob への変換は決めていない）。読めない rule（リンク切れ）と、写し先の名前がぶつかる rule は「失敗:」で作らない
+  - rules は、リンクのディレクトリの中も辿って拾う。frontmatter の判定は CRLF と BOM を除いてから行う。配布先のリンク切れの rule も「ある」とみなし、読めなければ「失敗:」
+  - rules を読み切れない（権限が無い等）ときは、写しを「元が無い」と取り違えないよう、何も触らずに「失敗:」。写し先の名前のぶつかりは大文字・小文字を区別せずに見る（macOS の標準のファイルシステムでは同じ場所になる）。写しは同じ置き場の一時ファイルから mv で置き換える（ハードリンク越しに外を書き換えない）
+  - 処理が途中で落ちても（変数の書き間違い等）、それまでの出力を見せて「失敗:」にする。frontmatter とみなすのは閉じの `---` があるときだけ。退避先の途中がリンクなら退避も上書き・削除もしない
+  - 退避先（`.ai-template-backup/<時刻>/.cursor/rules/`）の古い写しは、Cursor の起動時には読まれなかった（2026-10-06 cursor-agent で実測。入れ子の rules はそのフォルダのファイルを触ったときに効く）
+  - rule・スキルの名前を大文字・小文字だけ変えたときは、古い名前の写し・リンクを（退避してから）外し、正しい名前で作り直す（macOS では古い名前が同じ場所に見え、同じ回に消してしまうため）
+  - CLAUDE.md（AGENTS.md）が Codex の既定の上限 32 KiB を超えたら、流すたびに知らせる（リンクがあれば選んでいなくても）
+  - macOS 標準の bash 3.2 と bash 5 の両方でテストを流す（`TEST_BASH=/bin/bash`。文字列の置き換えの結果がバージョンで違う書き方を拾うため）
+  - 照合の分岐（SKIP・そのまま）でも、既にある生成物を必ず数える。選んでいなければずれとして知らせ、24,000 バイト超えの警告も毎回出す。作り直す・外す前の写しはバックアップに退避する（--no-backup を除く。退避できなければ「失敗:」で、上書き・削除しない）
+  - 書けなかったものは「失敗:」と表示して終了コード 4（フックの検証の失敗 3 を優先）
+  - Claude Code 側との重なり: CLAUDE.md があれば AGENTS.md は読まない。両方読む設定でも、CLAUDE.md へのリンクの AGENTS.md は2回読まない（Claude Code「How Claude remembers your project」https://code.claude.com/docs/en/memory 、2026-10-05 確認）
+  - 写しを照合する時点は「apply_template を流すたび」。選ばなかった道具の写しも見比べ、ずれ・リンク切れ・リンクの足りないスキルがあれば表示する（書き換えない）。選んだ道具では作り直し、元が無いものは外す
+  - dry-run はモード（safe / force / sync）から反映後の中身を求めて数える（まだコピーしていないため）
+  - `--codex` で `.codex/config.toml` は作らない。AGENTS.md が CLAUDE.md だけ（約 7.5 KB。2026-10-05 実測 7,468 バイト）になり、Codex の既定の上限 32 KiB に収まるため（人間の決定）
+  - 生成物は配布先の git に入れる方針（人間の決定。ずれが差分に出る）。README に書いた
+  - テスト `scripts/test_apply_template_agents.sh`（入れ方で結果が変わらないこと、手書きを守ること、外へ書かないこと、ずれの検出、dry-run の数え方ほか）
+  - (−) rules の効き方が道具ごとに違う（中身は同じ）。Antigravity と Codex は、読むかが AI 次第
+  - (−) 写しは流し直さないと古くなる（表示で知らせるだけ）。選ばなかった道具の生成物は消さない
+  - Antigravity が `trigger: model_decision` の写しを、作業に関係するときに読みに行くことを実機で確かめた（2026-10-05。デプロイの作業を頼むと、デプロイの rule の写しを読んで答えた）
+  - (−) 確かめていないこと: Cursor のエディタで `.claude/skills` と `.agents/skills` の同じスキルが2つ見えるか（cursor-agent では1件にまとめて表示）。Cursor が CLAUDE.md と AGENTS.md（同じ中身）を二重に読むか。Windows でのリンク
+  - **Alternatives**: AGENTS.md を CLAUDE.md と rules をつないで生成する案（約 40 KB で Codex の上限を超え、写しが1つ増える。前の版。レビューのあとに人間が取りやめた）／Antigravity の rules も常に効く形にする案（上限ぎりぎり。不採用）
+  - 出典: Codex「Build skills」https://learn.chatgpt.com/docs/build-skills、「AGENTS.md」https://learn.chatgpt.com/docs/agent-configuration/agents-md、Cursor「Agent Skills」https://cursor.com/docs/skills、「Rules」https://cursor.com/docs/rules、Antigravity「Agent skills」https://antigravity.google/docs/skills/、「Rules」https://antigravity.google/docs/rules/（2026-10-03 確認）
 ---
 
 ## ADR-040: 送り状モデルをやめ、学びは作者が Linear の ai-template プロジェクトに積む

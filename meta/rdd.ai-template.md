@@ -200,6 +200,7 @@ TypeScript strict → ESLint → テスト → CI → Dependabot
 
 ## 非目標（今回スコープ外）
 - マルチモデル活用の自動化（Gemini/Codex連携）→ 後回し
+  - 配布物をほかのエージェント（Codex・Cursor・Antigravity）でも読めるようにすること（`apply_template.sh --codex` 等）は、この非目標に入らない
 - FigJam存在設計キャンバスの完全自動化 → 手動運用から始める
 - CodeRabbitのサブスク → 品質ゲート整備後に再評価
 

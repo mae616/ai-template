@@ -37,7 +37,7 @@
 
 ## 参照の優先順位（SSOT）
 1. `CLAUDE.md`（普遍ルール）
-2. `.claude/rules/*.md`（運用ルール：自動適用）
+2. `.claude/rules/**/*.md`（運用ルール：Claude Code では自動適用。自動で読み込まれない環境（Codex 等）では、作業の前にサブディレクトリも含めて全部読む。読むかは AI 次第）
 3. `doc/input/rdd.md`（プロジェクト固有の事実・制約）
 4. `.claude/skills/*/SKILL.md`（判断軸：技術/役割スキル）
 

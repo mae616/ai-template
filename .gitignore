@@ -160,7 +160,8 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
-# Codex向けミラー構成（CLAUDE.md/.claude の写し。ローカル専用で配布物には含めない）
+# ai-template 自身をほかのエージェントで開くときのローカル用（配布物には含めない）。
+# apply_template.sh --codex 等が配布先に作るもの（AGENTS.md・.agents/・.cursor/rules/）は、配布先では git に入れる方針
 AGENTS.md
 .agents/
 .codex/
