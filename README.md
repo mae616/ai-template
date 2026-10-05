@@ -14,7 +14,6 @@ Claude Code 向けの開発プロンプトテンプレート。スキル（`/com
 | **レイヤーで積む** | 普遍ルール（`CLAUDE.md` / `rules`）の上に、プロジェクト固有の判断軸を重ねる（`judgment-harness`） |
 | **関所を仕組みで置く** | 事前確認 → 実行 → 事後レビューの各段でフック・レビューエージェントが機械的に働く |
 | **レビューは文脈遮断で** | 作った本人は自分の選択に錨づけされる。専任サブエージェントが差分だけを見て批評する |
-| **学びを還流させる** | 各プロジェクトで得た汎用的な学びを送り状としてテンプレートへ戻す |
 
 ## 前提条件
 
@@ -42,8 +41,31 @@ scripts/apply_template.sh --target /abs/path/to/your-project --safe
 | `--sync` | 上書き＋削除で同期。**危険** |
 | `--no-skills` | `.claude/` をコピーしない（グローバル適用済みの場合） |
 | `--overwrite-rdd` | `doc/input/rdd.md` を上書き（原則プロジェクト固有なので非推奨） |
+| `--codex` / `--cursor` / `--antigravity` | ほかのエージェント向けのファイルを作る（下の表）。付けたものだけ作る |
 
-配布されないもの: `doc/input/from-projects/`（テンプレート保守者の受信箱）、`doc/generated/reports/` の中身（ai-template 自身の作業記録）、`meta/`、`history/`。
+Claude Code・Cursor・Antigravity・Codex を同時に使っても決まりが食い違わないように、どの道具向けのものも **CLAUDE.md と `.claude/rules/`・`.claude/skills/` から作ります**（道具ごとに中身を書き分けない）。組み合わせて流しても、1つずつ流しても、同じものができます。
+
+| 作るもの | 中身 | `--codex` | `--cursor` | `--antigravity` |
+|---|---|:-:|:-:|:-:|
+| `AGENTS.md` | `CLAUDE.md` へのリンク | o | o | o |
+| `.agents/skills/<名前>` | `.claude/skills/<名前>` へのリンク（スキルごと） | o | - | o |
+| `.cursor/rules/ai-template-<名前>.mdc` | `.claude/rules/` の写し（常に読む形） | - | o | - |
+| `.agents/rules/ai-template-<名前>.md` | `.claude/rules/` の写し（AI が要ると判断したときに読む形） | - | - | o |
+
+- **rules の効き方は道具ごとに違います**（中身は同じ）: Claude Code と Cursor は常に読む。Antigravity は AI が要ると判断したときに読む（常に効く決まりの合計に 20,000 トークンの上限があり、CLAUDE.md と rules を合わせるとぎりぎりのため）。Codex は写しを作らず、CLAUDE.md の「自動で読み込まれない環境では作業の前に読む」を見て自分で読む。後の2つは、読むかどうかが AI 次第です
+- **写しは流し直さないと古くなります**。apply_template を流すたびに（`--no-skills` のときを除く）、選ばなかった道具の写しも今の rules と見比べ、ずれていれば「流し直して」と表示します（書き換えはしません）
+- 写しの5行目に「生成物」の印があります。**印の付いた写しを手で直しても、流し直すと元から作り直して上書きします**（直すなら元の rule を直す。上書き・削除する前の写しは `.ai-template-backup/` に退避します。`--no-backup` のときは退避しません）。印の無いファイル、手で置いた `AGENTS.md`、リンク（別の場所を指す `AGENTS.md`・写し先のファイル・`.agents` などの途中のディレクトリ）には触りません。配布先の外へ書かないためです
+- `.claude/rules/` のサブディレクトリ（リンクのディレクトリも含む）の rule も写します（`front/ui.md` → `ai-template-front--ui.mdc`）。frontmatter（`paths:` など）を持つ rule は、写すと効く範囲が変わるので作らず、SKIP と表示します（前に作った写しは外します）。必要なら道具ごとに手で置いてください。読めない rule（リンク切れ）や、写し先の名前がぶつかる rule（`front/ui.md` と `front--ui.md`。大文字・小文字の違いだけでもぶつかりとみなす）は作らず「失敗:」と表示します。`.claude/rules/` の中に読めないディレクトリがあるときは、写しに何も触りません
+- CLAUDE.md が Codex の既定の読み込み上限（32 KiB）を超えると、流すたびに知らせます（超えた分は Codex に読まれません）
+- 書けなかったものがあると「失敗:」と表示し、終了コード 4 で終わります（フックの検証の失敗は 3）
+- dry-run は、反映後の中身をモードから求めて数えます。rsync の除外（`build/`・`dist/` などのディレクトリ名や、テンプレート側で git が無視しているもの）にかかる rule は、dry-run と本番で数え方がずれることがあります
+- 選ばなかった道具の生成物は消しません。要らなければ手で消してください
+- Claude Code は CLAUDE.md があれば AGENTS.md を読みません。両方読む設定にしても、CLAUDE.md へのリンクの AGENTS.md は2回読みません（Claude Code「How Claude remembers your project」）
+- Cursor は `.claude/skills/` と `.agents/skills/` の両方を読みます。cursor-agent では同じ名前を1件にまとめて表示しました（2026-10-04 実測）。エディタで2つ見えたら、どちらも同じスキルです
+- `--no-skills` と一緒に付けたときは作りません（`.claude/` と `CLAUDE.md` を配らないので、リンクと写しの元がありません）
+- **生成物は配布先の git に入れてください**。流し直したときのずれが差分に出ます
+
+配布されないもの: `meta/`（ai-template 自身の仕様・ADR・レポート・決定ログ）、`history/`。`doc/` はアプリを作るときの空の雛形だけで、配布先にあるものは上書きしない。
 
 ### 2. グローバルへ適用する（任意）
 
@@ -87,6 +109,10 @@ scripts/apply_global.sh --all-skills   # 手順系スキルも含む
 
 `main` への直接 commit / push はフックでブロックされます。**入れただけで安心せず、実際に動くか確かめてください**。
 
+`apply_template.sh` は適用のあとに、テンプレートにあって配布先の `.claude/settings.json` に無い hooks / permissions と、置かれているのに登録されていないフックを一覧で表示します。**配布先に settings.json があれば、どのモード（safe / force / sync）でも書き換えません**（各プロジェクトの設定を壊さないため）。一覧を見て、採否を決めて手で足してください。
+
+続けて `.claude/hooks/test-*.sh` を流して結果を見せます（`--dry-run` では流しません。`--no-skills` ではこの確認ごと飛ばします）。流すのはテンプレートと中身が同じものだけで、1本でも FAIL なら終了コード 3 で終わります。手で確かめるときは次を流します。
+
 ```bash
 bash .claude/hooks/test-git-branch-guard.sh      # PASS=10 FAIL=0 になれば正常
 bash .claude/hooks/test-warn-destructive-bash.sh # PASS=21 FAIL=0 になれば正常
@@ -107,9 +133,24 @@ React / Svelte / Tailwind / GSAP / Three.js / Blender 等は **[ai-tech-knowledg
 | 状況 | 最初のコマンド |
 |---|---|
 | 新規プロジェクトを立ち上げる | `/project-init`（壁打ち → rdd.md → テンプレート適用 → CI確認） |
-| 既存プロジェクトを把握する | `/repo-tour` → `/docs-reverse` |
-| まず体験を探りたい | `/proto-loop` |
+| 既存プロジェクトを把握する | `/docs-reverse` |
+| まず体験を探りたい | `/design-language-options` |
 | 要件が固まっている | `/auto-build "作りたいものの説明"` |
+
+### 作る流れ（F0〜F5）
+
+各工程は「作る → 批評する」の組です。人間が画面を触って確かめるのは F1（選ぶ）・F4 の終わり・F5 です（決めごとを上げる・`doc/input/` に書く合意は、どの工程でも人間が決めます）。
+
+| 工程 | 作る | 批評する |
+|---|---|---|
+| F0 入口 | `/setup`（前提・引き継ぎ・環境・Web の公開範囲・今日のゴール） | — |
+| F1 方向を選ぶ | `/design-language-options`（問いから選択肢を作り、事例とプロトを並べて人間が選ぶ） | 匿名テスト・導出線・比較軸 |
+| F2 決めごとにする | `/design-consistency` ＋ `/design-doc`（値・デザインドック・画面一覧） | `/design-audit`（決めごとどうしの矛盾・抜け） |
+| F3 画面を描く | Figma、または `/design-mock` | `/design-critique`（見る）＋ `/design-audit`（数える） |
+| F4 作る | `/auto-design`（全画面をレスポンシブ・部品化まで一気に。Web なら `/web-discoverability`）。全体は `/auto-build` | コードの basic / deep-review ＋ 実装画面で `/design-critique` ＋ `/design-audit` |
+| F5 磨く | `/auto-design --polish`（判断盤で画面ごとに「直す／残す」→ 指示文 → タスク化 → F4 に戻る） | 磨いた画面にも F3・F4 の批評 |
+
+動き（Figma フレームの動き・状態遷移）をつなぐ工程は**決めていない**。
 
 ## コマンド
 
@@ -121,21 +162,20 @@ React / Svelte / Tailwind / GSAP / Three.js / Blender 等は **[ai-tech-knowledg
 |---------|--------------|-----------|
 | `/auto-build "プロンプト文"` or `成果物パス` | 要件定義 → Sprint計画 → 全タスク自律実装 → エビデンスHTML提示 | rdd.md確認（プロンプト起点時）/ sprint→main マージ |
 | `/auto-task #123` | 1タスクの実装 → テスト → レビュー収束 → task→sprint 自律マージ | 危険変更該当時のマージ判断 |
-| `/auto-design <Figma URL/会話/SSOT>` | デザインSSOT → UI骨格 → 型付きコンポーネント → マージ | Vibe Coding（触って確認） |
+| `/auto-design <Figma URL/会話/SSOT>` | デザインSSOT → UI骨格 → 型付きコンポーネント → マージ。`--polish` で磨き（F5）から | Vibe Coding（触って確認） |
 | `/auto-bug #123` | bug調査 → 修正案の試行・効果検証 → マージ | 危険変更該当時のマージ判断 |
 
 **共通の停止条件**: レビュー反復の上限超過 / bug連鎖3周で未解決 / 危険変更チェックリスト該当（`.claude/rules/code-quality.md`）/ 課金発生前。中断時は `history/loop-state.md` から再開できます。
 
-### プロトタイプの連作ループ
+### デザイン言語の連作ループ
 
-`/auto-build` の前段。仕様を先に固めず、**1案ごとに「確かめたい問い」を人間と決めてから**作り、触った学びを設定集（Setting Book）へ蒸留して次の案に継ぎます。
+`/auto-build` の前段。仕様を先に固めず、**ラウンドごとに「確かめたい問い」を人間と決めてから**、デザイン言語・モーション言語・声の選択肢を AI が作り、事例（Mobbin、無ければ Design Inspiration 系のサイト）とプロトで並べて人間が選びます。学びは設定集（Setting Book）へ蒸留して次のラウンドに継ぎます。
 
 | コマンド | 用途 |
 |---|---|
-| `/proto-loop` | 連作ループ本体。問いを立てる → 媒体を選ぶ → 作る → Vibe確認 → 設定集へ蒸留 → 反復 |
-| `proto-medium`（自動適用） | 「Figma か、コードか」の判断軸。止まっている絵で判断できるなら Figma、動かさないと分からないならコード |
+| `/design-language-options` | 問いを立てる → 事例を集める → 選択肢を作る（Figma かコードかは `references/medium.md`）→ 批評する → 判断盤で選ぶ → 設定集へ蒸留 → 反復 |
 
-無指示で複数案を並べることはしません。比較軸が明確なラウンドでのみ2案を並行します。
+無指示で案を並べることはしません。1ラウンドに並べるのは、違い（比較軸）を1行で言える2〜3案だけです。
 
 ### 手動フロー（1ステップずつ進めたい場合）
 
@@ -144,7 +184,7 @@ React / Svelte / Tailwind / GSAP / Three.js / Blender 等は **[ai-tech-knowledg
 | タスク | `/task-list` → `/task-detail` → `/task-run` |
 | バグ | `/bug-new` → `/bug-investigate` → `/bug-propose` → `/bug-fix` |
 | デザイン | `/design-mock`（会話起点）or `/design-ssot`（Figma起点）→ `/design-ui` → `/design-components` → `/design-assemble`（任意: `/design-html`） |
-| セッション | `/session-start` → 作業 → `/session-end` |
+| セッション | `/setup` → 作業 → `/session-end` |
 
 ### レビュー（文脈遮断）
 
@@ -164,43 +204,20 @@ React / Svelte / Tailwind / GSAP / Three.js / Blender 等は **[ai-tech-knowledg
 | `/judgment-harness` | 「何を良しとするか」をレイヤーで積み上げる方法論。プロジェクト立ち上げ時に最初に回す |
 | `project-design-language`（雛形） | プロジェクト固有の存在設計・体験設計のSSOT。埋めて使う穴埋め雛形 |
 | `/art-direction` | 描く瞬間の規律。コンセプト一語から材質・配色・タイポまでを1本の線で導出し、汎用ダッシュボード化を防ぐ |
+| `/design-fundamentals` | デザインの基本（近接・整列・反復・対比、ゲシュタルト、文字と階層、色とコントラスト、余白とグリッド、操作と使いやすさ、UXの法則、UIの文言）を「当てる問い」で持つ総覧。描く工程（design-drafter / design-mock / design-ui）が読み、批評ルーブリック（design-critique Q11・Q12・Q14・Q15）に反映している |
+| `/design-consistency` | 何の定義を・いつ決めるかのチェックリストと、全画面へ一律に当てる手順・古くさせない時点 |
+| `/design-doc` | 決めごとを主題ごとのデザインドック（決まっていること／なぜ／まだ決めていない）に書き、書き換えて保つ |
+| `/design-audit` | 決めごとを実物（デザインツール・実装）に照合して数える検品。外れ0件まで直す（`design-critique` の見る批評とは別） |
 
 ### 補助
 
 | コマンド | 用途 |
 |---------|------|
-| `/repo-tour` | リポジトリ構造の案内（初見向け） |
-| `/pair plan\|design\|arch\|dev` | 壁打ち（短い反復で方針を固める） |
 | `/build-context-site` | 要件・設計・ADR・図を横断する現状サイトを生成 |
 | `/manual-gen` / `/manual-guide` | 手順書の生成と、ステップごとの案内 |
 | `/docs-reverse` | コードベースから俯瞰ドキュメントを生成 |
-| `/image-prep` | 生成AI画像を透過レイヤーへ加工（ImageMagick） |
-
-### テンプレート保守（ai-template 側で使う）
-
-| コマンド | 用途 |
-|---|---|
-| `/template-inbox` | このPCの投函箱を構築する。sibling を走査し、未取込の学びをローカルに materialize する |
-| `/template-feedback` | 送り状を走査し、汎用化された学びをテンプレートへ取り込む。取り込み後は台帳を取込済に倒す |
-
-## 学びの還流（送り状モデル）
-
-各プロジェクトで得た汎用的な学びを、テンプレートへ戻す仕組みです。**プロジェクトはテンプレート本体を編集しません**。判断が1か所に集まるので、複数プロジェクトが並行しても競合しません。
-
-```mermaid
-flowchart LR
-  P["プロジェクトで<br/>学びを得る"] --> S["正本<br/>doc/output/to-template.md"]
-  P --> I["投函箱の写し<br/>doc/input/from-projects/"]
-  S --> F["/template-feedback<br/>取り込み・直列"]
-  I --> F
-  F --> R["rules / skills / hooks<br/>へ反映"]
-  F --> L["両方の状態を<br/>取込済に倒す"]
-```
-
-- 送り状の書式は `doc/output/to-template.md`（各プロジェクトへ配布される雛形）
-- 投函箱だけが `解決済みファイル`（直した実物のパス）を持ちます。取り込み時に**説明文ではなく動いている実物を読む**ためです
-- 投函箱の中身は各PCローカル（Git追跡外）。受信データには出典マシンの絶対パスが載るため、公開・配布物に混ぜません。新しいマシンでは `/template-inbox` で組み直します
-- 「状態」欄が二重取り込み防止の台帳として機能します
+| `/report-publish` | レポート（説明・作業報告）と判断盤を作り、保存して公開し、レポート一覧を更新する。Artifact が使えなければローカルの HTML ＋ 選んだ結果のコピー |
+| `/web-discoverability` | Web の検索・SNS・AI への見え方。OGP と SEO の基本を全ページに入れ、公開範囲の答え（検索／AI の学習／AI の検索・回答／出さないページ／利用者の操作で来る AI）から robots.txt・noindex を作り、ページごとに数えて照合する |
 
 ## 安全装置
 
@@ -248,6 +265,7 @@ flowchart LR
 | `code-quality.md` | 危険変更チェックリスト、スコープ外追加の三条件ガード、ADR-lite テンプレ |
 | `tool-usage.md` | ツールエラー防止、ガード系フックの検証原則、外部連携の全層検証 |
 | `context-management.md` | 毎ターン薄く効かせる文脈管理（意図の汲み取り / 問題の構造化 / 全体での位置付け） |
+| `doc-writing.md` | ドキュメントの書き方と置き場（値・判断・履歴を混ぜない、写しを作らない、未決を「無い」と書かない、止めた判断を残す） |
 | `git.md` | ブランチ構造・命名規則・CI要件 |
 
 ### 危険変更チェックリスト
@@ -282,7 +300,7 @@ ai-template/
 │   ├── input/            # 【合意済み】SSOT。AIが前提として扱う（rdd.md / architecture.md / design/）
 │   ├── draft/            # 【未合意】発酵中。AIは参考にするが前提にしない（設定集・検討中の案）
 │   ├── generated/        # 【AI生成】上書きOK（manual/ / reverse/ / reports/）
-│   └── output/           # 送り状（to-template.md）
+│   └── output/           # 人間に渡す成果物（auto-build が作るときにできる。雛形には無い）
 ├── scripts/
 │   ├── apply_template.sh # プロジェクトへの適用
 │   └── apply_global.sh   # ~/.claude への適用
@@ -307,7 +325,7 @@ ai-template/
 | デザイン | `ui-designer` / `usability-psychologist` / `sensory-design` / `animation-principles` |
 | 開発 | `architecture-expert` / `developer-specialist` / `testing` / `security-expert` / `frontend-implementation` / `accessibility-engineer` / `keyboard-shortcuts` |
 | クリエイティブ | `creative-coder` |
-| 工程 | `experience-plan`（状態×見た目×周辺の網羅チェック） / `proto-medium`（Figma かコードか） / `project-design-language`（プロジェクト固有SSOT雛形） |
+| 工程 | `project-design-language`（プロジェクト固有SSOT雛形） |
 | ツール | `agent-browser` |
 | 情報源 | `official-source-first`（制度・規約・料金は公式一次情報で判断。費用が出る手順の前に必ず適用） |
 
@@ -317,7 +335,7 @@ ai-template/
 
 | 領域 | 追加・変更 |
 |---|---|
-| 学びの還流 | 送り状モデルを仕組み化。投函箱（`doc/input/from-projects/`）をPCローカル化し、`/template-inbox` を新設 |
+| 学びの還流 | 送り状モデルを仕組み化。投函箱（`meta/from-projects/`）をPCローカル化し、`/template-inbox` を新設（v1.2.0 当時。ADR-040 で廃止） |
 | 判断軸 | `judgment-harness`（レイヤー方法論）・`project-design-language`（プロジェクト固有SSOT雛形）を追加 |
 | プロト工程 | `auto-mvp` を `/proto-loop`（連作ループ）へ置き換え。媒体判断ガイド `proto-medium` を新設 |
 | レビュー | 文脈遮断レビューを水平展開。専任エージェント3種（`code-reviewer` / `design-critic` / `design-drafter`）を追加 |

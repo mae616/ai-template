@@ -700,7 +700,7 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
 
 - **日付**: 2026-07-18
 - **対象**: `.claude/skills/proto-loop/`（旧 auto-mvp を改修・リネーム）, `.claude/skills/proto-medium/`（新設）, `.claude/skills/project-design-language/`, `.claude/skills/auto-build/`, `.claude/rules/dev-practices.md`
-- **出典**: `doc/generated/reports/2026-07-18-proto-workflow-proposal.html`（承認済み提案・図解つき）
+- **出典**: `meta/reports/2026-07-18-proto-workflow-proposal.html`（承認済み提案・図解つき）
 
 ### Context
 - auto-mvp の「プロンプト1文 → 無指示で2〜4案並列発散」は、体験設計・世界観にこだわる作り方と噛み合わなかった（「何も命令しないで3つ作って」は違う、という実感）
@@ -794,6 +794,9 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
 - 絶対パスを `~/` 表記に変えて追跡を続ける → ユーザー名は消えるが受信データ自体が配布物に残る。増え続ける問題も解決しない
 - 取込済の送り状を削除して未取込だけ追跡 → 「個人の受信箱を公開物に置く」構造は変わらない
 - `/template-feedback` に構築ステップを内包 → 取り込みの手順が厚くなる。厚いスキルは誤読・過剰実行を誘発するため分割した
+
+
+- **追記（2026-10-02）**: 投函箱とレポートの置き場は ADR-035 で `meta/from-projects/`・`meta/reports/` に移した（配布の除外ではなく、置き場の分離で防ぐ）
 
 ---
 
@@ -940,7 +943,7 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
   - **フックを同時に入れる**: 迂回はすぐ塞がるが、`doc/input/` への書き込みごとに確認が入り、
     日常の確認回数が増える。効き目を見てから判断するため分離
 
-- **出典**: 2026-08-27 のセッションログ解析（`doc/generated/reports/2026-08-27-ai-judgment-ssot.html`）
+- **出典**: 2026-08-27 のセッションログ解析（`meta/reports/2026-08-27-ai-judgment-ssot.html`）
 
 ---
 
@@ -1134,3 +1137,350 @@ ai-template 自身の skills / rules / CLAUDE.md を変更したときの「な�
     意識しそこねる可能性が残る。関所として機能しないため不採用
 
 - **出典**: 2026-08-28 のセッション（二重発火の実測＋`meta/personal-env/README.md` の置き場所表との照合）
+
+---
+
+## ADR-031: スキル見直し（2026-10）— 自律ループの共通化・デザイン基本の新設・未使用スキルの削除
+
+- **Context**:
+  スキルを最新の仕様（Agent Skills / Claude Code 公式）に合わせ、中身とラインナップを群ごとに人間と見直している（決定ログは `meta/draft/skills-review.md`）。
+  その過程で次の3点が判明した。
+  1. auto-bug / auto-design のマージ段は「`/auto-task` と同じ」＋要約で書かれていて、要約から**危険変更・main ベースでの停止条件が抜けていた**
+  2. 「グループ化されていない」「揃っていない」画面が出続けていた。配置の一般則が判断軸として呼び出せる形で無かった（how-we-work の送り状 項目8 で `layout-principles` として先行実装されていた）
+  3. 全プロジェクトのセッションログ（2026-08-18〜10-01、24プロジェクト）で、直接の呼び出しが0回のスキルが多数あった
+
+- **Decision**:
+  1. 自律ループの共通手順（ループ状態・ブランチ・ローカル検証・bug-* 連鎖・レビュー反復・マージの関所・課金前停止・中断再開）を、内部スキル **`auto-loop-core`** に1か所で定義する。auto-task / auto-bug / auto-design / auto-build は開始時にパス付きで読み込み、固有の手順だけを持つ。共通手順は要約・再掲しない
+  2. **`design-fundamentals`** を新設する。本体は索引＋4原則（近接・整列・反復・対比）＋自己点検。`references/` にゲシュタルト・文字と階層・色とコントラスト・余白とグリッド・操作と使いやすさ・UXの法則・UIの文言の7本。design-drafter / design-mock / design-ui が描く前に読み、design-critique のルーブリック（Q11・Q12 の対応列、Q14・Q15）に接続する。プロダクト固有の声とトーンは `project-design-language` で決める
+  3. 人間の選択で **repo-tour / image-prep / pair を削除**する。docs-reverse は、作る設計書を task-run・basic-review・deep-review が前提にしているため残す
+
+- **Consequences**:
+  - (+) 安全上の停止条件が全親スキルから1か所で効く。直す場所も1か所
+  - (+) 配置・文字・色・操作・文言の一般則を、描く工程と批評の両方が同じ問いで使える
+  - (−) 停止条件が `auto-loop-core` に集中するため、読み込まれないと全部効かない。親スキル冒頭の「読み込めなければ開始しない」で塞いでいる
+  - (−) design-critique の Q15（コントラスト・タップ領域）はスクリーンショットでは目測になる。目測だけで must-fix にせず、「要実測」として描画側が通過前に実測する形にした
+  - (−) design-fundamentals は `user-invocable: true` のため、`apply_global.sh` の既定（判断軸のみ）ではグローバルに配られない（art-direction / judgment-harness と同じ扱い）。プロジェクトへの適用（apply_template）では配られる
+
+- **Alternatives**:
+  - **各親スキルに全文を書く**: 読み漏れは無くなるが、同じ文が4か所になり直し漏れが出る。不採用
+  - **layout-principles をそのまま移す**: 配置以外（文字・色・操作・文言）の基本が残らない。人間の要望「有名なデザインの本の基本を呼び出せる形で」に足りないため、総覧の形に広げた
+  - **未使用スキルを一括削除**: 他スキルから参照されているもの（docs-reverse 等）を消すと手順が壊れる。参照元を確かめ、人間が1本ずつ選んだ
+
+- **出典**: 2026-10-01 のセッション（deep-review 3回、セッションログの集計、how-we-work 送り状 項目8）
+
+---
+
+## ADR-032: ドキュメントの書き方を rules にし、返答の順番を「決めてほしいこと」先頭に変える
+
+- **Context**:
+  兄弟プロジェクト（how-we-work）の送り状で、次の学びが未取込のまま溜まっていた（項目7・9・10・12・17・21・22・23 と番号なし1件、および同プロジェクトの rules/doc-writing.md）。
+  共通するのは「書いたものが、読む側（AI 含む）にとって現行だと信じられる形になっていない」こと。値・判断・履歴が混ざる、未決が「無い」と読まれる、宣言だけで照合されない、長い返答から決めることが探せない、など。
+
+- **Decision**:
+  1. 新規 `.claude/rules/doc-writing.md`（常時）: 値・判断・履歴の3層、履歴を積んでよい置き場の名指し、写しを作らず照合の時点を決める、引ける形、未決を「無い」と書かない、移行は機械で切り出して検算、止めた判断を残す（生成物は凍結せず初期化）、読む側の決めごと、定期的に測る
+  2. `dev-practices.md`: 未確定の混入は「反映元を限定する」で防ぐ／予定と現状の表を混ぜない／実体と写し（現在値は実体で判断し、写しのずれは直す）
+  3. `tool-usage.md`: 確認コマンドも「引っかかる入力・引っかからない入力」の両方で動かす／一括処理は飛ばした条件を別に数える／書いたものを見るガードは網の外を見ない
+  4. `CLAUDE.md`: 基本原則に値・判断・履歴の1行。出力テンプレを「🟥 決めてほしいこと → ✅ 結果 → 👀 見るもの → 詳細」に組み替え、適用範囲（人間への返答のみ・自律ループ中は止まらない・レポート一覧の行は最後）を明記
+  5. 出典の「判断の根拠を示す」節（2026-09-05）は取り込まない（出力テンプレの「推しと根拠／根拠なし・推測」は項目22として入っているが、rules への一律の発火条件・委譲時の扱いは入れていない）。送り状に人間の指示「取り込む前に effort とモデルで検証してほしい」があり、T6・O7 とあわせて**決めていない**
+
+- **Consequences**:
+  - (+) どこに何を書くかが1か所で引ける。古い値・未決の読み違いの経路が減る
+  - (+) 人間が返答の先頭だけで「何を決めるか」を拾える
+  - (−) rules が1本増え、毎ターン読む量が増える。重複は参照に寄せて最小にした
+  - (−) 既存の `meta/rdd.ai-template.md` は仕様書の中に日付つきスナップショットの節を持つ（§2 の名指しの外）。後続で直す候補
+  - (−) 既存の値のファイル（`doc/input/design/copy.json` 等）は §5 をまだ満たしていない。スキーマの `status`（素材の取得結果）と確定度のキーがぶつからないよう、P2 で雛形ごと直す
+
+- **Alternatives**:
+  - **出典の doc-writing.md をそのまま移す**: ボード番号・特定サービス・ブランチ別の引き継ぎなど、テンプレートに無い前提が混ざる。一般化した
+  - **出力テンプレは変えず、追記で対応**: 先頭で拾えない問題が残る。人間が組み替えに合意した
+
+- **出典**: 2026-10-01〜02 のセッション（判断盤の決定、deep-review 1回）
+
+---
+
+## ADR-033: デザインの決めごとを「値・ドック・照合」の3本で回す（design-doc / design-audit / design-consistency）
+
+- **Context**:
+  how-we-work の送り状 項目8・11・13・16・18〜20 と、同プロジェクトで育ったスキル3本（design-doc / design-audit / design-consistency）が未取込だった。
+  共通する問題は「定義が無いから適用されない」のではなく「定義が読める形をしていない／実物と照合されない」こと。テンプレート側も、値のファイルに確定度や未決の欄が無く、project-design-language が値・理由・方針を1ファイルに抱える形だった。
+
+- **Decision**:
+  1. 新規スキル3本を一般化して取り込む。`design-consistency`（何を・いつ決め、どう当て、いつ照合するか）／`design-doc`（主題ごとの「決まっていること／なぜ／まだ決めていない」。古くなったら書き換える）／`design-audit`（決めごとを実物に照合して数える。範囲は条件式で書く・文言の割れは4分類・対象外は別の規則で数え直す）。Figma で測るコード例は `design-audit/references/figma-measure.md` に分ける
+  2. 値の正は**既存の `doc/input/design/design-tokens.json` 等**とし、出典の `tokens.json` は作らない（値のファイルを2つにしない）
+  3. 全 JSON に `meta.decision`（provisional / confirmed）と `undecided` を持たせる（`ssot_schema.md` に「0) 全 JSON 共通」を追加）。既存の `status`（素材の取得結果 ok / failed）とぶつけないため、確定度のキーは `status` にしない
+  4. 雛形を置く: `design-tokens.json`（空）、`docs/README.md`（索引と1本の形）、`screen-map.md`（採番・遷移は「決めていない」）
+  5. `project-design-language` を薄い案内板にする（冒頭に索引、固有値レジストリは決定の一言と置き場だけ）。auto-* が雛形判定に使う `TBD` は残し、「TBD＝決めていない」と定義する
+  6. `design-critique` に `design-audit` との分担を明記（見る批評と数える検品）
+
+- **Consequences**:
+  - (+) 決めたことの行き先（値／ドック／画面一覧）が先にある状態で始められる。昇格し損ね・古い値の読み違いが減る
+  - (+) 目で見ても出ない割れ（サイズ・線幅・文言）を数えて拾える
+  - (−) スキルが3本増える。描く工程からの呼び出しは P3（フロー）でつなぐ
+  - (−) 配布の保護の代償として、テンプレート側で値のファイルの雛形を直しても既存プロジェクトには届かない（例: 今回の `meta.decision` / `undecided` は既存の copy.json 等に入らない。必要なら各プロジェクトで足す）。`--sync` でも、テンプレートから消したファイルは配布先の `doc/input/design/` に残る
+
+- **Alternatives**:
+  - **出典の tokens.json をそのまま足す**: design-ssot / design-mock が作る design-tokens.json と値のファイルが2つになる。不採用
+  - **project-design-language に全部書き続ける**: 出典では550行まで膨らんで引けなくなった。不採用
+
+- **出典**: 2026-10-02 のセッション。how-we-work 送り状の項目8・11・13・16・18・19・20 と、同プロジェクトのスキル design-audit・design-doc（判断盤 `meta/reports/2026-10-01-flow-intake-dashboard.html` では T8・T11・T13・T16・T18〜T20・E2・E3）
+- **追記（レビュー後）**: AI が `doc/input/design/` に書くときは `dev-practices.md`「一時と確定を分ける」に従う（人間の決定）。判断盤で選ばれたものはまとめて書いてよい。自律ループ中は `doc/draft/` に候補を置く。あわせて `apply_template.sh` に保護を足した: 配布先の `doc/input/design/` は削除しない（rsync の protect）、雛形のうち配布先に既にあるものは上書きしない（雛形の実ファイルから除外リストを作る。例外は契約の ssot_schema.md）。修正前は sync で値が上書き・独自ドックが削除、修正後は force / sync とも保持・新規には雛形が届くことを実測
+
+---
+
+## ADR-034: `/setup` を唯一の入口にし、各スキルの「自己評価」を「次の一手」に変える
+
+- **Context**:
+  セッションの入口が `/setup`（rdd を読んでスキルを選ぶ）と `/session-start`（引き継ぎ・ゴール）の2つに分かれていた。セッションログ（2026-08-18〜10-01）では `/setup` 65回・`/session-start` 3回で、引き継ぎを読む手順が実質使われていなかった。
+  また、19本のスキル末尾の「自己評価（成功自信度・一言理由）」が、AI に失敗を数え上げさせ、警告の密度を上げていた（how-we-work 送り状 項目7）。CLAUDE.md の「過去の失敗を数え上げない。次の一手を出す」と引っぱり合っていた。
+
+- **Decision**:
+  1. `/setup` を4段にする: ①前提を読む（rdd の事実ブロック）②引き継ぎを読む（session-context・journal・loop-state・タスクボード）③環境を確かめる（タスクボード・デザインツール・参考事例・判断盤の出し方・Web の公開範囲。記録が無いものだけ聞き、rdd の「運用環境」に合意の上で書く）④今日のゴールを決める
+  2. タスクボードの既定は置かない（GitHub Projects / Orca / Linear / 使わない、を聞く）
+  3. `session-start` を削除し、参照（session-end・auto-loop-core・project-init・README・doc-writing §8）を `/setup` に付け替える
+  4. 自己評価の欄を「次の一手」（次に効くこと・引き継ぎの自信度・失敗の一覧を書かない）に置き換える
+
+- **Consequences**:
+  - (+) 入口が1つになり、引き継ぎと環境の確認が毎回通る
+  - (+) できないこと（Artifact が使えない等）を最初に聞くので、作業の途中で詰まりにくい
+  - (−) 既存プロジェクトの rdd.md には「運用環境」の節が無い（rdd.md は配布で上書きしない）。初回の `/setup` で節ごと足す
+  - (−) 既存プロジェクトへの配布: `apply_template.sh` の safe（既定）では新しい setup が届かない。safe / force では削除した session-start が配布先に残る（消えるのは --sync だけ）。`apply_global.sh` で配った `~/.claude/skills/session-start` も残る。必要なら手で消す
+  - ai-template 自身では `meta/rdd.ai-template.md` を読み書きする（`doc/input/rdd.md` は配布用の雛形。人間の決定）
+
+- **Alternatives**:
+  - **session-start を残して /setup から呼ぶ**: 入口が2つのまま残り、どちらを使うか迷う問題が解けない。不採用
+  - **自己評価を残す**（群1の決定）: 判断盤で人間が O1「形を変えて取り込む」を選び、上書きした
+
+- **出典**: 2026-10-02 のセッション（判断盤 F0・O1・O3・O5・O6、セッションログの集計）
+
+---
+
+## ADR-035: ai-template 自身の記録は `meta/` に置き、`doc/` はアプリ用の雛形だけにする
+
+- **Context**:
+  `doc/` は配布されるアプリ用の雛形なのに、ai-template 自身の記録（見直しの決定ログ・レポート・投函箱）が `doc/draft/`・`doc/generated/reports/`・`doc/input/from-projects/` に混ざり、配布スクリプトの個別の除外（ADR-022 で追加）で防いでいた。除外は追加漏れで壊れる。また `.claude/` はディスクから丸ごとコピーされ、git が無視している ai-template 自身の引き継ぎ（`.claude/session-context.md`）まで配布先に届いていた（実測）。
+
+- **Decision**（人間の指示）:
+  1. ai-template 自身の記録は `meta/` に置く: 仕様 `meta/rdd.ai-template.md`・ADR・レポート `meta/reports/`・決定ログ `meta/draft/`・投函箱 `meta/from-projects/`（受信物は .gitignore で追跡外）
+  2. `doc/` はアプリを作るときの空の雛形だけにする（`doc/index.md` の構成図を更新）。`meta/` は配布対象に入っていないので、個別の除外は要らない
+  3. `/setup` は、ai-template 自身では `meta/rdd.ai-template.md` だけを読み書きする
+  4. `apply_template.sh` は、テンプレート側で git が無視しているファイルを配らない（git に聞いて除外を作る。git 管理外のときは `.DS_Store`・`session-context.md`・`team-board.md` を固定で除外）
+  5. 差分の可視化フックの監視に `meta/rdd.ai-template.md` を足す
+
+- **Consequences**:
+  - (+) 配布物に ai-template の記録が混ざる経路が、場所の分離で塞がる（除外の追加漏れに依存しない）
+  - (+) 配布先の引き継ぎが force / sync で上書き・削除されない（実測）
+  - (−) `meta/` は配布されないが公開リポジトリには入る。`meta/rdd.ai-template.md` の運用環境に書く値は公開される
+  - (−) 過去の ADR・レポート本文の中の旧パスは、当時の記録としてそのまま残る
+
+- **Alternatives**:
+  - **`doc/` に置いたまま除外を増やす**: ADR-022 のやり方。追加漏れで壊れる（今回 `.claude/session-context.md` で実際に起きた）。不採用
+
+- **関係**: ADR-022（投函箱・レポートを配布対象外にした判断）の「置き場」は、この ADR で `meta/` に置き換えた
+- **出典**: 2026-10-02 のセッション（人間の指示、deep-review）
+
+---
+
+## ADR-036: 体験探索の入口を `design-language-options`（F1）にし、proto-loop・proto-medium を吸収する
+
+- **Context**:
+  判断盤（2026-10-01）で新しいフロー F0〜F5 を採用し、O2 で「proto-loop・proto-medium・experience-plan を F1〜F3 に吸収して削除」が決まった。
+  proto-loop は「問いを立ててプロトを1案ずつ作る」連作だったが、F1 は「問いから AI がデザイン言語・モーション言語・声の選択肢を作り、事例を画像で並べた判断盤で人間が選ぶ」形で、事例の集め方と批評が無かった。
+  また P2 で、proto-loop を消すときに設定集（setting-book）をどうするかが P3 へ送られていた。
+
+- **Decision**:
+  1. 新規スキル `design-language-options`（F1）を置く。問い → 事例を集める → 2〜3案（比較軸を1行で言えるもの）→ 批評（匿名テスト・導出線・比較軸）→ 判断盤で人間が選ぶ → 設定集へ蒸留 → 昇格候補の提示、を1ラウンドとして回す
+  2. proto-loop の連作の決まり（問い必須・1案1エージェントの文脈遮断・品質ゲート最小・統合プロト・`auto-build --from-proto` への引き継ぎ・`doc/input/` に書かない・昇格を AI が決めない）を吸収し、proto-loop を削除する
+  3. proto-medium（Figma か、コードか）は `design-language-options/references/medium.md` に移し、proto-medium を削除する
+  4. Mobbin の使い方を決める（出典: Mobbin MCP `search_screens` のツール説明、2026-10-02 確認）: `mobbin_url` を必ず引用する／画像は `image_url` からダウンロードする（30日で失効）／検索語は1画面を具体的に書く／`ai_usage_notice` は一字一句そのまま見せる。Mobbin が使えなければ Design Inspiration 系のサイトから集め、引用元を画像ごとに残す。事例の画像は手元の写し（`refs/`）に置き、中に `.gitignore` を置いてコミットしない（第三者の画像で、利用規約を確かめていないため）
+  5. 設定集は残し、このスキルの下書きの置き場を兼ねる（人間の決定）。昇格先は project-design-language ではなく、デザインドックと値のファイル（F2: design-consistency / design-doc）
+
+- **Consequences**:
+  - (+) 人間が答えを持っていなくても、「どれが近いか」で選べる。事例が引用元つきで残る
+  - (+) 不採用の理由（判断の材料）が設定集に残る
+  - (−) proto-loop のステップ8（磨きラウンド）は持ち込んでいない。F5 を作る P3-c までは、auto-build のあとの「もう少し」を polish タスクとして起票し `auto-task` で回す（着手前のチェックリストは task-run の手順4）。P3-c で F5 に置き換える
+    - → ADR-038 段2で F5（`/auto-design --polish`）に置き換えた
+  - (−) proto-medium は `user-invocable: false` だったため、`apply_global.sh` の既定でグローバル（`~/.claude/skills/`）に配られていた可能性がある。配布先の proto-loop / proto-medium は、apply_template の safe / force では残る（消えるのは --sync だけ）。**apply_global はどのモードでも消さない**（テンプレートにあるスキルしか回さない）ので、配っていた場合は `~/.claude/skills/proto-medium` を手で消す（このマシンには無いことを確認済み）
+  - (−) design-language-options は `user-invocable: true` なので、apply_global の既定では配られない
+
+- **Alternatives**:
+  - **proto-loop を残して、F1 を前段に足す**: 入口が2つになり、どちらから始めるか毎回迷う（ADR-020 で auto-mvp と共存させなかったのと同じ理由）。不採用
+  - **設定集を廃止し、決定ログ（doc/draft）に書く**: 置き場は1つ減るが、採用・不採用を画像つきで並べた一覧が無くなる。人間が「残す」を選んだ
+  - **proto-medium を独立した判断軸として残す**: 使い道が F1 の媒体選びに限られていた（ログ上の呼び出し0回）。参照の形で残せば足りる
+
+- **追記（段2）**: 判断盤 O2 のもう1本、experience-plan は task-run の手順4「体験の網羅」に吸収して削除した。名前で呼んでいたのは task-run だけで、内容が着手前のチェックリスト1枚だったため
+  - 旧スキルは説明文から自動で効く判断軸だったので、UI の Issue が流れる auto-design（task-run を通らない）でも効き得た。その経路を残すため、auto-design の手順3に「task-run 手順4 の体験の網羅を宣言する」を足した
+  - (−) 判断軸（`user-invocable: false`）から手順系の task-run に移ったので、apply_global の既定では配られなくなる
+  - (−) 配布先の experience-plan は apply_template の safe / force では残る（消えるのは --sync だけ）。apply_global で配っていた場合は `~/.claude/skills/experience-plan` を手で消す（このマシンには無いことを確認済み）
+  - (−) 「Issue の実装詳細で固定した宣言」を書く手順が task-detail に無い（旧スキルからの持ち越し）。後続の候補
+- **関係**: ADR-020（auto-mvp → proto-loop・proto-medium 新設）をこの ADR で置き換えた
+- **出典**: 2026-10-02 のセッション（判断盤 F1・O2、人間の決定: 設定集を残す）
+
+---
+
+## ADR-037: Web の公開範囲を `/setup` で聞き、`web-discoverability` が設定と照合を行う
+
+- **Context**:
+  Web のプロジェクトで、OGP・SEO・robots.txt・noindex・AI クローラーの設定が、公開の直前か公開後に思い出される形になっていた。仕組みも紛らわしい（robots.txt で塞いだページの noindex は読まれない、AI のボットは各社で学習用と検索用に分かれている）。人間の決定（2026-10-02、決定ログ「追加の決定: Web の公開設定」）で、OGP と SEO は必ず設定し、公開範囲は聞いた答えから自動で設定することになった
+
+- **Decision**:
+  1. `/setup` の環境の確認で「Web の公開範囲」を4つ別々に聞く（検索／AI の学習／AI の検索・回答／出さないページ）。答えは rdd の「運用環境」に書く
+  2. 新規スキル `web-discoverability`: 全ページに title・description・canonical・画像の alt・OGP（必須4つ＋任意のうちテンプレートで入れるもの。og:image を入れたら og:image:alt）を入れる。答えから robots.txt（ボットごと）と noindex（meta か X-Robots-Tag）を作る。配信された HTML と robots.txt をページごと・サブドメインごとに数えて照合する
+  3. 決めていない答えは推測で埋めず、止まって聞く。答えどうしが食い違うとき、設定で叶えられない答え（Google の AI 機能だけを止める等）のときも、トレードオフを説明して聞き直す。出典を確かめていないボット名は足さない
+  4. 利用者の操作で来る AI を塞ぐかは、web-discoverability が初めて使われたときに聞き、rdd の「Web の公開範囲」の5つ目として書く（会社ごとに効き方が違うので、説明してから聞く）
+  5. OGP の値は直書きせず、ssot_schema.md の形で引く: 文言は copy.json の `site.*`・`<ページキー>.meta.*`（og:image:alt を含む）、画像は assets.json の `assets[]` の `key: "SiteOgImage"`。無ければ合意を取って `undecided` に足し、聞く
+  6. 出典はスキルの末尾に URL と確認日で持ち、書き換える前に読み直す
+
+- **Consequences**:
+  - (+) 公開範囲が作る前に決まり、設定は答えから機械的に作られる。照合で抜けを数えられる
+  - (+) 「AI に使わせない」を学習と検索に分けて聞くので、検索には出したいが学習には使わせない、が選べる
+  - (−) Google の AI 機能（AI Overviews 等）だけを止める手段は無い。叶えられない答えとして人間に聞き直す
+  - (−) ボットの名前と用途は各社が変える。スキルの表は確認日時点のもの。読み直しを忘れると古くなる
+  - (−) F4（実装）のどこで呼ぶか、照合をどのレビューに入れるかは、まだつないでいない（P3-c）
+
+- **Alternatives**:
+  - **robots.txt の雛形を配る**: 答えが無いまま既定値が入り、「出したくないのに出た／出したいのに塞いだ」が起きる。不採用
+  - **AI の可否を1問で聞く**: 各社でボットが分かれているので、答えから設定が1つに決まらない。不採用
+
+- **出典**: 2026-10-02 のセッション。一次情報は `.claude/skills/web-discoverability/SKILL.md` の「出典」（Google 5本・ogp.me・OpenAI・Anthropic、同日に読み直し）
+
+---
+
+## ADR-038: F2〜F5 を「作る → 批評する」の組でつなぐ（P3-c。段ごとに追記）
+
+- **Context**:
+  判断盤（2026-10-01）で F0〜F5 のフローを採用し、各工程を「作る → 批評する」の組にすると決めた。P2 で design-consistency・design-doc・design-audit を入れたが、描く工程（design-mock / design-ui / auto-design）からは呼ばれておらず、P3 へ送られていた
+
+- **Decision**（段1: F2・F3）:
+  1. F2・F3 の「作る → 批評する」は `design-consistency` の「フローの中の位置」に1か所で書く。F2 は昇格候補を値・ドック・screen-map に書き、決めごとどうしの矛盾・抜けを design-audit で数える。F3 は描いたあと design-critique（見る）と design-audit（数える）を、それぞれの収束条件まで回す
+  2. 描く工程（design-mock / auto-design）は、描く前に design-consistency 第1部のどのレベルまで決まっているかを確かめる。足りないとき、自律ループの外では聞く。**自律ループの中では仮の値で描き進め**、仮の値の印（`provisional` のファイルはそのまま、`confirmed` のファイルは `meta.provisional` にキーを足す）と `undecided` に記録して最後にまとめて聞く（人間の決定）。扱いの正は design-consistency の「フローの中の位置」1か所。仮の値は値のファイル（`doc/input/design/`）に provisional で書く（dev-practices に例外を追記。人間の決定。写しを `doc/draft/` に作る案は値のファイルが2組になるので不採用）
+  3. design-mock・design-ui のゲートと auto-design の手順2.5に design-audit を足す（auto-design では最大3周、収束しなければ blocked_by_review）。F2 の照合（実物がまだ無いとき、決めごとどうしを数える）を design-audit 手順2に書いた。人間が触って直した理由はデザインドックに書く
+
+- **Consequences**:
+  - (+) 決めた値が、描いた画面と照合されないまま進む経路が減る
+  - (−) 描く工程のゲートが1つ増え、1画面あたりの時間が延びる。design-audit の発火条件にも描く工程のゲートを足した
+  - (−) 自律ループの中で仮の値で描いた画面は、値が決まったあとに描き直しになることがある。仮に置いた値は `meta.provisional`・`undecided` に残るので、auto-design 手順9（auto-build ではエビデンスレポートの「判断待ち」）でまとめて拾える
+  - (−) ループが手順9の前に止まると、仮の値が `doc/input/design/` に残る。印（`meta.provisional`・`undecided`）は付いているが、後ろの工程が確定度を見ずに読むと確定として扱われる。止まったループは /setup の引き継ぎ（loop-state）で拾い、止まったのが auto-design なら印の付いた値も一覧にして見せる（setup の手順2に追記）
+
+- **Alternatives**:
+  - **各スキルに F2・F3 の手順を全文で書く**: 同じ文が3か所になり、直し漏れが出る（ADR-031 で auto-loop-core を作ったのと同じ理由）。不採用
+  - **auto-loop-core に「決めていない項目で止まる」状態を足して止まる**: 推測で描かれることは無くなるが、auto-build の Sprint ループが止まる。人間が「仮の値で描き進める」を選んだ
+
+- **出典**: 2026-10-02 のセッション（判断盤 F2・F3、P2 で P3 へ送った項目）
+
+- **Decision（段2: F4・F5）**:
+  1. F4 は `auto-design` の手順1〜8で、全画面をレスポンシブ・部品化まで一気に作ってから人間が触る。手順7で実装画面に design-critique（見る）と design-audit（数える）を回す
+  2. F5 は `auto-design` 手順9（入口は新しいモードD `/auto-design --polish`）: 判断盤で画面ごとに「直す／残す」を選び、修正の指示文をコピーして渡す → タスク化 → 該当手順から再実行。磨いた画面にも F3・F4 の批評を通す。auto-build のあとの見た目の「もう少し」もここで受ける（ADR-036 の仮の経路を置き換えた）
+  3. Web のプロジェクトでは `auto-design` 手順5.5で `web-discoverability` を設定・照合し、auto-build のエビデンスレポートに照合結果を載せる。自律ループの中で公開範囲が決まっていない項目は、その項目の robots.txt・noindex を書かずに進め、未決として手順9・「判断待ち」に載せる。公開の前には必ず人間が答える（正は web-discoverability の「入力」）
+  4. README に F0〜F5 と使うスキルの表を置く。動き（F6）は決めていない
+- **Consequences（段2）**:
+  - (+) 磨きの経路が1つ（F5）になり、ADR-036 で残っていた仮の経路が無くなった
+  - (−) F4 で全画面を一気に作るため、人間が触るまでの時間が長くなる。方向のずれは F1〜F3 で先に潰しておく前提
+  - (−) 判断盤の「F4 の素材は Figma → SSOT（Figma が無ければスクリーンショット）」のうち、スクリーンショットから SSOT を起こす手順は、受け手のスキルに無いので**決めていない**
+- **Alternatives（段2）**:
+  - **Web の照合を手順7のレビュー（basic / deep-review）に入れる**: レビュアーは差分を読む立場で、配信された HTML や robots.txt を取得して数える手順を持たない。照合は web-discoverability の手順で手順5.5に置き、ページが変わったら手順8の前に回し直す。判断盤の「数えるレビューで照合」は、この照合（外れ0件）に当たる
+  - **F5 の入口を auto-task に残す**（ADR-036 の仮の経路）: 画面ごとの「直す／残す」と、磨いた画面への批評（F3・F4）が通らない。auto-design にモードD として入口を置いた
+
+- **Context（段3）**: 判断盤 O6（Artifact が使えない環境での判断盤）で「ローカルの HTML を開き、判断をコピーして貼る」と決めた。レポートの作り方は CLAUDE.md に書かれていて毎ターン読まれ、判断盤の形はスキルごとに書き方がばらついていた
+- **Decision（段3: report-publish）**:
+  1. 新規スキル `report-publish`: レポートと判断盤の作り方・保存先・レポート一覧の更新・同じ URL の保ち方を1か所に持つ。判断盤は「1項目 = 1つの問い（決めること・選択肢と起きること・止まるもの・推しと根拠）＋ 自由記入 ＋ 選んだ結果をまとめてコピーするボタン」
+  2. Artifact が使えない環境では、保存したファイルをローカルで開き、判断盤は選んだ結果をコピーして会話に貼ってもらう。一覧もローカルで更新し、返答の最後にはパスを書く
+  3. CLAUDE.md の「概念・設計説明の可視化」は「いつ出すか」と参照だけに縮め、中身を report-publish に移した（人間が文面に合意）。返答の最後の `レポート一覧: <URL>` の決まりは、返答の決まりなので CLAUDE.md の出力テンプレに残す
+  4. 判断盤を出す箇所（design-language-options・auto-design 手順9・dev-practices・/setup）は report-publish を指す
+  6. 選択肢を返答の中で聞くか判断盤を出すかの境目（項目3つ以下で画像不要なら AskUserQuestion、それ以外は判断盤）は AI が決めた値。変えるなら report-publish の1か所
+  5. ローカルで開いても図が描けるよう、`file:` で開いたときだけ mermaid.js を版を固定して読み込む（人間の決定）。Artifact は Mermaid を自分で描き、ライブラリを読み込まない決まりなので、Artifact では読み込まない。ローカルで1回だけ描かれることを実測した（2026-10-03。SVG 1個、`file:` のオリジンの警告1件のみ）。判断盤の置き場は呼ぶ側が決めていればそちらが正（人間の決定）
+- **Consequences（段3）**:
+  - (+) 毎ターン読む CLAUDE.md が短くなり、判断盤の形がどの工程でも同じになる
+  - (−) レポートの決まりを読むには、スキルを読み込む必要がある。CLAUDE.md の参照が入口になる
+  - (−) ローカルで開くとき、CDN のスクリプトに改ざん検知（SRI）が無い。mermaid は追加のファイルを取りに行くので入口だけでは守れず、版の固定で受け入れた
+- **Alternatives（段3）**:
+  - **保存先だけ CLAUDE.md に残す**: スキルを読まなくても保存先を間違えにくいが、同じことが2か所になる。人間が「置き換える」を選んだ
+  - **図を SVG に変換して埋め込む**: ネットが無くても表示できるが、変換の道具が要る。人間が mermaid.js を選んだ
+- **出典（段3）**: 2026-10-02〜03 のセッション（判断盤 O6、P3-c の決定、deep-review）
+
+---
+
+## ADR-039: 配布で settings.json を書き換えず、差分を見せてフックのテストを流す（P4。段ごとに追記）
+
+- **Context**:
+  how-we-work 送り状 項目4。`apply_template.sh` の safe は既存の `.claude/settings.json` を飛ばすため、フックのスクリプトは届くのに登録が届かず、フックが一度も動いていなかった。permissions の差分（deny・ask）も届いていなかった。ファイルがあるので「守られている」と見える
+
+- **Decision**:
+  1. 適用のあと、テンプレートにあって配布先の `settings.json` に無い hooks（イベント・matcher・コマンド）と permissions（allow / ask / deny）を一覧で見せる。置かれているのに登録されていないフックも見せる
+  2. 配布先に `settings.json` があれば、**どのモード（safe / force / sync）でも上書き・削除しない**（人間の決定。以前は force / sync で上書きされていた）。無いときだけテンプレートのものを入れる。採否は人間が決めて手で足す
+  3. dry-run でないときは、配布先の `.claude/hooks/test-*.sh` を流して OK / FAIL を見せる（FAIL は末尾5行も）。流すのはテンプレートと中身が同じものだけ（違うものは SKIP と表示）。入力は閉じ、timeout があれば1本120秒。1本でも FAIL なら終了コード 3
+  4. `tool-usage.md` に「実体・登録・テストの3つがそろって接続済み」を足した
+  5. 配布先の settings.json が JSON として読めないときは、比較せずにそう表示する（空のファイルも含む。読めないまま比べると、全項目が「無い」と誤って出るため）。登録の有無は settings.local.json の hooks も見る（読めなければ表示して外す）
+
+- **Consequences**:
+  - (+) 黙って古い設定のまま残る経路が、適用のたびに目に入る形になる
+  - (−) 足すのは人間の手作業のまま。一覧を見て足さなければ、効かないままになる
+  - (−) 比較には jq が要る。無ければ「手で見比べる」と表示するだけ
+  - (−) フックのテストを毎回流すので、適用が数秒〜十数秒延びる（実測で全体約8秒）
+  - (−) 比べる単位は文字列の完全一致。matcher の並び順やコマンドの書き方が違うだけでも「無い」と出る
+  - (−) テンプレートの更新を force で配っても、配布先の settings.json には入らない。新しいフック・規則は一覧を見て人間が足す
+  - 実測（2026-10-03、パスに空白を含む一時ディレクトリ）: 新規で差0件・テスト4本 OK／配布先が足した許可が force・sync でも残る／dry-run+force で差2件と未登録のフック1本を表示／壊れた JSON で「読めない」と表示し比較しない／ガードを壊すと FAIL と終了コード3／配布先で書き換えたテストは SKIP。途中で、全角かっこが変数名に読まれるバグ（`$rc）`）を見つけて直した
+
+- **Alternatives**:
+  - **settings.json を jq で自動マージする**: 手間は消えるが、各プロジェクトが外した規則が勝手に戻る。送り状の「人間が採否を選ぶ。黙って何もしないのが最悪」に合わせ、見せるだけにした
+  - **force / sync では上書きし、そう表示する**: 表示と動きは合うが、各プロジェクトが足した設定が消える。人間が「どのモードでも書き換えない」を選んだ
+
+- **出典**: 2026-10-03 のセッション（how-we-work 送り状 項目4）
+
+- **追記（P4 段2）**: 全スキルの frontmatter に `name`（ディレクトリ名と同じ）を入れた。出典は Agent Skills 仕様（https://agentskills.io/specification。`name` と `description` は必須、`name` は小文字・数字・ハイフンで64文字まで・ディレクトリ名と一致、`description` は1024文字まで。2026-10-03 確認）。56本すべてで外れ0件。照合は `scripts/check_skill_frontmatter.sh` に置き、`apply_template.sh` と `apply_global.sh` が配る前に流して、外れがあれば配らない（宣言だけでは次に足すスキルで守られないため）。YAML のパーサ（ruby の標準ライブラリ）があれば frontmatter 全体をパーサで読む。無ければ必須項目の形だけを awk で見て「YAML としては確かめていない」と表示する。パーサが無いことだけでは配布を止めない（簡易判定で見つかった外れでは止める。人間の決定。道具が無いだけで配布が止まるのを避ける）。同じキーが2回ある場合はパーサでも後の値が採られ、検出しない。テスト `scripts/test_check_skill_frontmatter.sh` は両方の経路で52ケース
+
+
+
+- **追記（P4 段3）**（人間の決定）: ほかのエージェント向けのファイルを、`apply_template.sh` に `--codex` / `--cursor` / `--antigravity` を付けたときだけ作る。複数の AI を同時に使う人がいるので、**元は CLAUDE.md と `.claude/` だけにし、組み合わせても1つずつ流しても同じものができる**形にする
+  - AGENTS.md: `CLAUDE.md` へのリンク（3つのどれでも）。Codex・Cursor・Antigravity の3つとも、リンクを辿って読むことを実機で確かめた（2026-10-04。codex-cli 0.160.0・cursor-agent・agy。AGENTS.md だけが別の合言葉入りのファイルを指す形でも答えた）
+  - スキル: `.agents/skills/<名前>` → `../../.claude/skills/<名前>`（Codex・Antigravity）。`.agents/skills` そのものをリンクにすると Codex に読まれない（openai/codex#11314）。スキルごとのリンクは3つとも辿った（実機）
+  - rules: Cursor は `.cursor/rules/ai-template-<名前>.mdc`（`alwaysApply: true`。Claude Code と同じく常に効かせる）、Antigravity は `.agents/rules/ai-template-<名前>.md`（`trigger: model_decision`）を生成する。Codex は生成せず、CLAUDE.md の参照の優先順位に「自動で読み込まれない環境では作業の前に全部読む。読むかは AI 次第」と書いた（AGENTS.md が CLAUDE.md そのものなので、置き場所はここしかない）
+  - Antigravity に CLAUDE.md の写しは入れない（AGENTS.md から届く）。rules を常に効く形にしないのは、CLAUDE.md と rules で約 1.8 万文字（2026-10-05 実測 17,720 文字）あり、常に効く決まりの合計 20,000 トークンの上限にぎりぎりのため（人間の決定。超えると大きいものから参照だけに格下げされる）。1ファイルの上限は 24,000 バイトで、超えた分は切り捨てられる（Antigravity「Rules」、2026-10-05 再確認）。超える写しは表示で知らせる
+  - 写しの5行目に生成物の印を置き、見分けるときもこの位置だけを見る。印の無いもの・手書きの AGENTS.md・別の場所を指すリンク・よそのリンク・写し先のファイルがリンクのもの・途中のディレクトリがリンクのものには触らない（配布先の外へ書くため）
+  - `.claude/rules/` のサブディレクトリの rule も写す（Claude Code は rules を再帰的に読む。`/` は `--` にして平たく置く）。frontmatter（`paths:` など）を持つ rule は、写すと常に効く形に変わるので作らず SKIP と表示し、前に作った写しは外す（古い中身が別の効き方で残ると、道具の間で決まりが食い違うため。道具の glob への変換は決めていない）。読めない rule（リンク切れ）と、写し先の名前がぶつかる rule は「失敗:」で作らない
+  - rules は、リンクのディレクトリの中も辿って拾う。frontmatter の判定は CRLF と BOM を除いてから行う。配布先のリンク切れの rule も「ある」とみなし、読めなければ「失敗:」
+  - rules を読み切れない（権限が無い等）ときは、写しを「元が無い」と取り違えないよう、何も触らずに「失敗:」。写し先の名前のぶつかりは大文字・小文字を区別せずに見る（macOS の標準のファイルシステムでは同じ場所になる）。写しは同じ置き場の一時ファイルから mv で置き換える（ハードリンク越しに外を書き換えない）
+  - 処理が途中で落ちても（変数の書き間違い等）、それまでの出力を見せて「失敗:」にする。frontmatter とみなすのは閉じの `---` があるときだけ。退避先の途中がリンクなら退避も上書き・削除もしない
+  - 退避先（`.ai-template-backup/<時刻>/.cursor/rules/`）の古い写しは、Cursor の起動時には読まれなかった（2026-10-06 cursor-agent で実測。入れ子の rules はそのフォルダのファイルを触ったときに効く）
+  - rule・スキルの名前を大文字・小文字だけ変えたときは、古い名前の写し・リンクを（退避してから）外し、正しい名前で作り直す（macOS では古い名前が同じ場所に見え、同じ回に消してしまうため）
+  - CLAUDE.md（AGENTS.md）が Codex の既定の上限 32 KiB を超えたら、流すたびに知らせる（リンクがあれば選んでいなくても）
+  - macOS 標準の bash 3.2 と bash 5 の両方でテストを流す（`TEST_BASH=/bin/bash`。文字列の置き換えの結果がバージョンで違う書き方を拾うため）
+  - 照合の分岐（SKIP・そのまま）でも、既にある生成物を必ず数える。選んでいなければずれとして知らせ、24,000 バイト超えの警告も毎回出す。作り直す・外す前の写しはバックアップに退避する（--no-backup を除く。退避できなければ「失敗:」で、上書き・削除しない）
+  - 書けなかったものは「失敗:」と表示して終了コード 4（フックの検証の失敗 3 を優先）
+  - Claude Code 側との重なり: CLAUDE.md があれば AGENTS.md は読まない。両方読む設定でも、CLAUDE.md へのリンクの AGENTS.md は2回読まない（Claude Code「How Claude remembers your project」https://code.claude.com/docs/en/memory 、2026-10-05 確認）
+  - 写しを照合する時点は「apply_template を流すたび」。選ばなかった道具の写しも見比べ、ずれ・リンク切れ・リンクの足りないスキルがあれば表示する（書き換えない）。選んだ道具では作り直し、元が無いものは外す
+  - dry-run はモード（safe / force / sync）から反映後の中身を求めて数える（まだコピーしていないため）
+  - `--codex` で `.codex/config.toml` は作らない。AGENTS.md が CLAUDE.md だけ（約 7.5 KB。2026-10-05 実測 7,468 バイト）になり、Codex の既定の上限 32 KiB に収まるため（人間の決定）
+  - 生成物は配布先の git に入れる方針（人間の決定。ずれが差分に出る）。README に書いた
+  - テスト `scripts/test_apply_template_agents.sh`（入れ方で結果が変わらないこと、手書きを守ること、外へ書かないこと、ずれの検出、dry-run の数え方ほか）
+  - (−) rules の効き方が道具ごとに違う（中身は同じ）。Antigravity と Codex は、読むかが AI 次第
+  - (−) 写しは流し直さないと古くなる（表示で知らせるだけ）。選ばなかった道具の生成物は消さない
+  - Antigravity が `trigger: model_decision` の写しを、作業に関係するときに読みに行くことを実機で確かめた（2026-10-05。デプロイの作業を頼むと、デプロイの rule の写しを読んで答えた）
+  - (−) 確かめていないこと: Cursor のエディタで `.claude/skills` と `.agents/skills` の同じスキルが2つ見えるか（cursor-agent では1件にまとめて表示）。Cursor が CLAUDE.md と AGENTS.md（同じ中身）を二重に読むか。Windows でのリンク
+  - **Alternatives**: AGENTS.md を CLAUDE.md と rules をつないで生成する案（約 40 KB で Codex の上限を超え、写しが1つ増える。前の版。レビューのあとに人間が取りやめた）／Antigravity の rules も常に効く形にする案（上限ぎりぎり。不採用）
+  - 出典: Codex「Build skills」https://learn.chatgpt.com/docs/build-skills、「AGENTS.md」https://learn.chatgpt.com/docs/agent-configuration/agents-md、Cursor「Agent Skills」https://cursor.com/docs/skills、「Rules」https://cursor.com/docs/rules、Antigravity「Agent skills」https://antigravity.google/docs/skills/、「Rules」https://antigravity.google/docs/rules/（2026-10-03 確認）
+---
+
+## ADR-040: 送り状モデルをやめ、学びは作者が Linear の ai-template プロジェクトに積む
+
+- **Context**:
+  送り状（`doc/output/to-template.md`）と取り込みスキル（template-feedback・template-inbox）は配布物に入っていたが、実際に使うのは ai-template の作者だけだった。OSS として使う人には、読む量だけが増える。作者はタスクボードを Linear に決め、ai-template のプロジェクトを作った（ADR-038 の P3-c と同じ日）
+
+- **Decision**（人間の決定）:
+  1. 配布物から送り状の仕組みを外す: 雛形 `doc/output/to-template.md`、スキル template-feedback・template-inbox、投函箱 `meta/from-projects/`、ルール・README・`doc/index.md` の説明。`apply_template.sh` は `doc/output/` を配らない（中身が送り状だけだった。エビデンスレポートは作るときにできる）
+  2. 他のプロジェクトで出た汎用の学びは、作者が Linear の ai-template プロジェクトに課題として積む。積み方は作者のグローバル設定（リポジトリの外）に書く
+  3. 他のプロジェクトに残っている送り状のファイルには触らない。未取込の項目のうち、このブランチで取り込んでいないものだけを Linear に積んだ（how-we-work の項目6 → MAE-10、「判断の根拠を示す」節 → MAE-11。項目5 は MAE-7 の P4 に含まれる）。listening-editor は全件取込済み
+
+- **Consequences**:
+  - (+) 配布物から、作者しか使わない仕組みが消える
+  - (+) 学びの置き場が、作業の置き場（Linear）と同じになる
+  - (−) OSS を使う人には「学びをテンプレートへ返す」仕組みが届かない。必要なら各自で作る
+  - (−) 既に配布した先に残るもの: 2本のスキルは apply_template の safe / force では残る（--sync なら消える）。`doc/output/to-template.md` は `doc/output/` を配らなくなったので、どのモードでも残る（中身はそのプロジェクトの蓄積なので、消すかは各プロジェクトで決める）
+  - ai-template のローカルに残った投函箱の受信物（`meta/from-projects/` の中。git の管理外）は、消すかを人間が決めるまで `.gitignore` の除外を残す
+  - (−) how-we-work の送り状の状態の行は倒していない（触らないと決めた）。取り込み済みかどうかは、この ADR と ADR-032〜034・039 で辿る
+
+- **Alternatives**:
+  - **配布だけ止めて仕組みは ai-template に残す**: 使われなくなるので古くなる。不採用
+  - **template-feedback を Linear 版に書き換えて残す**: 取り込みは Linear の課題を見て進めれば足りる。人間が削除を選んだ
+
+- **関係**: ADR-006・016・021・022・025 の送り状モデルと投函箱は、この ADR で廃止した
+- **出典**: 2026-10-03 のセッション（人間の決定）

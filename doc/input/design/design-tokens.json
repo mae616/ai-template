@@ -1,0 +1,16 @@
+{
+  "meta": {
+    "version": 1,
+    "decision": "provisional",
+    "provisional": [],
+    "usage": "値はここから引く。絵やコードから写さない。なぜその値かは doc/input/design/docs/ に書く"
+  },
+  "primitives": {},
+  "semantic": {},
+  "undecided": [
+    {
+      "key": "primitives",
+      "note": "まだ何も決めていない。最初の画面を描く前に、色・文字サイズの段・余白の刻みを決める（design-consistency レベル0〜1）"
+    }
+  ]
+}

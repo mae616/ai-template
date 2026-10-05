@@ -3,13 +3,13 @@
 このドキュメントは、`/design-ssot`（Figma）や `/design-mock`（会話）で生成する **SSOT（Single Source of Truth）** の最低限の形を固定する。
 
 ## 目的
-- `doc/design/design-tokens.json` / `doc/design/components.json` / `doc/design/design_context.json` を **同じ解釈で**後続へ渡す
+- `doc/input/design/design-tokens.json` / `doc/input/design/components.json` / `doc/input/design/design_context.json` を **同じ解釈で**後続へ渡す
 - 後続（`/design-html` → `/design-ui` → `/design-components` → `/design-assemble`）の精度と再現性を上げる
-- 技術スタックのSSOTは **`doc/rdd.md`** とし、SSOT JSON は可能な限り **スタック非依存**に保つ
+- 技術スタックのSSOTは **`doc/input/rdd.md`** とし、SSOT JSON は可能な限り **スタック非依存**に保つ
 - CSSだけでは再現できない **画像アセット**（ロゴ/アイコン/イラスト/写真等）も、可能な限りSSOTとして管理する（後続で参照できるように）
 
 ## 見た目の基準（ビューポート）
-デザインの“見た目一致”の判定は、`doc/rdd.md` の「ターゲット表示環境（事実）」をSSOTとして扱う。  
+デザインの“見た目一致”の判定は、`doc/input/rdd.md` の「ターゲット表示環境（事実）」をSSOTとして扱う。  
 未記入の場合は、design系コマンドは次を **推奨デフォルト**として仮置きし、出力やレビューの前提に明記する：
 - desktop: 1440x900
 - mobile: 390x844
@@ -37,7 +37,22 @@
 
 ---
 
-## 1) `doc/design/design-tokens.json`（Design Tokens）
+## 0) 全 JSON 共通: 確定度と未決（固定）
+
+値のファイルは「確定した値だけ」を持つ場所だが、作っている途中は暫定の値も入る。暫定を確定と読ませないため、全 JSON に次を持たせる（`.claude/rules/doc-writing.md` §5）。
+
+| キー | 値 | 意味 |
+|---|---|---|
+| `meta.decision` | `"provisional"` / `"confirmed"` | ファイル全体の確定度。人間の合意を経たら `confirmed` |
+| `meta.provisional` | キーのパスの配列（例: `["primitives.color.brand"]`） | `confirmed` のファイルの中で、まだ暫定の項目 |
+| `undecided` | `[{ "key": "...", "note": "..." }]` | **決めていない**項目。⚠️ 空の配列は「全部決まっている」と読まれる。決めていないものがあるなら必ず書く |
+| `meta.usage` | 文字列 | 「値はここから引く。絵やコードから写さない」等の使い方の注記 |
+
+- ⚠️ `status` は使わない。assets の `status`（取得結果 `ok` / `failed`）と意味がぶつかる
+- 以下の各節の「例（抜粋）」は、この共通キーを省略している。実際に出力する JSON には必ず入れる
+- 理由と一体でないと誤用される値の「なぜ」は、デザインドック（`doc/input/design/docs/`）に書く。JSON には書かない
+
+## 1) `doc/input/design/design-tokens.json`（Design Tokens）
 
 ### ルール
 - **物理値（primitive）** と **意味（semantic）** を混ぜない
@@ -128,7 +143,7 @@
 
 ---
 
-## 2) `doc/design/components.json`（Components / Variants）
+## 2) `doc/input/design/components.json`（Components / Variants）
 
 ### ルール
 - variants は **propsに落とせる粒度**（`size/tone/state` のように実装分岐できる単位）
@@ -233,12 +248,12 @@ variants のキー名は「意味が通る共通語彙」に固定し、**プロ
 
 ---
 
-## 3) `doc/design/design_context.json`（Pages / Layout / Constraints）
+## 3) `doc/input/design/design_context.json`（Pages / Layout / Constraints）
 
 ### ルール
 - 画面（page）とレイアウト（frame/section）の階層を持つ
 - constraints/resizing（Figma）を、後続がスタック別にマッピングできる形で残す
-- **文言（コピー）はこのファイルに直書きしない**。必ず `doc/design/copy.json` の `copyKey` を参照して紐付ける（AIの言い換え混入を防ぐため）。
+- **文言（コピー）はこのファイルに直書きしない**。必ず `doc/input/design/copy.json` の `copyKey` を参照して紐付ける（AIの言い換え混入を防ぐため）。
 - `pages[].key` は `/design-ssot` の `PageKey` と一致させ、後続コマンドのページ選択単位として扱う
 
 ### constraints/resizing → レスポンシブ対応表（固定）
@@ -274,7 +289,7 @@ variants のキー名は「意味が通る共通語彙」に固定し、**プロ
   - Web: tokensに対応する `p-*`（magic number禁止）
 
 #### breakpoints（レスポンシブ）
-- breakpoints は `doc/design/design-tokens.json` の `primitives.breakpoints` をSSOTとする
+- breakpoints は `doc/input/design/design-tokens.json` の `primitives.breakpoints` をSSOTとする
 - ブレイクポイントで構造が変わる場合は、まず **layout側**（context）で表現し、props（variants）での分岐は必要時のみ
 
 ### 例（抜粋）
@@ -324,15 +339,15 @@ variants のキー名は「意味が通る共通語彙」に固定し、**プロ
 
 ## 後続コマンドとの関係（重要）
 - `/design-html` は上記3ファイルを入力として **スタック非依存HTML** を出す
-- `/design-ui` は上記3ファイルを入力として **スタック別の静的骨格** を出す（スタックは `doc/rdd.md` が既定）
-- `/design-assemble` は `components.json` の variants を **型付きprops** に落として結合する（スタックは `doc/rdd.md` が既定）
+- `/design-ui` は上記3ファイルを入力として **スタック別の静的骨格** を出す（スタックは `doc/input/rdd.md` が既定）
+- `/design-assemble` は `components.json` の variants を **型付きprops** に落として結合する（スタックは `doc/input/rdd.md` が既定）
 
 ---
 
-## 4) `doc/design/assets/assets.json`（Assets Manifest）
+## 4) `doc/input/design/assets/assets.json`（Assets Manifest）
 
 ### 目的
-- Figma（またはユーザー提供）から取得した画像アセットを `doc/design/assets/` に保存し、どの要素にどの画像を使うかを機械可読で残す
+- Figma（またはユーザー提供）から取得した画像アセットを `doc/input/design/assets/` に保存し、どの要素にどの画像を使うかを機械可読で残す
 - `/design-html` や `/design-ui` が参照して、画像の取りこぼしを防ぐ
 
 ### ルール
@@ -391,7 +406,7 @@ variants のキー名は「意味が通る共通語彙」に固定し、**プロ
 
 ---
 
-## 5) `doc/design/copy.json`（Copy / 文言SSOT）
+## 5) `doc/input/design/copy.json`（Copy / 文言SSOT）
 
 ### 目的
 - **文字の文言（コピー）を一字一句固定**し、会話コンテキストがクリアでも同一文言で再現できるようにする
@@ -399,7 +414,7 @@ variants のキー名は「意味が通る共通語彙」に固定し、**プロ
 
 ### ルール（固定）
 - 当面の運用は `defaultLocale: "ja-JP"` を既定とする（必要になった時点で `locales` に追加して拡張する）
-- `doc/design/design_context.json` の text ノードは **必ず `copyKey` を持ち**、`doc/design/copy.json` を参照する
+- `doc/input/design/design_context.json` の text ノードは **必ず `copyKey` を持ち**、`doc/input/design/copy.json` を参照する
 - `copy.json` に存在しない `copyKey` を参照してはいけない（不足時は生成を止め、ユーザーに `FIGMA_REF` 再提示 or 文言提供を依頼する）
 - 文言は**改変しない**（空白/改行/記号も含めて一致が目的）
 

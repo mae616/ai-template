@@ -1,4 +1,5 @@
 ---
+name: design-html
 user-invocable: true
 description: "デザインSSOT JSONからドキュメント・共有用の静的HTMLを生成しdoc/input/design/html/に保存する。SSOTだけ先にある場合の視覚的確認や共有に使う。"
 ---

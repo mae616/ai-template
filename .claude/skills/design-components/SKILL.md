@@ -1,4 +1,5 @@
 ---
+name: design-components
 user-invocable: true
 description: "静的UI骨格からLayout/Componentを抽出して技術スタックの標準配置に分離する。UI骨格を再利用可能なコンポーネント構造に整理するときに使う。"
 ---

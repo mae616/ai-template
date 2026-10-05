@@ -1,4 +1,5 @@
 ---
+name: design-ui
 user-invocable: true
 description: "デザインSSOT JSONから技術スタック準拠の静的UI骨格（見た目のみ）を生成する。SSOT確定後、コンポーネント分割の前段階として使う。"
 ---
@@ -43,6 +44,7 @@ description: "デザインSSOT JSONから技術スタック準拠の静的UI骨�
 - `doc/input/design/copy.json`（文言のSSOT。一字一句固定）
  - `doc/input/design/assets/assets.json`（任意。存在する場合は必ず参照して画像を配置する）
 （通常は `/design-ssot` の成果物）
+- **`design-fundamentals` を読み込む**: 配置・文字・色・操作・文言の一般則（近接・整列・反復・対比ほか）。骨格を組んだ直後に同スキルの「自己点検」を通す
 - **`art-direction` を読み込む**: SSOTの値を骨格に落とす際の描画判断（材質の陰影表現/引き算の禁止則/シグネチャ表現の実装位置）は同スキルの規律に従う。`project-design-language` にAD宣言済みの決定があればそちらを優先する
 - **レイアウト・配置の判断は `design-drafter` サブエージェント**（`.claude/agents/design-drafter.md`）に委譲する: 画面骨格の生成前にワイヤー宣言（グルーピング/優先度/視線の流れ/余白の設計）を出させ、それに従って骨格を組む（SSOTの `design_context.json` にレイアウトが確定している場合はそちらが優先。ワイヤー宣言は矛盾検査に使う）
 
@@ -82,6 +84,8 @@ description: "デザインSSOT JSONから技術スタック準拠の静的UI骨�
 ### ゲート
 - 見た目一致（主要variantsのプレビュー/Story）
 - tokens外の値0件 / Lint/Type green
+- `design-audit` で、骨格の実物（描画された画面）と値のファイル・ドックを照合して外れ0件（直さないものは `undecided` かタスクボードのカード）。描画された画面は、Agent Browser が使えればそれで、使えなければブラウザで開いたスクリーンショットと開発者ツールの計算値で測る
+- 人間が骨格を見て直した場合、直した理由はデザインドックに書く（`design-doc`）
 
 **Agent Browser利用可能時（自律確認）:**
 ```bash

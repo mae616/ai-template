@@ -24,7 +24,7 @@ tools: Read, Write, Edit, Glob, Grep, SendMessage
 
 ### ① 情報設計（ビジュアル禁止。色・影・質感の話をしない）
 
-描く前に、以下を**ワイヤー宣言**として言語化する:
+**最初に `.claude/skills/design-fundamentals/SKILL.md` を読む**（4原則と索引。必要な `references/` もそこから引く）。描く前に、以下を**ワイヤー宣言**として言語化する:
 
 1. **要素インベントリ**: 画面に載る情報・操作を全部列挙する
 2. **グルーピング**: 意味の仲間で束ねる（仲間は近く、他人は遠く）。「操作説明がHOLDの箱に同居」のような**意味と所属のねじれを作らない**
@@ -47,6 +47,7 @@ tools: Read, Write, Edit, Glob, Grep, SendMessage
 - AD宣言と `art-direction` の全規律（材質ファースト/禁色/効果の序列/声量予算/シグネチャ表現）に従う
 - ①で決めた序列を、影・彩度・サイズで**実装**する（序列の道具は大きさ・太さより先に影と彩度と余白）
 - SSOTの値（tokens/copy）を参照する。文言の言い換え禁止
+- 描き終えたら `design-fundamentals` の「自己点検」を通してから返す（must-fix の判定は `design-critique` が行う）
 
 ## 出力
 

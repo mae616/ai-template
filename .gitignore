@@ -160,12 +160,11 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
-# Codex向けミラー構成（CLAUDE.md/.claude の写し。ローカル専用で配布物には含めない）
+# ai-template 自身をほかのエージェントで開くときのローカル用（配布物には含めない）。
+# apply_template.sh --codex 等が配布先に作るもの（AGENTS.md・.agents/・.cursor/rules/）は、配布先では git に入れる方針
 AGENTS.md
 .agents/
 .codex/
 
-# 投函箱の受信物（各PCローカル。出典マシンの絶対パスを含むため公開・配布しない）
-# README.md は仕組みの説明なので追跡する
-doc/input/from-projects/*.md
-!doc/input/from-projects/README.md
+# 投函箱は廃止済み（ADR-040）。ローカルに残った受信物（出典マシンの絶対パスを含む）を誤って追跡しないため
+meta/from-projects/

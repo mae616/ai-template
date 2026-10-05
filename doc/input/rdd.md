@@ -35,6 +35,14 @@ paginate: true
 - 外部依存: ...
 - コンプラ/ライセンス: ...
 
+## 運用環境（事実）
+> `/setup` が記録の無い項目だけ聞いて埋める。未記入は「決めていない」。
+- タスクボード: ...（GitHub Projects / Orca / Linear / 使わない。プロジェクト: ...）
+- デザインツール: ...（例: Figma MCP 使用可）
+- 参考事例: ...（例: Mobbin MCP 使用可 / Design Inspiration 系サイト）
+- 判断盤の出し方: ...（Artifact / ローカル HTML）
+- Web の公開範囲（Web のとき）: 検索 ... / AI の学習 ... / AI の検索・回答 ... / 出さないページ ... / 利用者の操作で来る AI ... / 本番の URL ...（最後の2つは `web-discoverability` が聞く）
+
 ## 参照（事実）
 - アーキテクチャ: `doc/Architecture.md`
 - デザイン: `doc/design/`

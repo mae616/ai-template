@@ -18,6 +18,7 @@ setup() {
   mkdir -p doc/input meta .claude/rules
   echo "初期" > doc/input/rdd.md
   echo "初期" > meta/adr-lite.md
+  echo "初期" > meta/rdd.ai-template.md
   echo "初期" > CLAUDE.md
   echo "初期" > .claude/rules/dev-practices.md
   echo "初期" > README.md
@@ -100,7 +101,13 @@ if echo "$OUT" | grep -q "本文は省略"; then echo "  ✅ 大きい差分 →
 else echo "  ❌ 大きい差分 → 端末を埋めている"; FAIL=$((FAIL+1)); fi
 teardown
 
-# 10. git 管理外のディレクトリ → 落ちずに黙る
+# 10. ai-template 自身の仕様（/setup が運用環境を書く先）→ 見せる
+setup
+echo "- タスクボード: Orca" >> meta/rdd.ai-template.md
+check "meta/rdd.ai-template.md の書き換え" "見せる" "$(run_hook)"
+teardown
+
+# 11. git 管理外のディレクトリ → 落ちずに黙る
 SANDBOX="$(mktemp -d)"
 check "git管理外" "黙る" "$(CLAUDE_PROJECT_DIR="$SANDBOX" bash "$HOOK" 2>&1)"
 rm -rf "$SANDBOX"

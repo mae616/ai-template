@@ -1,4 +1,5 @@
 ---
+name: design-assemble
 user-invocable: true
 description: "コンポーネントのvariants定義から型付きProps/属性へマッピングし、再利用可能なUIとして結合する。コンポーネント分割後の実装結合フェーズで使う。"
 ---

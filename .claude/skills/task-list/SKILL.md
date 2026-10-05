@@ -1,4 +1,5 @@
 ---
+name: task-list
 user-invocable: true
 description: "rdd.mdからSprint計画を作成し、GitHub MilestoneとIssueを一括生成する。スプリント計画、タスク分解で使う。"
 ---
@@ -14,6 +15,7 @@ description: "rdd.mdからSprint計画を作成し、GitHub MilestoneとIssueを
 - **doc/input/rdd.md** を根拠に、Sprint（Milestone）とタスク（Issue）を一括作成する
 - 組み込みTask（TaskCreate）にも登録し、セッション中の並行・依存管理を可能にする
 - GitHub と 組み込みTask の対応関係を維持する
+- 組み込みTask が無い環境（Claude Code 以外）では、組み込みTask の手順を飛ばして GitHub の Milestone と Issue だけで管理する
 
 ---
 
@@ -122,9 +124,10 @@ TaskCreate:
 
 ---
 
-## 自己評価
-- **成功自信度**: (1-10)
-- **一言理由**: {短く理由を記載}
+## 次の一手
+- **次に効くこと**: {次の工程・次のセッションが速く確実になる、具体的な一手を1つ}
+- **引き継ぎの自信度**: (1-10) — この出力だけで次に再開できるか
+- ⚠️ この欄に失敗の一覧を書かない（書くのは「次にどうするか」）。ただし次の判断が変わる事実（未検証・未書き出しのもの）は引き継ぎとして書く。PR 本文やレポートが求める試行の記録は、そちらに書く
 
 ---
 

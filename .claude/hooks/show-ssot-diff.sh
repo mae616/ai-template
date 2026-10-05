@@ -19,6 +19,7 @@ git rev-parse --is-inside-work-tree >/dev/null 2>&1 || exit 0
 TARGETS=(
   "doc/input/"
   "meta/adr-lite.md"
+  "meta/rdd.ai-template.md"
   "CLAUDE.md"
   ".claude/rules/"
 )
@@ -54,7 +55,7 @@ if [ "$LINES" -le "$THRESHOLD" ]; then
 else
   echo "────────────────────────────────────────────────────────"
   echo "  差分が ${LINES} 行あるため本文は省略しました。次で確認できます:"
-  echo "    git diff HEAD -- doc/input/ meta/adr-lite.md CLAUDE.md .claude/rules/"
+  echo "    git diff HEAD -- doc/input/ meta/adr-lite.md meta/rdd.ai-template.md CLAUDE.md .claude/rules/"
 fi
 echo "════════════════════════════════════════════════════════"
 

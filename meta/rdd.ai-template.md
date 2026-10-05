@@ -34,6 +34,13 @@ paginate: true
 - モデル運用: 主力は Claude。補助的に他モデルを併用する場合は「ここぞ」の場面に絞る（コストに応じて調整）
 - 方針: オーバースペックにしない。シンプルさを優先
 
+## 運用環境（事実）
+> `/setup` が記録の無い項目だけ聞いて埋める。未記入は「決めていない」。ai-template 自身の値はここに書く（`doc/input/rdd.md` は配布用の雛形なので書かない）。
+- タスクボード: Linear（プロジェクト: ai-template）
+- デザインツール: Figma MCP（公式プラグイン）が使える
+- 参考事例: Mobbin MCP が使える
+- 判断盤の出し方: Artifact が使える
+
 ## 参照（事実）
 - 壁打ちログ: `history/log.md`（gitignore済み・ローカルのみ）
 - セッション引き継ぎ: `history/journal.md`（設計中）
@@ -122,11 +129,10 @@ paginate: true
 - フック: 4個（check-release-notes / post-edit-notify / validate-mermaid / warn-destructive-bash）
 - ルール: 4個（code-quality / dev-practices / git / tool-usage）
 - スクリプト: apply_template.sh / apply_global.sh
-- 送り状雛形: `doc/output/to-template.md`（配布対象）
 
-## フィードバックループ（送り状モデル）
-- 各プロジェクトは汎用学びを自リポの送り状 `doc/output/to-template.md` に記録するだけ（ai-template を直接編集しない＝競合回避）
-- 取り込みは ai-template 側で `/template-feedback` により直列処理し、反映済み項目は送り状の状態を `取込済` に倒す（二重取り込み防止台帳）
+## 学びの還流
+- 他のプロジェクトで出た汎用の学びは、作者が Linear の ai-template プロジェクトに課題として積み、ai-template で取り込む。これは作者の運用で、**配布物には還流の仕組みを含めない**（使うのが作者だけのため。積み方は作者のグローバル設定に書く）
+- 他のプロジェクトは ai-template を直接編集しない（競合を避ける）
 - テンプレに書くのは**判断軸・優先順位・困ったとき何を疑うか・固有の手順/思想のみ**（AIが既に持つ一般知識・固有例は書かない）
 
 ## ファイル・ディレクトリ命名方針
@@ -194,6 +200,7 @@ TypeScript strict → ESLint → テスト → CI → Dependabot
 
 ## 非目標（今回スコープ外）
 - マルチモデル活用の自動化（Gemini/Codex連携）→ 後回し
+  - 配布物をほかのエージェント（Codex・Cursor・Antigravity）でも読めるようにすること（`apply_template.sh --codex` 等）は、この非目標に入らない
 - FigJam存在設計キャンバスの完全自動化 → 手動運用から始める
 - CodeRabbitのサブスク → 品質ゲート整備後に再評価
 

@@ -1,4 +1,5 @@
 ---
+name: manual-guide
 user-invocable: true
 description: "生成済みの手順書を会話形式でステップごとに案内する。手順書に沿った実行支援、初回セットアップのガイドで使う。"
 ---

@@ -1,4 +1,5 @@
 ---
+name: auto-build
 user-invocable: true
 description: "プロンプト文または既存成果物（要件定義・設計のHTML/MD）から、Sprint計画 → 全タスク自律実装 → sprint→main PR → エビデンスレポート（HTML）生成までを1コマンドで完結する。Loop Engineering の最上位親スキル。"
 ---
@@ -6,6 +7,8 @@ description: "プロンプト文または既存成果物（要件定義・設計
 # [ループ] 自律ビルド `/auto-build`
 
 > Loop Engineering の最上位親スキル。既存のループ層スキル（task-list / task-detail / auto-task / auto-bug）を**連鎖呼び出し**して、「作って」から「完成＋エビデンス提示」まで自律で運ぶ。スキル本体は触らない（Harness 層不可侵）。
+>
+> **開始前に `.claude/skills/auto-loop-core/SKILL.md` を読み込み、共通手順はそれに従う**（読み込めなければ開始しない。ループ状態・課金前停止・中断再開・マージの関所）。ここには全体を束ねる固有の手順だけを書く。
 >
 > 設計根拠: `meta/adr-lite.md` の **ADR-008 / ADR-014**
 >
@@ -19,7 +22,7 @@ description: "プロンプト文または既存成果物（要件定義・設計
 |---|---|---|
 | **A: プロンプト** | `/auto-build "家計簿アプリを作って"` | AI が要件定義（rdd.md）から起こす |
 | **B: 成果物** | `/auto-build doc/input/設計.md` | 既存の要件定義・設計（HTML/MD・プロトタイプ）を読み込んで開始 |
-| **C: proto-loop選定結果** | `/auto-build --from-proto <設定集パス>` | `proto-loop` で連作・統合した結果（設定集＋統合プロト）を rdd.md の種として取り込み、TDD で作り直す（プロトのコード再利用は最小限。`--from-mvp` は旧称エイリアス） |
+| **C: 連作の選定結果** | `/auto-build --from-proto <設定集パス>` | `design-language-options` で連作・統合した結果（設定集＋統合プロト）を rdd.md の種として取り込み、TDD で作り直す（プロトのコード再利用は最小限。`--from-mvp` は旧称エイリアス） |
 
 オプション（省略時は `mvp`）:
 - `--scope mvp`: MVP（最小の動く価値）までを計画・実装する
@@ -38,31 +41,25 @@ description: "プロンプト文または既存成果物（要件定義・設計
 ## 前提（必ず確認）
 
 - GitHub リポジトリ・gh CLI が使える状態であること
-- 課金が発生しうる操作（新規パッケージインストール、リモートデプロイ、外部 API 課金）は**事前にユーザーへ確認**して止まる（`/auto-task` と同じ方針）
+- 課金前停止は `auto-loop-core` の「7. 課金前停止」に加えて、**モードAで技術スタックを AI が選定する場合**、有料 SaaS を前提にする選定も事前確認して止まる
 - **sprint → main は絶対に自律マージしない**（人間の唯一の関所）
 
 ---
 
 ## 実行手順
 
-### 0. ループ状態ファイルの初期化
+### 0. ループ状態の初期化
 
-`history/loop-state.md` を以下で開始（既存なら追記）:
+`auto-loop-core` の「1. ループ状態の記録」で、見出しに `(--scope <mvp|product>)` を付け、`steps` を次のとおりにして開始する（`branch` 行は不要）:
 
 ```markdown
-## YYYY-MM-DD HH:MM /auto-build <入力の要約> (--scope <mvp|product>)
-- status: in_progress
-- steps:
   - [ ] project-init-check (未初期化なら project-init 連鎖)
   - [ ] input-normalize (rdd.md 準備)
   - [ ] task-list (Sprint計画)
   - [ ] sprint-loop (Sprintごとの実装。進捗は sprint 単位で追記)
   - [ ] evidence-report (HTML生成)
   - [ ] handoff (人間への提示)
-- last_action: ループ開始
 ```
-
-各ステップ完了時に `[x]` 更新と `last_action` 書き換え（ADR-012 の中断時復帰の鍵）。
 
 ---
 
@@ -98,9 +95,10 @@ description: "プロンプト文または既存成果物（要件定義・設計
 - **project-design-language の起票確認**（UI を持つプロジェクトのみ）: `.claude/skills/project-design-language/SKILL.md` が**雛形のまま**（基本方針が `{...}` / TBD）なら、デザイン実装に入る前に埋める工程を計画へ組み込む:
   - **先行**の場合 → この場で `judgment-harness` の発酵ループに従い、基本方針（誰のため/北極星/単一メタファー）を人間と対話で埋めてから design 系 Issue へ進む
   - **後行**の場合 → デザイン Sprint の先頭に「project-design-language 起票」Issue を作成する（機能 Sprint 中は TBD のままでよい）
+- **Web の公開範囲の確認**（Web のプロジェクトのみ）: rdd の「運用環境」の「Web の公開範囲」が決まっているかを見る。決まっていない項目は、モードAなら要件の関所（手順2）で一緒に聞く。それ以外の扱いは `web-discoverability` の「入力」の自律ループの中の決まりに従う
 - `task-list` の手順に従い、rdd.md から Milestone（Sprint）と Issue を一括作成
 - `--scope mvp` の場合は **MVP に必要な Sprint のみ**計画する。`--scope product` は要件全体を Sprint に分割
-- 組み込み Task にも登録（並行・依存管理）
+- 組み込み Task にも登録（並行・依存管理）。組み込み Task が無い環境では GitHub の Issue とマイルストーンだけで管理する
 
 ---
 
@@ -112,8 +110,8 @@ description: "プロンプト文または既存成果物（要件定義・設計
 2. **タスクループ**: `ready-for-dev` な Issue を**依存関係順**に `auto-task` 連鎖で実行
    - **デザイン系 Issue**（画面・UIコンポーネント実装。Figma 参照や SSOT を持つもの）は `auto-task` の代わりに **`auto-design`** を連鎖する
    - 実装（SOLID 遵守）→ テストピラミッド全層（単体/結合/E2E）→ bug 検知時は問題解決志向の bug-* 連鎖で自己修復して復帰 → basic-review 収束 → deep-review 収束 → task→sprint 自律マージ
-   - 依存が独立な Issue はサブエージェントで並行実行してよい（結果の整合は統合時に確認）
-3. **Sprint 完了検知**: 全タスクマージ後、`auto-task` ステップ9に従い **sprint → main の PR を作成**（マージはしない）
+   - 依存が独立な Issue はサブエージェントで並行実行してよい（結果の整合は統合時に確認）。サブエージェントが無い環境では依存関係順に1件ずつ実行する
+3. **Sprint 完了検知**: 全タスクマージ後、`auto-task` の「5. Sprint 完了検知」に従い **sprint → main の PR を作成**（マージはしない）。Web のプロジェクトでは PR 本文に公開範囲の未決の件数を書く（決まりは `auto-task` の「5. Sprint 完了検知」）
 
 **Sprint 単位で `history/loop-state.md` に進捗を追記**（`sprint-1: completed (PR #42)` の形式）。
 
@@ -121,7 +119,7 @@ description: "プロンプト文または既存成果物（要件定義・設計
 - あるタスクが blocked（bug 連鎖 3周超え / レビュー反復上限超え / 危険変更チェック該当）になった場合:
   - そのタスクに**依存しない**他タスクは続行してよい
   - blocked タスクに**依存する**タスクには着手しない
-- **同一 Sprint 内で 2 タスクが blocked になったら Sprint ループ全体を停止**し、`history/loop-state.md` に状況を記録して人間へ報告する（構造的な問題（要件・設計のズレ）の兆候であり、押し切ると傷が深くなるため）
+- **同一 Sprint 内で 2 タスクが blocked になったら Sprint ループ全体を停止**し、`history/loop-state.md` に `status: blocked_by_sprint` と状況を記録して人間へ報告する（構造的な問題（要件・設計のズレ）の兆候であり、押し切ると傷が深くなるため）
 
 ---
 
@@ -129,7 +127,7 @@ description: "プロンプト文または既存成果物（要件定義・設計
 
 全 Sprint 完了後（または `--scope mvp` の範囲完了後）、人間の判断材料を1つの HTML に集約する。
 
-- **出力先**: `doc/output/evidence/YYYY-MM-DD-<プロジェクト名>.html`
+- **出力先**: `doc/output/evidence/YYYY-MM-DD-<プロジェクト名>.html`（ディレクトリが無ければ作る。配布の雛形には無い）
 - **生成方法**: `build-context-site` の仕組み・スタイルを流用（自己完結 HTML、外部依存なし）
 
 **必須コンテンツ**:
@@ -138,10 +136,11 @@ description: "プロンプト文または既存成果物（要件定義・設計
 |---|---|
 | 要件・設計 | rdd.md の要約と全文リンク、AI判断で埋めた箇所の一覧、アーキテクチャ概要（構成図） |
 | Sprint / タスク | Sprint一覧、各 Issue と対応 PR、依存関係グラフ |
-| レビュー履歴 | basic-review / deep-review の**反復回数と指摘数の推移**（例: basic 3周 8→2→0件）、主要指摘と対応内容 |
+| レビュー履歴 | basic-review / deep-review（デザイン系 Issue では design-critique / design-audit も）の**反復回数と指摘数の推移**（例: basic 3周 8→2→0件）、主要指摘と対応内容 |
 | テスト結果 | 単体 / 結合 / E2E の実行結果・件数・カバレッジ。実行コマンドと生ログへの参照 |
+| Web の見え方（Web のときだけ） | `web-discoverability` の照合結果（ページごとの title・description・canonical・OGP、robots.txt・noindex と公開範囲の答えの突き合わせ）。外れと未決の件数 |
 | bug 対応記録 | bug-* 連鎖の発動回数、試した修正案と採否、ロールバック履歴 |
-| 判断待ち | sprint → main の PR 一覧（リンク）、`ai-merged-unreviewed` ラベルの残数 |
+| 判断待ち | sprint → main の PR 一覧（リンク）、`ai-merged-unreviewed` ラベルの残数、`auto-design` が仮の値で描いた項目と design-audit で `undecided` に回したもの（値のファイルの `meta.provisional`・`undecided` から抜き出す）、web-discoverability の未決の項目（Web のとき。公開の前に人間が答える） |
 
 > 原則: **「AIがやったと言っている」ではなく「人間が検証できる」**形で載せる。テスト結果は実行ログ由来、レビュー履歴はコミット・PR コメント由来で、出典を辿れるようにする。
 
@@ -152,19 +151,13 @@ description: "プロンプト文または既存成果物（要件定義・設計
 1. エビデンスレポートのパスを提示し、内容の要約（3〜5行）を添える
 2. sprint → main の PR 一覧と「マージ判断をお願いする」旨を明示
 3. `history/loop-state.md` を `status: completed` に更新
-4. Vibe Coding（人間が実際に触る確認）を促す。フィードバックが出たら通常フロー（タスク化 → `/auto-task` or `/auto-bug`）で受ける
-
----
-
-## 課金前停止ポイント
-
-`/auto-task` と同じ（新規パッケージ・リモートデプロイ・有料外部 API・有料 CI）。加えて:
-
-- **モードAで技術スタックを AI が選定する場合**、有料 SaaS を前提にする選定は**事前確認**して止まる
+4. Vibe Coding（人間が実際に触る確認）を促す。画面の見た目・体験の「もう少し」は F5（`/auto-design --polish`。判断盤で画面ごとに「直す／残す」→ 指示文 → タスク化 → F4 に戻る）で受ける。F5 は別のループとして auto-design 側の loop-state で管理する（auto-build の completed とは別）。機能の追加は `/auto-task`、不具合は `/auto-bug` で受ける
 
 ---
 
 ## 中断・再開
+
+`auto-loop-core` の「8. 中断・再開」に加えて:
 
 - `history/loop-state.md` の `last_action` と Sprint 単位の進捗記録から再開位置を判定
 - 手動再開は `/auto-build` を再起動（同じ rdd.md があれば入力判定をスキップして続きから）
@@ -174,17 +167,17 @@ description: "プロンプト文または既存成果物（要件定義・設計
 
 ## やってはいけない
 
-- sprint → main の自律マージ（唯一の人間の関所を壊さない）
+`auto-loop-core` の共通項目に加えて:
+
 - rdd.md の不明点を**推測で埋める**。記録すれば埋めてよい、ではない。
   不明点は**短問で確認する**か、`doc/draft/` に候補として置いて合意を待つ。
   やむを得ず仮置きする場合は「AI判断・未合意」と明記し、**合意を得るまで確定扱いしない**（ADR-027）
 - テストが通らない・レビューが収束しないまま次の Sprint へ進む
 - エビデンスに検証不能な主張を載せる（出典・ログのないテスト結果、実在しないリンク）
-- 課金発生ポイントの確認スキップ
-- `history/loop-state.md` の更新を怠る
 
 ---
 
-## 自己評価
-- **成功自信度**: (1-10)
-- **一言理由**: {Sprint数・bug連鎖発動回数・レビュー反復回数・エビデンスの網羅度を踏まえて記載}
+## 次の一手
+- **次に効くこと**: {次の工程・次のセッションが速く確実になる、具体的な一手を1つ}
+- **引き継ぎの自信度**: (1-10) — この出力だけで次に再開できるか
+- ⚠️ この欄に失敗の一覧を書かない（書くのは「次にどうするか」）。ただし次の判断が変わる事実（未検証・未書き出しのもの）は引き継ぎとして書く。PR 本文やレポートが求める試行の記録は、そちらに書く
